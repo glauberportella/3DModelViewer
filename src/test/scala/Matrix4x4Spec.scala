@@ -1,7 +1,12 @@
 import enterthematrix.{Matrix4x4, Vector4}
+import org.scalactic.{Equality, TolerantNumerics}
 import org.scalatest.{FunSuite, PrivateMethodTester}
 
 class Matrix4x4Spec extends FunSuite with PrivateMethodTester {
+  val epsilon = 1e-4f
+
+  implicit val doubleEq: Equality[Double] = TolerantNumerics.tolerantDoubleEquality(epsilon)
+
   test("get") {
     val m2 = Matrix4x4(
       4, 2, 1, 0,
@@ -27,10 +32,10 @@ class Matrix4x4Spec extends FunSuite with PrivateMethodTester {
       9, 4, 2, 0,
       0, 0, 0, 0)
     val mi = PrivateMethod[Double]('multiplyInternal)
-    assert ((Matrix4x4 invokePrivate mi(m1,m2,0,0)) === 20)
-    assert ((Matrix4x4 invokePrivate mi(m1,m2,0,1)) === 8)
-    assert ((Matrix4x4 invokePrivate mi(m1,m2,0,2)) === 12)
-    assert ((Matrix4x4 invokePrivate mi(m1,m2,1,0)) === 25)
+    assert ((Matrix4x4 invokePrivate mi(m1,m2,0,0)) === 20.0f)
+    assert ((Matrix4x4 invokePrivate mi(m1,m2,0,1)) === 8.0f)
+    assert ((Matrix4x4 invokePrivate mi(m1,m2,0,2)) === 12.0f)
+    assert ((Matrix4x4 invokePrivate mi(m1,m2,1,0)) === 25.0f)
   }
 
 
@@ -98,6 +103,23 @@ class Matrix4x4Spec extends FunSuite with PrivateMethodTester {
       2 * 15 + 3,
       1
     ))
-
   }
+
+  test("rotate x axis") {
+    val m1 = Matrix4x4.rotateAroundXAxis(90)
+    assert (m1.get(0,0) === 1)
+//    assert (m1.get(1,2) === 0)
+//    assert (m1.get(2,1) === 0)
+    assert (m1.get(1,1) === 1)
+    assert (m1.get(2,2) === 1)
+    assert (m1.get(3,3) === 1)
+  }
+
+  test("rotate x axis, effect on vector") {
+    val m1 = Matrix4x4.rotateAroundXAxis(90)
+    val v = Vector4(0.5f, 0.5f, 0f, 1)
+    val done = m1 * v
+    assert (done == Vector4(0.5f, 0, 0, 1))
+  }
+
 }

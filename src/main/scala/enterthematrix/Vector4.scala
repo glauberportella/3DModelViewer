@@ -23,6 +23,6 @@ case class Vector4(x: Float, y: Float, z: Float, w: Float) {
 }
 
 object Vector4 {
-  def fill(v: Float) = Vector4(v, v, v, v)
+  def fill(v: Float) = Vector4(v, v, v, 1)
 }
 
