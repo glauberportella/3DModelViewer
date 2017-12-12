@@ -83,8 +83,8 @@ class World {
         try (ShaderUse su = new ShaderUse(lightingShader)) {
             float fullStrength = 1.0f;
             float halfStrength = 0.5f;
-            float ambientStrength = halfStrength;
-            float diffuseStrength = fullStrength;
+            float ambientStrength = 0.2f;
+            float diffuseStrength = 0.6f;
 
 //            Vector3 lightDiffuse = new Vector3(diffuseStrength * (float) Math.sin(glfwGetTime()), diffuseStrength * (float) Math.cos(glfwGetTime()), diffuseStrength);
             Vector3 lightDiffuse = new Vector3(diffuseStrength, diffuseStrength, diffuseStrength);
