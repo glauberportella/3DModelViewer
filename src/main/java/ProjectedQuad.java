@@ -1,6 +1,5 @@
-import com.github.jpbetz.subspace.Vector3;
-import com.sun.prism.ps.Shader;
-import org.joml.Matrix4f;
+import enterthematrix.Matrix4x4;
+import enterthematrix.Vector3;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
@@ -19,6 +18,19 @@ import static org.lwjgl.opengl.GL20.*;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import static org.lwjgl.glfw.GLFW.*;
 
+class GLWrapShaderProgram implements AutoCloseable {
+    public GLWrapShaderProgram(int shaderId) {
+        System.out.println("Using shader " + shaderId);
+        glUseProgram(shaderId);
+    }
+
+    @Override
+    public void close() {
+        System.out.println("Resetting shader");
+        glUseProgram(0);
+    }
+}
+
 //public class ProjectedQuad extends GLFWKeyCallback implements Drawable {
 public class ProjectedQuad implements Drawable {
     private final int vaoId;
@@ -36,20 +48,20 @@ public class ProjectedQuad implements Drawable {
     private int projectionMatrixLocation = 0;
     private int viewMatrixLocation = 0;
     private int modelMatrixLocation = 0;
-    private Matrix4f projectionMatrix = null;
-    private Matrix4f viewMatrix = null;
-    private Matrix4f modelMatrix = null;
-    private Vector3f modelPos = null;
-    private Vector3f modelAngle = null;
-    private Vector3f modelScale = null;
-    private Vector3f cameraPos = null;
+    private Matrix4x4 projectionMatrix = null;
+    private Matrix4x4 viewMatrix = null;
+    private Matrix4x4 modelMatrix = null;
+    private Vector3 modelPos = null;
+    private Vector3 modelAngle = null;
+    private Vector3 modelScale = null;
+    private Vector3 cameraPos = null;
     private FloatBuffer matrix44Buffer = null;
 
     private final int VBO_INDEX_VERTICES = 0;
     private final int VBO_INDEX_COLOURS = 1;
     private final int VBO_INDEX_TEXTURES = 2;
 
-    public ProjectedQuad() {
+    public ProjectedQuad(AppParams params) {
         createShaders();
 
         v0.setXYZ(-0.5f, 0.5f, 0); v0.setRGB(1, 0, 0); v0.setST(0, 0);
@@ -120,10 +132,12 @@ public class ProjectedQuad implements Drawable {
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
 
         // Set the default quad rotation, scale and position values
-        modelPos = new Vector3f(0, 0, 0);
-        modelAngle = new Vector3f(0, 0, 0);
-        modelScale = new Vector3f(1, 1, 1);
-        cameraPos = new Vector3f(0, 0, -1);
+        modelPos = new Vector3(0, 0, 0);
+        modelAngle = new Vector3(0, 0, 0);
+        modelScale = new Vector3(1, 1, 1);
+        cameraPos = new Vector3(0, 0, -1);
+
+        setupMatrices(params);
     }
 
 //    @Override
@@ -190,8 +204,8 @@ public class ProjectedQuad implements Drawable {
         Vector3 position = new Vector3(0, 0, 1);
         Vector3 origin = Vector3.fill(0);
 
-        Vector3f scaleAddResolution = new Vector3f(scaleDelta, scaleDelta, scaleDelta);
-        Vector3f scaleMinusResolution = new Vector3f(-scaleDelta, -scaleDelta, -scaleDelta);
+        Vector3 scaleAddResolution = new Vector3(scaleDelta, scaleDelta, scaleDelta);
+        Vector3 scaleMinusResolution = new Vector3(-scaleDelta, -scaleDelta, -scaleDelta);
 
 //            if (key == GLFW_KEY_UP) modelPos.y += posDelta;
 //            else if (key == GLFW_KEY_DOWN) modelPos.y -= posDelta;
@@ -202,11 +216,12 @@ public class ProjectedQuad implements Drawable {
 
         //-- Update matrices
         // Reset view and model matrices
-        viewMatrix = new Matrix4f();
-        modelMatrix = new Matrix4f();
+        viewMatrix = Matrix4x4.identity();
+        modelMatrix = Matrix4x4.identity();
 
 //        // Translate camera
-//        Matrix4f.translate(cameraPos, viewMatrix, viewMatrix);
+//        cameraPos = Matrix4x4.forTranslation(
+//        Matrix4x4.translate(cameraPos, viewMatrix, viewMatrix);
 //
 //        // Scale, translate and rotate model
 //        Matrix4f.scale(modelScale, modelMatrix, modelMatrix);
@@ -245,8 +260,7 @@ public class ProjectedQuad implements Drawable {
     }
 
     private void setupMatrices(AppParams params) {
-        // Setup projection matrix
-        projectionMatrix = new Matrix4f();
+        // Setup projection enterthematrix
         float fieldOfView = params.fovDegrees;
         float aspectRatio = (float)params.widthPixels / (float)params.heightPixels;
         float near_plane = 0.1f;
@@ -256,6 +270,11 @@ public class ProjectedQuad implements Drawable {
         float x_scale = y_scale / aspectRatio;
         float frustum_length = far_plane - near_plane;
 
+        projectionMatrix = new Matrix4x4(x_scale, 0,0, 0,
+                0, y_scale, 0, 0,
+                0, 0, -((far_plane + near_plane) / frustum_length), -1,
+                0, 0, -((2 * near_plane * far_plane) / frustum_length), 0);
+
 //        projectionMatrix.m00 = x_scale;
 //        projectionMatrix.m11 = y_scale;
 //        projectionMatrix.m22 = -((far_plane + near_plane) / frustum_length);
@@ -263,11 +282,11 @@ public class ProjectedQuad implements Drawable {
 //        projectionMatrix.m32 = -((2 * near_plane * far_plane) / frustum_length);
 //        projectionMatrix.m33 = 0;
 
-        // Setup view matrix
-        viewMatrix = new Matrix4f();
+        // Setup view enterthematrix
+        viewMatrix = Matrix4x4.identity();
 
-        // Setup model matrix
-        modelMatrix = new Matrix4f();
+        // Setup model enterthematrix
+        modelMatrix = Matrix4x4.identity();
 
         // Create a FloatBuffer with the proper size to store our matrices later
         matrix44Buffer = BufferUtils.createFloatBuffer(16);
@@ -293,6 +312,8 @@ public class ProjectedQuad implements Drawable {
         GL20.glBindAttribLocation(shaderProgram, 0, "in_Position");
         // Color information will be attribute 1
         GL20.glBindAttribLocation(shaderProgram, 1, "in_Color");
+        // Texture information will be attribute 2
+        GL20.glBindAttribLocation(shaderProgram, 2, "in_TextureCoord");
 
         glLinkProgram(shaderProgram);
         GL20.glValidateProgram(shaderProgram);
@@ -309,27 +330,26 @@ public class ProjectedQuad implements Drawable {
     }
 
     public void draw() {
-        glUseProgram(shaderProgram);
+        try (GLWrapShaderProgram shader = new GLWrapShaderProgram(shaderProgram)) {
+            int indicesCount = 6;
 
-        int indicesCount = 6;
+            // Bind to the VAO that has all the information about the quad vertices
+            GL30.glBindVertexArray(vaoId);
+            GL20.glEnableVertexAttribArray(VBO_INDEX_VERTICES);
+            GL20.glEnableVertexAttribArray(VBO_INDEX_COLOURS);
 
-        // Bind to the VAO that has all the information about the quad vertices
-        GL30.glBindVertexArray(vaoId);
-        GL20.glEnableVertexAttribArray(VBO_INDEX_VERTICES);
-        GL20.glEnableVertexAttribArray(VBO_INDEX_COLOURS);
+            // Bind to the index VBO that has all the information about the order of the vertices
+            GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboIndicesId);
 
-        // Bind to the index VBO that has all the information about the order of the vertices
-        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboIndicesId);
+            // Draw the vertices
+            GL11.glDrawElements(GL11.GL_TRIANGLES, indicesCount, GL11.GL_UNSIGNED_BYTE, 0);
 
-        // Draw the vertices
-        GL11.glDrawElements(GL11.GL_TRIANGLES, indicesCount, GL11.GL_UNSIGNED_BYTE, 0);
-
-        // Put everything back to default (deselect)
-        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
-        GL20.glDisableVertexAttribArray(VBO_INDEX_VERTICES);
-        GL20.glDisableVertexAttribArray(VBO_INDEX_COLOURS);
-        GL30.glBindVertexArray(0);
-        GL20.glUseProgram(0);
+            // Put everything back to default (deselect)
+            GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
+            GL20.glDisableVertexAttribArray(VBO_INDEX_VERTICES);
+            GL20.glDisableVertexAttribArray(VBO_INDEX_COLOURS);
+            GL30.glBindVertexArray(0);
+        }
     }
 
 

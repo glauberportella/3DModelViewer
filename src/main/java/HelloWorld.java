@@ -26,8 +26,13 @@ public class HelloWorld {
     public void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 
-        init();
-        loop();
+        AppParams params = new AppParams();
+        params.heightPixels = 300;
+        params.widthPixels = 300;
+        params.fovDegrees = 60;
+
+        init(params);
+        loop(params);
 
         // Free the window callbacks and destroy the window
         glfwFreeCallbacks(window);
@@ -38,7 +43,7 @@ public class HelloWorld {
         glfwSetErrorCallback(null).free();
     }
 
-    private void init() {
+    private void init(AppParams params) {
         // Setup an error callback. The default implementation
         // will print the error message in System.err.
         GLFWErrorCallback.createPrint(System.err).set();
@@ -55,7 +60,7 @@ public class HelloWorld {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
         // Create the window
-        window = glfwCreateWindow(300, 300, "Hello World!", NULL, NULL);
+        window = glfwCreateWindow(params.widthPixels, params.heightPixels, "Hello World!", NULL, NULL);
         if ( window == NULL )
             throw new RuntimeException("Failed to create the GLFW window");
 
@@ -92,7 +97,7 @@ public class HelloWorld {
 
     }
 
-    private void loop() {
+    private void loop(AppParams params) {
         // This line is critical for LWJGL's interoperation with GLFW's
         // OpenGL context, or any context that is managed externally.
         // LWJGL detects the context that is current in the current thread,
@@ -106,7 +111,8 @@ public class HelloWorld {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        Drawable quad = new ProjectedQuad();
+        Drawable quad = new ProjectedQuad(params);
+
         if (quad instanceof GLFWKeyCallback) {
             glfwSetKeyCallback(window, (GLFWKeyCallback) quad);
         }

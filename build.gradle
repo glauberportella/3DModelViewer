@@ -2,6 +2,7 @@ group 'com.grahampople'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'scala'
 
 sourceCompatibility = 1.8
 
@@ -35,13 +36,19 @@ dependencies {
     compile group: 'org.l33tlabs.twl', name: 'pngdecoder', version: '1.0'
 
     // https://mvnrepository.com/artifact/org.joml/joml
-    compile group: 'org.joml', name: 'joml', version: '1.9.6'
-    compile 'com.github.jpbetz:subspace:0.1.0'
+//    compile group: 'org.joml', name: 'joml', version: '1.9.6'
+//    compile 'com.github.jpbetz:subspace:0.1.0'
 
 // https://mvnrepository.com/artifact/org.lwjgl/lwjgl-util
 //    compile group: 'org.lwjgl', name: 'lwjgl-util', version: '2.7.1'
 
     compile 'org.immutables:value:2.5.5'
+
+    // https://mvnrepository.com/artifact/org.scalatest/scalatest
+    testCompile group: 'org.scalatest', name: 'scalatest_2.12', version: '3.2.0-SNAP9'
+
+    // https://mvnrepository.com/artifact/org.scala-lang/scala-library
+    compile group: 'org.scala-lang', name: 'scala-library', version: '2.12.4'
 
     // https://www.lwjgl.org/customize
     compile "org.lwjgl:lwjgl:$lwjglVersion"
