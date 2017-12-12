@@ -16,15 +16,25 @@ class World {
         lightingShader.setVec3("lightColour",  new Vector3(1.0f, 1.0f, 1.0f));
 
         // Scale, translate, then rotate.
+//        {
+//            // The cube
+//            Matrix4x4 transform = Matrix4x4.identity();
+//            models.add(new Cube(transform, lightingShader));
+//        }
+
         {
-            // The cube
-            Matrix4x4 transform = Matrix4x4.identity();
-            models.add(new Cube(transform, lightingShader));
+            // Cubes!
+            for (int x = 0; x < 5; x ++)
+                for (int z = 0; z < 5; z ++) {
+                    Matrix4x4 transform = Matrix4x4.translate(0.1f * x, 0, 0.1f * z).$times(Matrix4x4.scale(0.05f));
+                    Cube cube = new Cube(transform, lightingShader);
+                    models.add(cube);
+                }
         }
 
         {
             // The lamp cube
-            Matrix4x4 transform = Matrix4x4.translate(0.3f, 0, 0).$times(Matrix4x4.scale(-0.5f));
+            Matrix4x4 transform = Matrix4x4.translate(0.3f, 0.3f, 0).$times(Matrix4x4.scale(0.01f));
             models.add(new Cube(transform, lampShader));
         }
     }
