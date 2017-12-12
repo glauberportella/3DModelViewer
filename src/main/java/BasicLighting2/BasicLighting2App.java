@@ -1,28 +1,22 @@
-package BasicLighting;
+package BasicLighting2;
 
 import Useful.AppParams;
 import Useful.Drawable;
-import Useful.GLWrapShaderProgram;
-import Useful.ShaderUtils;
 import enterthematrix.Matrix4x4;
-import enterthematrix.Vector3;
-import matrixlwjgl.MatrixLwjgl;
 import org.lwjgl.glfw.GLFWKeyCallback;
-import org.lwjgl.opengl.GL20;
 
 import static java.lang.Math.PI;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL20.*;
 
-public class BasicLightingApp extends GLFWKeyCallback implements Drawable {
+public class BasicLighting2App extends GLFWKeyCallback implements Drawable {
     private int shaderProgram;
     private Camera cameraPos;
     private World world;
 
 
-    public BasicLightingApp(AppParams params) {
+    public BasicLighting2App(AppParams params) {
         createShaders();
-        world = new BasicLighting.World();
+        world = new World();
 //        cameraPos = new Camera();
         cameraPos = new Camera();
     }

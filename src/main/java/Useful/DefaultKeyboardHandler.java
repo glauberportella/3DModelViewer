@@ -1,3 +1,5 @@
+package Useful;
+
 import org.lwjgl.glfw.GLFWKeyCallback;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
