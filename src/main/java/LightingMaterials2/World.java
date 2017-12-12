@@ -29,8 +29,8 @@ class World {
 //        }
 
         {
-            int numCubesX = 4;
-            int numCubesZ = 6;
+            int numCubesX = 10;
+            int numCubesZ = 10;
             // Cubes!
             for (int x = 0; x < numCubesX; x ++)
                 for (int z = 0; z < numCubesZ; z ++) {
@@ -96,8 +96,8 @@ class World {
             lightingShader.setVec3("viewPos", cameraPos.getPosition().toVector3());
 
             lightingShader.setFloat("light.constant",  1.0f);
-            lightingShader.setFloat("light.linear",    0.7f);
-            lightingShader.setFloat("light.quadratic", 1.8f);
+            lightingShader.setFloat("light.linear",    3.7f);
+            lightingShader.setFloat("light.quadratic", 5.8f);
 
             try (ShaderUse su2 = new ShaderUse(lampShader)) {
                 lampShader.setVec3("lamp_Color", lightDiffuse);
