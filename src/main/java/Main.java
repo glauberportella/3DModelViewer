@@ -1,6 +1,6 @@
 public class Main {
     public static void main(String args[]) {
-        BasicLighting2.AppWrapper app = new BasicLighting2.AppWrapper();
+        LightingMaterials.AppWrapper app = new LightingMaterials.AppWrapper();
         app.run();
     }
 }

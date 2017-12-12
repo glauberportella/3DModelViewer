@@ -19,7 +19,7 @@ class World {
 //        {
 //            // The cube
 //            Matrix4x4 transform = Matrix4x4.identity();
-//            models.add(new CubeWithNormals(transform, lightingShader));
+//            models.add(new CubeWithNormalsAndMaterials(transform, lightingShader));
 //        }
 
         {
