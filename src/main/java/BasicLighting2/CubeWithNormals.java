@@ -1,6 +1,7 @@
 package BasicLighting2;
 
 import enterthematrix.Matrix4x4;
+import enterthematrix.Vector4;
 import matrixlwjgl.MatrixLwjgl;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -18,16 +19,28 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
 class CubeWithNormals {
     private final int vaoId;
-    private Matrix4x4 modelMatrix;
+
+    public Vector4 getPos() {
+        return pos;
+    }
+
+    public void setPos(Vector4 pos) {
+        this.pos = pos;
+    }
+
+    private Vector4 pos;
+    private final Matrix4x4 otherTransform;
     private final Shader shader;
     private final int VBO_INDEX_VERTICES = 0;
     private final int VBO_INDEX_NORMALS = 1;
 
+
     /**
-     * @param transform Used to place model into world. Scale, translate, then rotate.
+     * @param otherTransform Used to place model into world. Scale, translate, then rotate.
      */
-    public CubeWithNormals(Matrix4x4 transform, Shader shader) {
-        this.modelMatrix = transform;
+    public CubeWithNormals(Vector4 pos, Matrix4x4 otherTransform, Shader shader) {
+        this.pos = pos;
+        this.otherTransform = otherTransform;
         this.shader = shader;
 
         float vertices[] = {
@@ -99,11 +112,13 @@ class CubeWithNormals {
     }
 
     public void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate) {
-      try (ShaderUse wrap = new ShaderUse(shader)) {
+        try (ShaderUse wrap = new ShaderUse(shader)) {
             // Upload matrices to the uniform variables
             int modelMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "modelMatrix");
             int projectionMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "projectionMatrix");
             int viewMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "viewMatrix");
+
+            Matrix4x4 modelMatrix = Matrix4x4.translate(pos).$times(otherTransform);
 
             GL20.glUniformMatrix4fv(projectionMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(projectionMatrix));
             GL20.glUniformMatrix4fv(viewMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(cameraTranslate));

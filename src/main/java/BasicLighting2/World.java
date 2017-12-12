@@ -5,6 +5,7 @@ import enterthematrix.Vector3;
 import enterthematrix.Vector4;
 
 import java.util.ArrayList;
+import java.util.Vector;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -12,6 +13,7 @@ class World {
     private final ArrayList<CubeWithNormals> models = new ArrayList<>();
     private final Shader lightingShader;
     private Camera cameraPos;
+    private CubeWithNormals light;
 
     World() {
         lightingShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/basic_lighting2_fragment.glsl");
@@ -29,8 +31,9 @@ class World {
             // Cubes!
             for (int x = 0; x < numCubes; x ++)
             for (int z = 0; z < numCubes; z ++) {
-                Matrix4x4 transform = Matrix4x4.translate(0.1f * ((numCubes / 2) - x), 0, 0.1f * ((numCubes / 2) - z)).$times(Matrix4x4.scale(0.05f));
-                CubeWithNormals cube = new CubeWithNormals(transform, lightingShader);
+                Vector4 pos = new Vector4(0.1f * ((numCubes / 2) - x), 0, 0.1f * ((numCubes / 2) - z), 1);
+                Matrix4x4 transform = Matrix4x4.scale(0.05f);
+                CubeWithNormals cube = new CubeWithNormals(pos, transform, lightingShader);
                 models.add(cube);
             }
         }
@@ -38,9 +41,9 @@ class World {
         {
             // The lamp cube
             Vector4 lightPos = new Vector4(0.3f, 0.3f, 0, 1);
-            Matrix4x4 transform = Matrix4x4.translate(lightPos).$times(Matrix4x4.scale(0.01f));
-            models.add(new CubeWithNormals(transform, lampShader));
-            lightingShader.setVec3("lightPos", lightPos.toVector3());
+            Matrix4x4 transform = Matrix4x4.scale(0.01f);
+            light = new CubeWithNormals(lightPos, transform, lampShader);
+            models.add(light);
         }
 
 
@@ -69,6 +72,13 @@ class World {
     }
 
     public void draw(Matrix4x4 projectionMatrix) {
+        float lightX = (float) Math.sin(glfwGetTime()) % 2.0f - 1.0f;
+        Vector4 newLightPos = new Vector4(lightX, 0.3f, lightX, 1);
+        light.setPos(newLightPos);
+
+        Matrix4x4 transform = Matrix4x4.translate(light.getPos()).$times(Matrix4x4.scale(0.01f));
+        lightingShader.setVec3("lightPos", light.getPos().toVector3());
+
         Matrix4x4 cameraTranslate = cameraPos.getMatrix();
         lightingShader.setVec3("viewPos", cameraPos.getPosition().toVector3());
         models.forEach(model -> model.draw(projectionMatrix, cameraTranslate));
