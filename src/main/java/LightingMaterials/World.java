@@ -10,14 +10,14 @@ import java.util.Random;
 import static org.lwjgl.glfw.GLFW.*;
 
 class World {
-    private final ArrayList<CubeWithNormalsAndMaterials> models = new ArrayList<>();
+    private final ArrayList<CubeWithNormalsAndMaterialsAndDiffuseMap> models = new ArrayList<>();
     private final Shader lightingShader;
     private final Shader lampShader;
     private Camera cameraPos;
     private CubeWithNormals light;
 
     World() {
-        lightingShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_fragment.glsl");
+        lightingShader = new Shader("../shaders/lighting_materials_vertex.glsl", "../shaders/lighting_materials_fragment.glsl");
         lampShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
         Materials materials = new Materials();
 
@@ -38,7 +38,7 @@ class World {
                     Matrix4x4 transform = Matrix4x4.scale(0.05f);
 //                    Material material = materials.get(new Random().nextInt(materials.getLength()));
                     Material material = materials.get(x + z);
-                    CubeWithNormalsAndMaterials cube = new CubeWithNormalsAndMaterials(pos, transform, lightingShader, material);
+                    CubeWithNormalsAndMaterialsAndDiffuseMap cube = new CubeWithNormalsAndMaterialsAndDiffuseMap(pos, transform, lightingShader, material);
                     models.add(cube);
                 }
         }

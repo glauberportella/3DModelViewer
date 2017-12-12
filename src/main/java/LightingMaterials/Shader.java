@@ -61,6 +61,12 @@ class Shader {
         glUniform1f(location, v);
     }
 
+    public void setInt(String name, int v) {
+        assertInUse();
+        int location = GL20.glGetUniformLocation(getShaderId(), name);
+        glUniform1i(location, v);
+    }
+
     public void setVec3(String name, float x, float y, float z) {
         assertInUse();
 
