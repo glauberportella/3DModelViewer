@@ -18,7 +18,7 @@ import static org.lwjgl.system.MemoryUtil.*;
 import org.lwjgl.glfw.GLFWKeyCallback;
 
 
-public class HelloWorld {
+public class MainOld {
 
     // The window handle
     private long window;
@@ -138,7 +138,7 @@ public class HelloWorld {
     }
 
     public static void main(String[] args) {
-        new HelloWorld().run();
+        new MainOld().run();
     }
 
 }
