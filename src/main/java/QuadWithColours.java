@@ -1,3 +1,5 @@
+import Useful.Drawable;
+import Useful.ShaderUtils;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
@@ -10,7 +12,7 @@ import java.nio.FloatBuffer;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL20.glDeleteShader;
 
-public class QuadWithColours implements Drawable  {
+public class QuadWithColours implements Drawable {
     private final int vaoId;
     private final int vboIndicesId;
     private final int vboColoursId;

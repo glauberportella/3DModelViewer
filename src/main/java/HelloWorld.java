@@ -1,3 +1,6 @@
+import ProjectedQuad.ProjectedQuad;
+import Useful.AppParams;
+import Useful.Drawable;
 import org.lwjgl.*;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
@@ -9,13 +12,10 @@ import java.nio.*;
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 import org.lwjgl.glfw.GLFWKeyCallback;
-import static org.lwjgl.glfw.GLFW.*;
 
 
 public class HelloWorld {
@@ -27,9 +27,9 @@ public class HelloWorld {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 
         AppParams params = new AppParams();
-        params.heightPixels = 300;
-        params.widthPixels = 300;
-        params.fovDegrees = 60;
+        params.heightPixels = 600;
+        params.widthPixels = 600;
+        params.fovDegrees = 90;
 
         init(params);
         loop(params);

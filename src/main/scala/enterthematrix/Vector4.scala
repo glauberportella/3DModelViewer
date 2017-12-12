@@ -19,7 +19,7 @@ case class Vector4(x: Float, y: Float, z: Float, w: Float) {
     val cosineAngleBetweenVectors = (x * v.x + y * v.y + z * v.z + w * v.w) / (len1 * len2)
     len1 * len2 * cosineAngleBetweenVectors
   }
-//  def crossProduct(b: Vector4) = Vector(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x)
+  def crossProduct(b: Vector4) = Vector4(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x, 1)
 }
 
 object Vector4 {

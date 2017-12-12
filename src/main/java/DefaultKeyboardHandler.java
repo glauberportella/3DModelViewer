@@ -4,7 +4,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
 
-public class KeyboardHandler extends GLFWKeyCallback {
+public class DefaultKeyboardHandler extends GLFWKeyCallback {
 
     public static boolean[] keys = new boolean[Character.MAX_VALUE];
 

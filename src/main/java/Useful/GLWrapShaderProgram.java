@@ -1,4 +1,4 @@
-package GLWrap;
+package Useful;
 
 import static org.lwjgl.opengl.GL20.glUseProgram;
 

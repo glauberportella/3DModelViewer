@@ -1,3 +1,5 @@
+package Useful;
+
 import org.lwjgl.opengl.GL20;
 
 import java.io.BufferedReader;
@@ -7,7 +9,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 public class ShaderUtils {
-    static boolean checkShaderStatus(int shaderId) {
+    public static boolean checkShaderStatus(int shaderId) {
 
         if (GL20.glGetShaderi(shaderId, GL20.GL_COMPILE_STATUS) == 0) {
             String infoLog = GL20.glGetShaderInfoLog(shaderId);
@@ -35,11 +37,12 @@ public class ShaderUtils {
         return shaderId;
     }
 
-    public static int loadShader(URL filename, int type) {
+    public static int loadShader(URL resource, int type) {
+        assert (resource != null);
         int shaderId = 0;
 
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(filename.openStream()));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(resource.openStream()));
             shaderId = loadShaderInternal(reader, type);
             reader.close();
         } catch (IOException e) {
