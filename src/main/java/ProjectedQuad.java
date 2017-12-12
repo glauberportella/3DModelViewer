@@ -1,35 +1,18 @@
+import GLWrap.GLWrapShaderProgram;
 import enterthematrix.Matrix4x4;
 import enterthematrix.Vector3;
+import matrixlwjgl.MatrixLwjgl;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 import static java.lang.Math.PI;
 import static org.lwjgl.opengl.GL20.*;
-import org.lwjgl.glfw.GLFWKeyCallback;
-import static org.lwjgl.glfw.GLFW.*;
-
-class GLWrapShaderProgram implements AutoCloseable {
-    public GLWrapShaderProgram(int shaderId) {
-        System.out.println("Using shader " + shaderId);
-        glUseProgram(shaderId);
-    }
-
-    @Override
-    public void close() {
-        System.out.println("Resetting shader");
-        glUseProgram(0);
-    }
-}
 
 //public class ProjectedQuad extends GLFWKeyCallback implements Drawable {
 public class ProjectedQuad implements Drawable {
@@ -55,7 +38,7 @@ public class ProjectedQuad implements Drawable {
     private Vector3 modelAngle = null;
     private Vector3 modelScale = null;
     private Vector3 cameraPos = null;
-    private FloatBuffer matrix44Buffer = null;
+//    private FloatBuffer matrix44Buffer = null;
 
     private final int VBO_INDEX_VERTICES = 0;
     private final int VBO_INDEX_COLOURS = 1;
@@ -217,7 +200,10 @@ public class ProjectedQuad implements Drawable {
         //-- Update matrices
         // Reset view and model matrices
         viewMatrix = Matrix4x4.identity();
-        modelMatrix = Matrix4x4.identity();
+        projectionMatrix = Matrix4x4.identity();
+        modelMatrix = Matrix4x4.identity();//Matrix4x4.scale(0.1f);
+
+
 
 //        // Translate camera
 //        cameraPos = Matrix4x4.forTranslation(
@@ -233,10 +219,14 @@ public class ProjectedQuad implements Drawable {
 //        Matrix4f.rotate(this.degreesToRadians(modelAngle.x), new Vector3f(1, 0, 0),
 //                modelMatrix, modelMatrix);
 
-        // Upload matrices to the uniform variables
-        GL20.glUseProgram(shaderProgram);
+        try (GLWrapShaderProgram shader = new GLWrapShaderProgram(shaderProgram)) {
+            // Upload matrices to the uniform variables
 
+            GL20.glUniformMatrix4fv(modelMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(modelMatrix));
+            GL20.glUniformMatrix4fv(projectionMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(projectionMatrix));
+            GL20.glUniformMatrix4fv(viewMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(viewMatrix));
 
+            //            GL20.glUniformMatrix4(modelMatrixLocation, false, matrix44Buffer);
 
 //        projectionMatrix.store(matrix44Buffer);
 //        matrix44Buffer.flip();
@@ -247,8 +237,7 @@ public class ProjectedQuad implements Drawable {
 //        modelMatrix.store(matrix44Buffer);
 //        matrix44Buffer.flip();
 //        GL20.glUniformMatrix4(modelMatrixLocation, false, matrix44Buffer);
-
-        GL20.glUseProgram(0);
+        }
     }
 
     private float coTangent(float angle) {
@@ -289,7 +278,7 @@ public class ProjectedQuad implements Drawable {
         modelMatrix = Matrix4x4.identity();
 
         // Create a FloatBuffer with the proper size to store our matrices later
-        matrix44Buffer = BufferUtils.createFloatBuffer(16);
+//        matrix44Buffer = BufferUtils.createFloatBuffer(16);
     }
 
     private void createShaders() {
@@ -297,11 +286,6 @@ public class ProjectedQuad implements Drawable {
         int vertexShader = ShaderUtils.loadShader(this.getClass().getResource("shaders/projected_quad_vertex.glsl"), GL20.GL_VERTEX_SHADER);
         // Load the fragment shader
         int fragmentShader = ShaderUtils.loadShader(this.getClass().getResource("shaders/projected_quad_fragment.glsl"), GL20.GL_FRAGMENT_SHADER);
-
-        // Get matrices uniform locations
-        projectionMatrixLocation = GL20.glGetUniformLocation(shaderProgram, "projectionMatrix");
-        viewMatrixLocation = GL20.glGetUniformLocation(shaderProgram, "viewMatrix");
-        modelMatrixLocation = GL20.glGetUniformLocation(shaderProgram, "modelMatrix");
 
         // Final steps to use the shaders
         shaderProgram = glCreateProgram();
@@ -323,10 +307,15 @@ public class ProjectedQuad implements Drawable {
             System.err.println("Failed to link shader: " + error);
         }
 
-
         // Cleanup
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
+
+        // Get matrices uniform locations
+        projectionMatrixLocation = GL20.glGetUniformLocation(shaderProgram, "projectionMatrix");
+        viewMatrixLocation = GL20.glGetUniformLocation(shaderProgram, "viewMatrix");
+        modelMatrixLocation = GL20.glGetUniformLocation(shaderProgram, "modelMatrix");
+
     }
 
     public void draw() {
