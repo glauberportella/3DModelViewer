@@ -139,7 +139,7 @@ object Matrix4x4 {
     0, 0, 0, v.w)
 
   def rotateAroundXAxis(angleDegrees: Float): Matrix4x4 = {
-    val angleInRadians = Math.cos(angleDegrees * (Math.PI / 180.0f))
+    val angleInRadians = angleDegrees * (Math.PI / 180.0f)
     val cos = Math.cos(angleInRadians).toFloat
     val sin = Math.sin(angleInRadians).toFloat
     Matrix4x4(
@@ -151,7 +151,7 @@ object Matrix4x4 {
   }
 
   def rotateAroundYAxis(angleDegrees: Float): Matrix4x4 = {
-    val angleInRadians = Math.cos(angleDegrees * (Math.PI / 180.0f))
+    val angleInRadians = angleDegrees * (Math.PI / 180.0f)
     val cos = Math.cos(angleInRadians).toFloat
     val sin = Math.sin(angleInRadians).toFloat
     Matrix4x4(
@@ -163,7 +163,7 @@ object Matrix4x4 {
   }
 
   def rotateAroundZAxis(angleDegrees: Float): Matrix4x4 = {
-    val angleInRadians = Math.cos(angleDegrees * (Math.PI / 180.0f))
+    val angleInRadians = angleDegrees * (Math.PI / 180.0f)
     val cos = Math.cos(angleInRadians).toFloat
     val sin = Math.sin(angleInRadians).toFloat
     Matrix4x4(
@@ -176,7 +176,7 @@ object Matrix4x4 {
 
 
   def rotateAroundAnyAxis(x: Float, y: Float, z: Float, angleDegrees: Float): Matrix4x4 = {
-    val angleInRadians = Math.cos(angleDegrees * (Math.PI / 180.0f))
+    val angleInRadians = angleDegrees * (Math.PI / 180.0f)
     val cos = Math.cos(angleInRadians).toFloat
     val sin = Math.sin(angleInRadians).toFloat
     Matrix4x4(

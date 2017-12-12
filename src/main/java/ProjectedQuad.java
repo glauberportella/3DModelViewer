@@ -167,9 +167,10 @@ class Model {
     }
 
     public void draw(int shaderProgram) {
-//        float angle = (float) (glfwGetTime() * 10 % 360);
+//        float angle = (float) (glfwGetTime() * 30 % 360);
 //        System.out.println(angle);
-//        modelMatrix = Matrix4x4.rotateAroundXAxis(angle).$times(Matrix4x4.translate(0, 0, 0.5f));
+//        modelMatrix = Matrix4x4.rotateAroundAnyAxis(0 ,0, 1, angle);//.$times(Matrix4x4.translate(0, 0, -0.6f));
+//        modelMatrix = Matrix4x4.rotateAroundXAxis(angle);//.$times(Matrix4x4.translate(0, 0, -0.6f));
 
         try (GLWrapShaderProgram shader = new GLWrapShaderProgram(shaderProgram)) {
             int modelMatrixLocation = GL20.glGetUniformLocation(shaderProgram, "modelMatrix");
@@ -212,20 +213,20 @@ public class ProjectedQuad extends GLFWKeyCallback implements Drawable {
         models = new ArrayList<>();
 
         // Draw quad1, putting it back along the z-axis a bit.
-        Matrix4x4 quad1Transform = Matrix4x4.translate(0, 0, 0.2f).$times(Matrix4x4.rotateAroundZAxis(45));
+        Matrix4x4 quad1Transform = Matrix4x4.translate(0, 0.5f, -0.6f).$times(Matrix4x4.rotateAroundZAxis(45));
         Model quad1 = new Model(quad1Transform);
 
         // Draw quad2, putting it back along the z-axis a bit more and off to the right.
-        Matrix4x4 quad2Transform = Matrix4x4.translate(0.2f, 0, 0.5f).$times(Matrix4x4.rotateAroundXAxis(90));
+        Matrix4x4 quad2Transform = Matrix4x4.translate(0.2f, 0.5f, -0.8f);//.$times(Matrix4x4.rotateAroundXAxis(90));
         Model quad2 = new Model(quad2Transform);
 
         // Draw floor
-        Matrix4x4 floorTransform = Matrix4x4.rotateAroundXAxis(90);//.$times(Matrix4x4.translate(0, -0.5f, 0));
+        Matrix4x4 floorTransform = Matrix4x4.rotateAroundAnyAxis(1, 0, 0, 89).$times(Matrix4x4.scale(3));
         Model floor = new Model(floorTransform);
 
         models.add(quad1);
         models.add(quad2);
-//        models.add(floor);
+        models.add(floor);
 
         cameraPos = new CameraPosition();
     }
@@ -233,14 +234,14 @@ public class ProjectedQuad extends GLFWKeyCallback implements Drawable {
     public Matrix4x4 createProjectionMatrix(AppParams params) {
         float fieldOfView = params.fovDegrees;
         float aspectRatio = (float)params.widthPixels / (float)params.heightPixels;
-        float near_plane = 0.1f;
+        float near_plane = 0.001f;
         float far_plane = 100f;
 
         float y_scale = this.coTangent(this.degreesToRadians(fieldOfView / 2f));
         float x_scale = y_scale / aspectRatio;
         float frustum_length = far_plane - near_plane;
 
-//        projectionMatrix = new Matrix4x4(x_scale, 0,0, 0,
+//        return new Matrix4x4(x_scale, 0,0, 0,
 //                0, y_scale, 0, 0,
 //                0, 0, -((far_plane + near_plane) / frustum_length), -1,
 //                0, 0, -((2 * near_plane * far_plane) / frustum_length), 0);
@@ -352,7 +353,7 @@ public class ProjectedQuad extends GLFWKeyCallback implements Drawable {
     }
 
     @Override public void draw(AppParams params) {
-        Matrix4x4 cameraTranslate = Matrix4x4.identity();// cameraPos.getMatrix();
+        Matrix4x4 cameraTranslate = cameraPos.getMatrix();
         Matrix4x4 projectionMatrix = createProjectionMatrix(params);
 
         try (GLWrapShaderProgram shader = new GLWrapShaderProgram(shaderProgram)) {
