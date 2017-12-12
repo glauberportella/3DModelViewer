@@ -12,6 +12,10 @@ class Camera {
     // Note this is really the reverse direction from where we're facing - it's meant to be
     private final Vector4 initialDirection = initialPosition.$minus(initialTarget).normalize();
 
+    public Vector4 getPosition() {
+        return origin;
+    }
+
     private Vector4 origin = initialPosition;
     private float rotationLeftRightAngleDegrees = 0.0f;
     private float rotationTopBottomAngleDegrees = 0.0f;

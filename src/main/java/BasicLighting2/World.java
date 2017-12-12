@@ -6,11 +6,15 @@ import enterthematrix.Vector4;
 
 import java.util.ArrayList;
 
+import static org.lwjgl.glfw.GLFW.*;
+
 class World {
     private final ArrayList<CubeWithNormals> models = new ArrayList<>();
+    private final Shader lightingShader;
+    private Camera cameraPos;
 
     World() {
-        Shader lightingShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/basic_lighting2_fragment.glsl");
+        lightingShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/basic_lighting2_fragment.glsl");
         Shader lampShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/basic_lighting_lamp_fragment.glsl");
 
         // Scale, translate, then rotate.
@@ -43,9 +47,30 @@ class World {
         lightingShader.setVec3("objectColour", new Vector3(1.0f, 0.5f, 0.31f));
         lightingShader.setVec3("lightColour",  new Vector3(1.0f, 1.0f, 1.0f));
 
+        cameraPos = new Camera();
+
     }
 
-    public void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate) {
+    public void invoke(long window, int key, int scancode, int action, int mods) {
+            //-- Input processing
+            float rotationDelta = 1.0f;
+            float posDelta = 0.05f;
+
+            if (key == GLFW_KEY_UP) cameraPos.rotateUp(rotationDelta);
+            else if (key == GLFW_KEY_DOWN) cameraPos.rotateDown(rotationDelta);
+            else if (key == GLFW_KEY_LEFT) cameraPos.rotateLeft(rotationDelta);
+            else if (key == GLFW_KEY_RIGHT) cameraPos.rotateRight(rotationDelta);
+            else if (key == GLFW_KEY_W) cameraPos.moveForward(posDelta);
+            else if (key == GLFW_KEY_S) cameraPos.moveBackward(posDelta);
+            else if (key == GLFW_KEY_R) cameraPos.moveUp(posDelta);
+            else if (key == GLFW_KEY_F) cameraPos.moveDown(posDelta);
+            else if (key == GLFW_KEY_A) cameraPos.moveLeft(posDelta);
+            else if (key == GLFW_KEY_D) cameraPos.moveRight(posDelta);
+    }
+
+    public void draw(Matrix4x4 projectionMatrix) {
+        Matrix4x4 cameraTranslate = cameraPos.getMatrix();
+        lightingShader.setVec3("viewPos", cameraPos.getPosition().toVector3());
         models.forEach(model -> model.draw(projectionMatrix, cameraTranslate));
     }
 

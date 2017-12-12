@@ -12,6 +12,8 @@ out vec3 FragPos;
 
 void main(void) {
 	gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(aPos, 1.0);
-    Normal = aNormal;
+	// https://learnopengl.com/#!Lighting/Basic-Lighting
+	// Expensive, better to inverse on CPU and send it down
+    Normal = mat3(transpose(inverse(modelMatrix))) * aNormal;
     FragPos = vec3(modelMatrix * vec4(aPos, 1.0));
 }

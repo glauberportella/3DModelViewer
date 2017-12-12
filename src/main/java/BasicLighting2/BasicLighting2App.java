@@ -10,7 +10,6 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class BasicLighting2App extends GLFWKeyCallback implements Drawable {
     private int shaderProgram;
-    private Camera cameraPos;
     private World world;
 
 
@@ -18,7 +17,6 @@ public class BasicLighting2App extends GLFWKeyCallback implements Drawable {
         createShaders();
         world = new World();
 //        cameraPos = new Camera();
-        cameraPos = new Camera();
     }
 
     private Matrix4x4 createPerspectiveProjectionMatrix(AppParams params) {
@@ -45,21 +43,7 @@ public class BasicLighting2App extends GLFWKeyCallback implements Drawable {
         if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
             glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
         } else {
-
-            //-- Input processing
-            float rotationDelta = 1.0f;
-            float posDelta = 0.1f;
-
-            if (key == GLFW_KEY_UP) cameraPos.rotateUp(rotationDelta);
-            else if (key == GLFW_KEY_DOWN) cameraPos.rotateDown(rotationDelta);
-            else if (key == GLFW_KEY_LEFT) cameraPos.rotateLeft(rotationDelta);
-            else if (key == GLFW_KEY_RIGHT) cameraPos.rotateRight(rotationDelta);
-            else if (key == GLFW_KEY_W) cameraPos.moveForward(posDelta);
-            else if (key == GLFW_KEY_S) cameraPos.moveBackward(posDelta);
-            else if (key == GLFW_KEY_R) cameraPos.moveUp(posDelta);
-            else if (key == GLFW_KEY_F) cameraPos.moveDown(posDelta);
-            else if (key == GLFW_KEY_A) cameraPos.moveLeft(posDelta);
-            else if (key == GLFW_KEY_D) cameraPos.moveRight(posDelta);
+            world.invoke(window, key, scancode, action, mods);
         }
     }
 
@@ -77,20 +61,9 @@ public class BasicLighting2App extends GLFWKeyCallback implements Drawable {
     }
 
     @Override public void draw(AppParams params) {
-        Matrix4x4 cameraTranslate = cameraPos.getMatrix();
         Matrix4x4 projectionMatrix = createPerspectiveProjectionMatrix(params);
 //        Matrix4x4 projectionMatrix = Matrix4x4.identity();
-
-//        try (GLWrapShaderProgram shader = new GLWrapShaderProgram(shaderProgram)) {
-//            // Upload matrices to the uniform variables
-//            int projectionMatrixLocation = GL20.glGetUniformLocation(shaderProgram, "projectionMatrix");
-//            int viewMatrixLocation = GL20.glGetUniformLocation(shaderProgram, "viewMatrix");
-//
-//            GL20.glUniformMatrix4fv(projectionMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(projectionMatrix));
-//            GL20.glUniformMatrix4fv(viewMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(cameraTranslate));
-//        }
-
-        world.draw(projectionMatrix, cameraTranslate);
+        world.draw(projectionMatrix);
     }
 }
 
