@@ -111,7 +111,7 @@ public class AppWrapper {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        Drawable quad = new App(params);
+        Drawable quad = new BasicLightingApp(params);
 
         if (quad instanceof GLFWKeyCallback) {
             glfwSetKeyCallback(window, (GLFWKeyCallback) quad);

@@ -1,34 +1,36 @@
 package BasicLighting;
 
 import enterthematrix.Matrix4x4;
+import enterthematrix.Vector3;
 
 import java.util.ArrayList;
 
 class World {
-    private ArrayList<Model> models;
+    private final ArrayList<Cube> models = new ArrayList<>();
 
     World() {
-        models = new ArrayList<>();
+        Shader lightingShader = new Shader("../shaders/basic_lighting_vertex.glsl", "../shaders/basic_lighting_fragment.glsl");
+        Shader lampShader = new Shader("../shaders/basic_lighting_vertex.glsl", "../shaders/basic_lighting_lamp_fragment.glsl");
 
-        Matrix4x4 quad1Transform = Matrix4x4.translate(0, 0f, -0.3f);
-        //        Matrix4x4 quad1Transform = Matrix4x4.translate(0, 0f, 0f).$times(Matrix4x4.rotateAroundZAxis(45));
-        Model quad1 = new Model(quad1Transform);
+        lightingShader.setVec3("objectColour", new Vector3(1.0f, 0.5f, 0.31f));
+        lightingShader.setVec3("lightColour",  new Vector3(1.0f, 1.0f, 1.0f));
 
-        Matrix4x4 quad2Transform = Matrix4x4.translate(0f, 0f, 0.3f);//.$times(Matrix4x4.rotateAroundXAxis(90));
-        Model quad2 = new Model(quad2Transform);
+        // Scale, translate, then rotate.
+        {
+            // The cube
+            Matrix4x4 transform = Matrix4x4.identity();
+            models.add(new Cube(transform, lightingShader));
+        }
 
-        // Draw floor
-        Matrix4x4 floorTransform = Matrix4x4.rotateAroundAnyAxis(1, 0, 0, 89).$times(Matrix4x4.translate(0, 0, -0.8f));//.$times(Matrix4x4.scale(3));
-
-        Model floor = new Model(floorTransform);
-
-        models.add(quad1);
-        models.add(quad2);
-//        models.add(floor);
+        {
+            // The lamp cube
+            Matrix4x4 transform = Matrix4x4.translate(0.3f, 0, 0).$times(Matrix4x4.scale(-0.5f));
+            models.add(new Cube(transform, lampShader));
+        }
     }
 
-    public void draw(int shaderProgram) {
-        models.forEach(model -> model.draw(shaderProgram));
+    public void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate) {
+        models.forEach(model -> model.draw(projectionMatrix, cameraTranslate));
     }
 
 }

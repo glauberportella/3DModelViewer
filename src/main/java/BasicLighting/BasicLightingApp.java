@@ -5,6 +5,7 @@ import Useful.Drawable;
 import Useful.GLWrapShaderProgram;
 import Useful.ShaderUtils;
 import enterthematrix.Matrix4x4;
+import enterthematrix.Vector3;
 import matrixlwjgl.MatrixLwjgl;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.opengl.GL20;
@@ -13,13 +14,13 @@ import static java.lang.Math.PI;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL20.*;
 
-public class App extends GLFWKeyCallback implements Drawable {
+public class BasicLightingApp extends GLFWKeyCallback implements Drawable {
     private int shaderProgram;
     private Camera cameraPos;
     private World world;
 
 
-    public App(AppParams params) {
+    public BasicLightingApp(AppParams params) {
         createShaders();
         world = new World();
 //        cameraPos = new Camera();
@@ -41,13 +42,6 @@ public class App extends GLFWKeyCallback implements Drawable {
                 0, y_scale, 0, 0,
                 0, 0, - ((far_plane + near_plane) / frustum_length), -((2 * far_plane * near_plane)) / frustum_length,
                 0, 0, -1, 0);
-
-
-//        return new Matrix4x4(x_scale, 0,0, 0,
-//                0, y_scale, 0, 0,
-//                0, 0, -((far_plane + near_plane) / frustum_length), -1,
-//                0, 0, -((2 * near_plane * far_plane) / frustum_length), 0);
-//        return Matrix4x4.identity();
     }
 
 
@@ -85,34 +79,7 @@ public class App extends GLFWKeyCallback implements Drawable {
     }
 
     private void createShaders() {
-        // Load the vertex shader
-        int vertexShader = ShaderUtils.loadShader(this.getClass().getResource("../shaders/projected_quad_vertex.glsl"), GL20.GL_VERTEX_SHADER);
-        // Load the fragment shader
-        int fragmentShader = ShaderUtils.loadShader(this.getClass().getResource("../shaders/projected_quad_fragment.glsl"), GL20.GL_FRAGMENT_SHADER);
 
-        // Final steps to use the shaders
-        shaderProgram = glCreateProgram();
-        glAttachShader(shaderProgram, vertexShader);
-        glAttachShader(shaderProgram, fragmentShader);
-
-        // Position information will be attribute 0
-        GL20.glBindAttribLocation(shaderProgram, 0, "in_Position");
-        // Color information will be attribute 1
-        GL20.glBindAttribLocation(shaderProgram, 1, "in_Color");
-        // Texture information will be attribute 2
-        GL20.glBindAttribLocation(shaderProgram, 2, "in_TextureCoord");
-
-        glLinkProgram(shaderProgram);
-        GL20.glValidateProgram(shaderProgram);
-
-        if (glGetProgrami(shaderProgram, GL_LINK_STATUS) == 0) {
-            String error = glGetProgramInfoLog(shaderProgram);
-            System.err.println("Failed to link shader: " + error);
-        }
-
-        // Cleanup
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
     }
 
     @Override public void draw(AppParams params) {
@@ -120,15 +87,16 @@ public class App extends GLFWKeyCallback implements Drawable {
         Matrix4x4 projectionMatrix = createPerspectiveProjectionMatrix(params);
 //        Matrix4x4 projectionMatrix = Matrix4x4.identity();
 
-        try (GLWrapShaderProgram shader = new GLWrapShaderProgram(shaderProgram)) {
-            // Upload matrices to the uniform variables
-            int projectionMatrixLocation = GL20.glGetUniformLocation(shaderProgram, "projectionMatrix");
-            int viewMatrixLocation = GL20.glGetUniformLocation(shaderProgram, "viewMatrix");
+//        try (GLWrapShaderProgram shader = new GLWrapShaderProgram(shaderProgram)) {
+//            // Upload matrices to the uniform variables
+//            int projectionMatrixLocation = GL20.glGetUniformLocation(shaderProgram, "projectionMatrix");
+//            int viewMatrixLocation = GL20.glGetUniformLocation(shaderProgram, "viewMatrix");
+//
+//            GL20.glUniformMatrix4fv(projectionMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(projectionMatrix));
+//            GL20.glUniformMatrix4fv(viewMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(cameraTranslate));
+//        }
 
-            GL20.glUniformMatrix4fv(projectionMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(projectionMatrix));
-            GL20.glUniformMatrix4fv(viewMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(cameraTranslate));
-        }
-
-        world.draw(shaderProgram);
+        world.draw(projectionMatrix, cameraTranslate);
     }
 }
+

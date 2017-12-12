@@ -4,7 +4,9 @@ import enterthematrix.Matrix4x4;
 import enterthematrix.Vector4;
 
 class Camera {
-    private final Vector4 initialPosition = new Vector4(0, 0, 3, 0);
+    // Remember: normalized co-ords have to be between -1 to 1. If using a projection matrix (perspective or ortho),
+    // this will normalize from whatever range we want into that.  Else, have to output in that range.
+    private final Vector4 initialPosition = new Vector4(0, 0, 0.1f, 0);
     private final Vector4 initialTarget = new Vector4(0, 0, 0, 0);
     // Note this is really the reverse direction from where we're facing - it's meant to be
     private final Vector4 initialDirection = initialPosition.$minus(initialTarget).normalize();
@@ -80,15 +82,16 @@ class Camera {
     public Matrix4x4 getMatrix() {
 
         // Force it always pointing straight up
-        Vector4 up = new Vector4(0, 1, 0, 0);
-        Vector4 xAxis = new Vector4(1, 0, 0, 0);
+        Vector4 up = new Vector4(0, 1, 0, 1);
+        Vector4 xAxis = new Vector4(1, 0, 0, 1);
         Matrix4x4 rotationLeftRight = Matrix4x4.rotateAroundAnyAxis(up, rotationLeftRightAngleDegrees);
         Matrix4x4 rotationTopBottom = Matrix4x4.rotateAroundAnyAxis(xAxis, rotationTopBottomAngleDegrees);
         // This is the direction we're looking in
         Vector4 dir = rotationLeftRight.$times(rotationTopBottom).$times(initialDirection);
         // Cross product gives us vector perpendicular to both up and the direction we're looking - e.g. it's our right axis
         Vector4 right = up.crossProduct(dir).normalize();
-        return calcLookat(right, up, dir);
+        Matrix4x4 out = calcLookat(right, up, dir);
+        return out;
 //        return Matrix4x4.translate(origin).$times(rotationLeftRight).$times(rotationTopBottom);
     }
 
