@@ -8,6 +8,7 @@ import java.util.Vector;
 class Camera {
     private final Vector4 initialPosition = new Vector4(0, 0, 3, 0);
     private final Vector4 initialTarget = new Vector4(0, 0, 0, 0);
+    // Note this is really the reverse direction from where we're facing - it's meant to be
     private final Vector4 initialDirection = initialPosition.$minus(initialTarget).normalize();
 
     private Vector4 origin = initialPosition;
@@ -81,8 +82,8 @@ class Camera {
     public Matrix4x4 getMatrix() {
 
         // Force it always pointing straight up
-        Vector4 up = new Vector4(0, 1, 0, 1);
-        Vector4 xAxis = new Vector4(1, 0, 0, 1);
+        Vector4 up = new Vector4(0, 1, 0, 0);
+        Vector4 xAxis = new Vector4(1, 0, 0, 0);
         Matrix4x4 rotationLeftRight = Matrix4x4.rotateAroundAnyAxis(up, rotationLeftRightAngleDegrees);
         Matrix4x4 rotationTopBottom = Matrix4x4.rotateAroundAnyAxis(xAxis, rotationTopBottomAngleDegrees);
         // This is the direction we're looking in

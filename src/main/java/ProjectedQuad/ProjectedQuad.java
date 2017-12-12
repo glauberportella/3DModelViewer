@@ -17,33 +17,15 @@ import static org.lwjgl.opengl.GL20.*;
 
 public class ProjectedQuad extends GLFWKeyCallback implements Drawable {
     private int shaderProgram;
-
-    private CameraRotatingAroundOrigin cameraPos;
-    private ArrayList<Model> models;
+    private Camera cameraPos;
+    private World world;
 
 
     public ProjectedQuad(AppParams params) {
         createShaders();
-
-        models = new ArrayList<>();
-
-        // Draw quad1, putting it back along the z-axis a bit.
-        Matrix4x4 quad1Transform = Matrix4x4.translate(0, 0.5f, -0.6f).$times(Matrix4x4.rotateAroundZAxis(45));
-        Model quad1 = new Model(quad1Transform);
-
-        // Draw quad2, putting it back along the z-axis a bit more and off to the right.
-        Matrix4x4 quad2Transform = Matrix4x4.translate(0.2f, 0.5f, -0.8f);//.$times(Matrix4x4.rotateAroundXAxis(90));
-        Model quad2 = new Model(quad2Transform);
-
-        // Draw floor
-        Matrix4x4 floorTransform = Matrix4x4.rotateAroundAnyAxis(1, 0, 0, 89).$times(Matrix4x4.translate(0, 0, -0.8f));//.$times(Matrix4x4.scale(3));
-        Model floor = new Model(floorTransform);
-
-        models.add(quad1);
-        models.add(quad2);
-//        models.add(floor);
-
-        cameraPos = new CameraRotatingAroundOrigin();
+        world = new World();
+//        cameraPos = new Camera();
+        cameraPos = new Camera();
     }
 
     private Matrix4x4 createPerspectiveProjectionMatrix(AppParams params) {
@@ -92,7 +74,7 @@ public class ProjectedQuad extends GLFWKeyCallback implements Drawable {
             else if (key == GLFW_KEY_F) cameraPos.moveDown(posDelta);
             else if (key == GLFW_KEY_A) cameraPos.moveLeft(posDelta);
             else if (key == GLFW_KEY_D) cameraPos.moveRight(posDelta);
-      }
+        }
     }
 
 
@@ -142,7 +124,6 @@ public class ProjectedQuad extends GLFWKeyCallback implements Drawable {
 
         try (GLWrapShaderProgram shader = new GLWrapShaderProgram(shaderProgram)) {
             // Upload matrices to the uniform variables
-            // Get matrices uniform locations
             int projectionMatrixLocation = GL20.glGetUniformLocation(shaderProgram, "projectionMatrix");
             int viewMatrixLocation = GL20.glGetUniformLocation(shaderProgram, "viewMatrix");
 
@@ -150,9 +131,6 @@ public class ProjectedQuad extends GLFWKeyCallback implements Drawable {
             GL20.glUniformMatrix4fv(viewMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(cameraTranslate));
         }
 
-        models.stream().forEach(model -> model.draw(shaderProgram));
-
+        world.draw(shaderProgram);
     }
-
-
 }

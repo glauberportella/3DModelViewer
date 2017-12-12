@@ -14,10 +14,13 @@ case class Vector4(x: Float, y: Float, z: Float, w: Float) {
     Vector4(x / len, y / len, z / len, w / len)
   }
   def dotProduct(v: Vector4) = {
-    val len1 = length
-    val len2 = v.length
-    val cosineAngleBetweenVectors = (x * v.x + y * v.y + z * v.z + w * v.w) / (len1 * len2)
-    len1 * len2 * cosineAngleBetweenVectors
+    // Not sure which is correct definition, have found both defined
+    x * v.x + y * v.y + z * v.z + w * v.w
+
+//    val len1 = length
+//    val len2 = v.length
+//    val cosineAngleBetweenVectors = (x * v.x + y * v.y + z * v.z + w * v.w) / (len1 * len2)
+//    len1 * len2 * cosineAngleBetweenVectors
   }
   def crossProduct(b: Vector4) = Vector4(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x, 1)
 }
