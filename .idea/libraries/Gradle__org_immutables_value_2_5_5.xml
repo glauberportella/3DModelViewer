@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.immutables:value:2.5.5">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.immutables/value/2.5.5/f8f03f7884a2c6df2ca20fe67287b1c798ad17e3/value-2.5.5.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.immutables/value/2.5.5/6bca037d2f214307eaab50da3767b2dfad9d198b/value-2.5.5-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
