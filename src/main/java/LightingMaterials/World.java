@@ -12,12 +12,13 @@ import static org.lwjgl.glfw.GLFW.*;
 class World {
     private final ArrayList<CubeWithNormalsAndMaterials> models = new ArrayList<>();
     private final Shader lightingShader;
+    private final Shader lampShader;
     private Camera cameraPos;
     private CubeWithNormals light;
 
     World() {
         lightingShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_fragment.glsl");
-        Shader lampShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/basic_lighting_lamp_fragment.glsl");
+        lampShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
         Materials materials = new Materials();
 
         // Scale, translate, then rotate.
@@ -83,11 +84,17 @@ class World {
             float ambientStrength = fullStrength;
             float diffuseStrength = fullStrength;
 
+            Vector3 lightDiffuse = new Vector3(diffuseStrength * (float) Math.sin(glfwGetTime()), diffuseStrength * (float) Math.cos(glfwGetTime()), diffuseStrength);
+
             lightingShader.setVec3("light.ambient", ambientStrength, ambientStrength, ambientStrength);
-            lightingShader.setVec3("light.diffuse", diffuseStrength * (float) Math.sin(glfwGetTime()), diffuseStrength * (float) Math.cos(glfwGetTime()), diffuseStrength); // darken the light a bit to fit the scene
+            lightingShader.setVec3("light.diffuse", lightDiffuse); // darken the light a bit to fit the scene
             lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
             lightingShader.setVec3("light.position", light.getPos().toVector3());
             lightingShader.setVec3("viewPos", cameraPos.getPosition().toVector3());
+
+            try (ShaderUse su2 = new ShaderUse(lampShader)) {
+                lampShader.setVec3("lamp_Color", lightDiffuse);
+            }
         }
 
         Matrix4x4 cameraTranslate = cameraPos.getMatrix();
