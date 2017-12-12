@@ -37,7 +37,8 @@ class World {
                     Vector4 pos = new Vector4(0.1f * ((numCubesX / 2) - x), 0, 0.1f * ((numCubesZ / 2) - z), 1);
                     Matrix4x4 transform = Matrix4x4.scale(0.05f);
 //                    Material material = materials.get(new Random().nextInt(materials.getLength()));
-                    Material material = materials.get(x + z);
+//                    Material material = materials.get(x + z);
+                    Material material = materials.get(0);
                     CubeWithNormalsAndMaterialsAndDiffuseMap cube = new CubeWithNormalsAndMaterialsAndDiffuseMap(pos, transform, lightingShader, material);
                     models.add(cube);
                 }
@@ -81,10 +82,12 @@ class World {
 //        Matrix4x4 transform = Matrix4x4.translate(light.getPos()).$times(Matrix4x4.scale(0.01f));
         try (ShaderUse su = new ShaderUse(lightingShader)) {
             float fullStrength = 1.0f;
-            float ambientStrength = fullStrength;
+            float halfStrength = 0.5f;
+            float ambientStrength = halfStrength;
             float diffuseStrength = fullStrength;
 
-            Vector3 lightDiffuse = new Vector3(diffuseStrength * (float) Math.sin(glfwGetTime()), diffuseStrength * (float) Math.cos(glfwGetTime()), diffuseStrength);
+//            Vector3 lightDiffuse = new Vector3(diffuseStrength * (float) Math.sin(glfwGetTime()), diffuseStrength * (float) Math.cos(glfwGetTime()), diffuseStrength);
+            Vector3 lightDiffuse = new Vector3(diffuseStrength, diffuseStrength, diffuseStrength);
 
             lightingShader.setVec3("light.ambient", ambientStrength, ambientStrength, ambientStrength);
             lightingShader.setVec3("light.diffuse", lightDiffuse); // darken the light a bit to fit the scene

@@ -12,6 +12,7 @@ import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE1;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
@@ -21,7 +22,7 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 class CubeWithNormalsAndMaterialsAndDiffuseMap {
     private final int vaoId;
 //    private final int textureId;
-    private final Texture texture;
+    private final Texture texture, specularMap;
 
     public Vector4 getPos() {
         return pos;
@@ -122,6 +123,7 @@ class CubeWithNormalsAndMaterialsAndDiffuseMap {
         GL30.glBindVertexArray(0);
 
         texture = new Texture("../images/container2.png", GL13.GL_TEXTURE0);
+        specularMap = new Texture("../images/container2_specular.png", GL13.GL_TEXTURE0);
     }
 
 
@@ -146,9 +148,10 @@ class CubeWithNormalsAndMaterialsAndDiffuseMap {
 
         try (ShaderUse wrap = new ShaderUse(shader)) {
 //            shader.setVec3("material.ambient", material.getAmbient());
-            shader.setInt("tex", 0);
-            shader.setInt("material.diffuse", texture.getTextureId());
-            shader.setVec3("material.specular", material.getSpecular());
+            shader.setInt("material.texture", 0);
+            shader.setInt("material.diffuse", 0);
+//            shader.setVec3("material.specular", material.getSpecular());
+            shader.setInt("material.specular", 1);
             shader.setFloat("material.shininess", material.getShininess());
 
             // Upload matrices to the uniform variables
@@ -169,6 +172,8 @@ class CubeWithNormalsAndMaterialsAndDiffuseMap {
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture.getTextureId());
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, specularMap.getTextureId());
 
             GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 36);
 
