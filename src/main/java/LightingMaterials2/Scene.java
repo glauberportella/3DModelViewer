@@ -1,25 +1,15 @@
 package LightingMaterials2;
 
 import Useful.AppParams;
-import Useful.Drawable;
 import Useful.HandyMaths;
 import enterthematrix.Matrix4x4;
-import org.lwjgl.glfw.GLFWKeyCallback;
 
-import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
+import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
+import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
 
-public class LightingMaterials2App extends GLFWKeyCallback implements Drawable {
-    private int shaderProgram;
-    private ShinyCubeWorld world;
-
-
-    public LightingMaterials2App(AppParams params) {
-        createShaders();
-        world = new ShinyCubeWorld();
-//        cameraPos = new Camera();
-    }
-
-    private Matrix4x4 createPerspectiveProjectionMatrix(AppParams params) {
+abstract public class Scene {
+    protected Matrix4x4 createPerspectiveProjectionMatrix(AppParams params) {
         float fieldOfView = params.fovDegrees;
         float aspectRatio = (float)params.widthPixels / (float)params.heightPixels;
         float near_plane = 0.001f;
@@ -36,26 +26,15 @@ public class LightingMaterials2App extends GLFWKeyCallback implements Drawable {
                 0, 0, -1, 0);
     }
 
-
-
-    @Override
-    public void invoke(long window, int key, int scancode, int action, int mods) {
+    public void keyPressed(long window, int key, int scancode, int action, int mods) {
         if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
             glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
         } else {
-            world.invoke(window, key, scancode, action, mods);
+            keyPressedImpl(window, key, scancode, action, mods);
         }
     }
 
+    abstract protected void keyPressedImpl(long window, int key, int scancode, int action, int mods);
+    abstract public void draw(AppParams params);
 
-    private void createShaders() {
-
-    }
-
-    @Override public void draw(AppParams params) {
-        Matrix4x4 projectionMatrix = createPerspectiveProjectionMatrix(params);
-//        Matrix4x4 projectionMatrix = Matrix4x4.identity();
-        world.draw(projectionMatrix);
-    }
 }
-

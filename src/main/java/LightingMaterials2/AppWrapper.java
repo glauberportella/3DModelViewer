@@ -1,9 +1,7 @@
 
 package LightingMaterials2;
 
-import LightingMaterials.BasicLighting2App;
 import Useful.AppParams;
-import Useful.Drawable;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
@@ -12,6 +10,7 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -19,9 +18,9 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public class AppWrapper {
-
-    // The window handle
+public class AppWrapper extends GLFWKeyCallback {
+    Scene currentScene;
+    ArrayList<Scene> scenes = new ArrayList<>();
     private long window;
 
     public void run() {
@@ -44,6 +43,17 @@ public class AppWrapper {
         glfwSetErrorCallback(null).free();
     }
 
+    @Override public void invoke(long window, int key, int scancode, int action, int mods) {
+        if (action == GLFW_PRESS) {
+            if (key == GLFW_KEY_KP_1) changeScene(0);
+            else if (key == GLFW_KEY_KP_2) changeScene(1);
+            else if (key == GLFW_KEY_ESCAPE) glfwSetWindowShouldClose(window, true);
+        }
+
+        currentScene.keyPressedImpl(window, key, scancode, action, mods);
+    }
+
+
     private void init(AppParams params) {
         // Setup an error callback. The default implementation
         // will print the error message in System.err.
@@ -61,7 +71,7 @@ public class AppWrapper {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
         // Create the window
-        window = glfwCreateWindow(params.widthPixels, params.heightPixels, "Hello GloomyCubeWorld!", NULL, NULL);
+        window = glfwCreateWindow(params.widthPixels, params.heightPixels, "Hello GloomyCubeScene!", NULL, NULL);
         if ( window == NULL )
             throw new RuntimeException("Failed to create the GLFW window");
 
@@ -93,10 +103,16 @@ public class AppWrapper {
         // Make the window visible
         glfwShowWindow(window);
 
+        glfwSetKeyCallback(window, this);
 
 //		glfwSetInputMode(id, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 //		glfwSetInputMode(id, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
+    }
+
+    private void changeScene(int index) {
+        Scene scene = scenes.get(index);
+        currentScene = scene;
     }
 
     private void loop(AppParams params) {
@@ -109,28 +125,17 @@ public class AppWrapper {
 
         glEnable(GL_DEPTH_TEST);
 
-        // Set the clear color
-//		glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
-//        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClearColor(1f, 1f, 1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        Scene lit = new ShinyCubeScene();
+        Scene gloomy = new GloomyCubeScene();
+        scenes.add(lit);
+        scenes.add(gloomy);
 
-        Drawable quad = new LightingMaterials2App(params);
-
-        if (quad instanceof GLFWKeyCallback) {
-            glfwSetKeyCallback(window, (GLFWKeyCallback) quad);
-        }
-
-        //drawQuadWithArrays();
+        changeScene(0);
 
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
         while ( !glfwWindowShouldClose(window) ) {
-            quad.update();
-
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
-
-            quad.draw(params);
+            currentScene.draw(params);
 
             glfwSwapBuffers(window); // swap the color buffers
 

@@ -1,5 +1,6 @@
 package LightingMaterials2;
 
+import Useful.AppParams;
 import de.matthiasmann.twl.utils.PNGDecoder;
 import enterthematrix.Matrix4x4;
 import enterthematrix.Vector4;
@@ -8,18 +9,19 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL11.*;
 
-class GloomyCubeWorld {
+class ShinyCubeScene extends Scene {
     private final ArrayList<FancyCube> cubeModels = new ArrayList<>();
     private final ArrayList<FancyQuad> quadModels = new ArrayList<>();
     private final Shader lightingShader;
     private Camera camera;
-    private final GloomyLighting lighting;
+    private final BrightLighting lighting;
 
-    GloomyCubeWorld() {
+    ShinyCubeScene() {
         lightingShader = new Shader("../shaders/lighting_materials_vertex.glsl", "../shaders/lighting_materials2_fragment.glsl");
         Materials materials = new Materials();
-        lighting = new GloomyLighting();
+        lighting = new BrightLighting();
         Texture texture = new Texture("../images/container2.png", PNGDecoder.Format.RGBA);
         Texture specularMap = new Texture("../images/container2_specular.png", PNGDecoder.Format.RGBA);
 
@@ -46,7 +48,7 @@ class GloomyCubeWorld {
 
 
         {
-            Texture floorTexture = new Texture("../images/step2b.png", PNGDecoder.Format.RGB);
+            Texture floorTexture = new Texture("../images/WM_IndoorWood-44_1024.png", PNGDecoder.Format.RGBA);
 //            Optional<Matrix4x4> rotate = Optional.empty();
             Optional<Matrix4x4> rotate = Optional.of(Matrix4x4.rotateAroundXAxis(90));
 //            Optional<Matrix4x4> scale = Optional.empty();
@@ -55,8 +57,8 @@ class GloomyCubeWorld {
             Vector4 pos = new Vector4(0,-0.05f,0, 1);
             // Goes -0.5f to 0.5f
             // Want it -2 to 2
-            Material material = new Material("dull", null, null, null, 2);
-            FancyQuad floor = new FancyQuad(pos, scale, rotate, lightingShader, material, floorTexture, floorTexture, 5);
+            Material material = new Material("dull", null, null, null, 32);
+            FancyQuad floor = new FancyQuad(pos, scale, rotate, lightingShader, material, floorTexture, floorTexture, 10);
             quadModels.add(floor);
         }
 
@@ -65,7 +67,7 @@ class GloomyCubeWorld {
 
     }
 
-    public void invoke(long window, int key, int scancode, int action, int mods) {
+    @Override public void keyPressedImpl(long window, int key, int scancode, int action, int mods) {
         //-- Input processing
         float rotationDelta = 1.0f;
         float posDelta = 0.05f;
@@ -86,7 +88,11 @@ class GloomyCubeWorld {
         }
     }
 
-    public void draw(Matrix4x4 projectionMatrix) {
+    @Override public void draw(AppParams params) {
+        glClearColor(1f, 1f, 1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        Matrix4x4 projectionMatrix = createPerspectiveProjectionMatrix(params);
         Matrix4x4 cameraTranslate = camera.getMatrix();
         lighting.draw(projectionMatrix, cameraTranslate, lightingShader, camera);
         cubeModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate));
