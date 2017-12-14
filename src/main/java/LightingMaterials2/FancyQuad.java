@@ -27,23 +27,23 @@ class FancyQuad extends Model {
     private final Material material;
 
 
-    public FancyQuad(Vector4 pos, Optional<Matrix4x4> scale, Optional<Matrix4x4> rotate, Shader shader, Material material, Texture texture, Texture specularMap) {
+    public FancyQuad(Vector4 pos, Optional<Matrix4x4> scale, Optional<Matrix4x4> rotate, Shader shader, Material material, Texture texture, Texture specularMap, float textureRepeats) {
         super(pos, scale, rotate);
         this.shader = shader;
         this.material = material;
         this.texture = texture;
         this.specularMap = specularMap;
 
-        float tc = 5.0f;
+        float tc = textureRepeats;
 
         float vertices[] = {
                 // positions          // normals           // texture coords
-                -0.5f, -0.5f, 0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-                0.5f, -0.5f, 0f,  0.0f,  0.0f, -1.0f,  tc, 0.0f,
-                0.5f,  0.5f, 0,  0.0f,  0.0f, -1.0f,  tc, tc,
-                0.5f,  0.5f, 0,  0.0f,  0.0f, -1.0f,  tc, tc,
-                -0.5f,  0.5f, 0,  0.0f,  0.0f, -1.0f,  0.0f, tc,
-                -0.5f, -0.5f, 0,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+                -0.5f, -0.5f, 0f,  0.0f,  0.0f, 1.0f,  0.0f, 0.0f,
+                0.5f, -0.5f, 0f,  0.0f,  0.0f, 1.0f,  tc, 0.0f,
+                0.5f,  0.5f, 0,  0.0f,  0.0f, 1.0f,  tc, tc,
+                0.5f,  0.5f, 0,  0.0f,  0.0f, 1.0f,  tc, tc,
+                -0.5f,  0.5f, 0,  0.0f,  0.0f, 1.0f,  0.0f, tc,
+                -0.5f, -0.5f, 0,  0.0f,  0.0f, 1.0f,  0.0f, 0.0f,
 
 //                -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
 //                0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,

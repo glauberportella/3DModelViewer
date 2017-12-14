@@ -6,17 +6,16 @@ import Useful.HandyMaths;
 import enterthematrix.Matrix4x4;
 import org.lwjgl.glfw.GLFWKeyCallback;
 
-import static java.lang.Math.PI;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class LightingMaterials2App extends GLFWKeyCallback implements Drawable {
     private int shaderProgram;
-    private World world;
+    private ShinyCubeWorld world;
 
 
     public LightingMaterials2App(AppParams params) {
         createShaders();
-        world = new World();
+        world = new ShinyCubeWorld();
 //        cameraPos = new Camera();
     }
 

@@ -1,23 +1,20 @@
 package LightingMaterials2;
 
-import Useful.HandyMaths;
 import enterthematrix.Matrix4x4;
 import enterthematrix.Vector3;
 import enterthematrix.Vector4;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFW.glfwGetTime;
 
-public class Lighting {
+public class BrightLighting {
     private final Light directional;
     private final Light[] points;
     static final int MAX_POINT_LIGHTS = 4;
     private final Shader lampShader;
 
-    Lighting() {
+    BrightLighting() {
         Matrix4x4 standardLight = Matrix4x4.scale(0.01f);
         lampShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
         points = new Light[MAX_POINT_LIGHTS];
@@ -25,8 +22,8 @@ public class Lighting {
         float fullStrength = 1.0f;
         float halfStrength = 0.5f;
         float ambientStrength = 0.2f;
-        float diffuseStrength = 0.6f;
-        float directionalModifier = 0.1f;
+        float diffuseStrength = 0.9f;
+        float directionalModifier = 2f;
 
         Vector3 ambient = new Vector3(ambientStrength, ambientStrength, ambientStrength);
         Vector3 diffuse = new Vector3(diffuseStrength, diffuseStrength, diffuseStrength);

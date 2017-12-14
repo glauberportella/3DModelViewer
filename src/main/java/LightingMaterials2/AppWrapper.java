@@ -61,7 +61,7 @@ public class AppWrapper {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
         // Create the window
-        window = glfwCreateWindow(params.widthPixels, params.heightPixels, "Hello World!", NULL, NULL);
+        window = glfwCreateWindow(params.widthPixels, params.heightPixels, "Hello GloomyCubeWorld!", NULL, NULL);
         if ( window == NULL )
             throw new RuntimeException("Failed to create the GLFW window");
 
@@ -112,6 +112,7 @@ public class AppWrapper {
         // Set the clear color
 //		glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
 //        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(1f, 1f, 1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         Drawable quad = new LightingMaterials2App(params);

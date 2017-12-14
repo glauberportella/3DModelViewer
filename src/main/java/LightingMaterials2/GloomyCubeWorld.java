@@ -3,24 +3,23 @@ package LightingMaterials2;
 import de.matthiasmann.twl.utils.PNGDecoder;
 import enterthematrix.Matrix4x4;
 import enterthematrix.Vector4;
-import org.lwjgl.opengl.GL13;
 
 import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-class World {
+class GloomyCubeWorld {
     private final ArrayList<FancyCube> cubeModels = new ArrayList<>();
     private final ArrayList<FancyQuad> quadModels = new ArrayList<>();
     private final Shader lightingShader;
     private Camera camera;
-    private final Lighting lighting;
+    private final GloomyLighting lighting;
 
-    World() {
+    GloomyCubeWorld() {
         lightingShader = new Shader("../shaders/lighting_materials_vertex.glsl", "../shaders/lighting_materials2_fragment.glsl");
         Materials materials = new Materials();
-        lighting = new Lighting();
+        lighting = new GloomyLighting();
         Texture texture = new Texture("../images/container2.png", PNGDecoder.Format.RGBA);
         Texture specularMap = new Texture("../images/container2_specular.png", PNGDecoder.Format.RGBA);
 
@@ -57,7 +56,7 @@ class World {
             // Goes -0.5f to 0.5f
             // Want it -2 to 2
             Material material = new Material("dull", null, null, null, 2);
-            FancyQuad floor = new FancyQuad(pos, scale, rotate, lightingShader, material, floorTexture, floorTexture);
+            FancyQuad floor = new FancyQuad(pos, scale, rotate, lightingShader, material, floorTexture, floorTexture, 5);
             quadModels.add(floor);
         }
 
