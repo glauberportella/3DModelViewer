@@ -7,6 +7,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
 
 import java.nio.FloatBuffer;
+import java.util.Optional;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
@@ -19,21 +20,10 @@ import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
-class CubeWithNormalsAndMaterialsAndDiffuseMap {
+class FancyCube extends Model {
     private final int vaoId;
 //    private final int textureId;
     private final Texture texture, specularMap;
-
-    public Vector4 getPos() {
-        return pos;
-    }
-
-    public void setPos(Vector4 pos) {
-        this.pos = pos;
-    }
-
-    private Vector4 pos;
-    private final Matrix4x4 otherTransform;
     private final Shader shader;
     private final int VBO_INDEX_VERTICES = 0;
     private final int VBO_INDEX_NORMALS = 1;
@@ -41,14 +31,12 @@ class CubeWithNormalsAndMaterialsAndDiffuseMap {
     private final Material material;
 
 
-    /**
-     * @param otherTransform Used to place model into world. Scale, translate, then rotate.
-     */
-    public CubeWithNormalsAndMaterialsAndDiffuseMap(Vector4 pos, Matrix4x4 otherTransform, Shader shader, Material material) {
-        this.pos = pos;
-        this.otherTransform = otherTransform;
+    public FancyCube(Vector4 pos, Optional<Matrix4x4> scale, Optional<Matrix4x4> rotate, Shader shader, Material material, Texture texture, Texture specularMap) {
+        super(pos, scale, rotate);
         this.shader = shader;
         this.material = material;
+        this.texture = texture;
+        this.specularMap = specularMap;
 
         float vertices[] = {
                 // positions          // normals           // texture coords
@@ -121,31 +109,11 @@ class CubeWithNormalsAndMaterialsAndDiffuseMap {
 
         // Deselect VAO
         GL30.glBindVertexArray(0);
-
-        texture = new Texture("../images/container2.png", GL13.GL_TEXTURE0);
-        specularMap = new Texture("../images/container2_specular.png", GL13.GL_TEXTURE0);
     }
 
 
 
     public void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate) {
-//        shader.setVec3("material.ambient",  new Vector3(1.0f, 0.5f, 0.31f).$times(5f));
-//        shader.setVec3("material.diffuse",  new Vector3(1.0f, 0.5f, 0.31f).$times(2f));
-//        shader.setVec3("material.specular", new Vector3(0.1f, 0.1f, 0.1f));
-//        shader.setFloat("material.shininess", 32.0f);
-
-//        shader.setFloat("material.shininess", material.getShininess());
-
-//        shader.setVec3("material.ambient", material.getAmbient());
-//        shader.setVec3("material.diffuse", material.getDiffuse());
-//        shader.setVec3("material.specular", material.getSpecular());
-
-//        shader.setVec3("material.ambient", 0.0f, 0.1f, 0.06f);
-//        shader.setVec3("material.diffuse", 0.0f, 0.50980392f, 0.50980392f);
-//        shader.setVec3("material.specular", 0.50196078f, 0.50196078f, 0.50196078f);
-//        shader.setFloat("material.shininess", 32.0f);
-
-
         try (ShaderUse wrap = new ShaderUse(shader)) {
 //            shader.setVec3("material.ambient", material.getAmbient());
             shader.setInt("material.texture", 0);
@@ -159,7 +127,7 @@ class CubeWithNormalsAndMaterialsAndDiffuseMap {
             int projectionMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "projectionMatrix");
             int viewMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "viewMatrix");
 
-            Matrix4x4 modelMatrix = Matrix4x4.translate(pos).$times(otherTransform);
+            Matrix4x4 modelMatrix = getModelMatrix();
 
             GL20.glUniformMatrix4fv(projectionMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(projectionMatrix));
             GL20.glUniformMatrix4fv(viewMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(cameraTranslate));

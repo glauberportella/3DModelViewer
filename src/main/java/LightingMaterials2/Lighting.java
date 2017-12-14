@@ -26,20 +26,26 @@ public class Lighting {
         float halfStrength = 0.5f;
         float ambientStrength = 0.2f;
         float diffuseStrength = 0.6f;
+        float directionalModifier = 0.1f;
 
         Vector3 ambient = new Vector3(ambientStrength, ambientStrength, ambientStrength);
         Vector3 diffuse = new Vector3(diffuseStrength, diffuseStrength, diffuseStrength);
         Vector3 specular = new Vector3(fullStrength, fullStrength, fullStrength);
 
+        Vector3 ambientDirectional = new Vector3(ambientStrength * directionalModifier, ambientStrength * directionalModifier, ambientStrength * directionalModifier);
+        Vector3 diffuseDirectional = new Vector3(diffuseStrength * directionalModifier, diffuseStrength * directionalModifier, diffuseStrength * directionalModifier);
+        Vector3 specularDirectional = new Vector3(fullStrength * directionalModifier, fullStrength * directionalModifier, fullStrength * directionalModifier);
+
         Vector3 directionalDir = new Vector3(-1, -1, 0);
 
-        directional = new DirectionalLight(directionalDir, true, ambient, diffuse, specular);
+        directional = new DirectionalLight(directionalDir, true, ambientDirectional, diffuseDirectional, specularDirectional);
 
+        // Putting into a -1 to 1 space
         for (int i = 0; i < MAX_POINT_LIGHTS; i++) {
 
             // Put in a circle
 //            float pos = (float) Math.sin(HandyMaths.degreesToRadians(360 / MAX_POINT_LIGHTS) * i) * 0.1f;
-            float pos = (i * 0.1f) + 0.1f;
+            float pos = (i * (2.0f / MAX_POINT_LIGHTS)) - 1.0f;
             Vector4 lightPos = new Vector4(pos, 0.1f, pos, 1);
             Light light = new PointLight(lightPos, standardLight, lampShader, true, i, ambient, diffuse, specular);
             points[i] = light;

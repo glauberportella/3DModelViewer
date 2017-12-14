@@ -16,7 +16,7 @@ class Texture {
 
     final private int textureId;
 
-    public Texture(String filename, int textureUnit) {
+    public Texture(String filename, PNGDecoder.Format inputFormat) {
         // Create a new texture object in memory and bind it
         ByteBuffer buf = null;
         int tWidth = 0;
@@ -35,7 +35,7 @@ class Texture {
 
             // Decode the PNG file in a ByteBuffer
             buf = ByteBuffer.allocateDirect(4 * decoder.getWidth() * decoder.getHeight());
-            decoder.decode(buf, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
+            decoder.decode(buf, decoder.getWidth() * 4, inputFormat);
             buf.flip();
 
             in.close();
@@ -63,43 +63,5 @@ class Texture {
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
 //        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-
-
     }
 }
-
-//class Textures {
-//    static public ByteBuffer loadTexture(String filename) {
-//        ByteBuffer buf = null;
-//        int tWidth = 0;
-//        int tHeight = 0;
-//
-//        try {
-//            // Open the PNG file as an InputStream
-//            InputStream in = new FileInputStream(filename);
-//            // Link the PNG decoder to this stream
-//            PNGDecoder decoder = new PNGDecoder(in);
-//
-//            // Get the width and height of the texture
-//            tWidth = decoder.getWidth();
-//            tHeight = decoder.getHeight();
-//
-//
-//            // Decode the PNG file in a ByteBuffer
-//            buf = ByteBuffer.allocateDirect(
-//                    4 * decoder.getWidth() * decoder.getHeight());
-//            decoder.decode(buf, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
-//            buf.flip();
-//
-//            in.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            System.exit(-1);
-//        }
-//
-//        return buf;
-//    }
-//
-//
-//
-//}

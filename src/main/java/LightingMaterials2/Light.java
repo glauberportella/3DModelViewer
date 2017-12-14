@@ -59,8 +59,8 @@ class PointLight extends Light {
         if (isEnabled()) {
             lightingShader.setVec3(lightText + ".position", pos);
             lightingShader.setFloat(lightText + ".constant", 1.0f);
-            lightingShader.setFloat(lightText + ".linear", 3.7f);
-            lightingShader.setFloat(lightText + ".quadratic", 5.8f);
+            lightingShader.setFloat(lightText + ".linear", 0.7f);
+            lightingShader.setFloat(lightText + ".quadratic", 1.8f);
         }
     }
 
