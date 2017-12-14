@@ -115,13 +115,13 @@ class CubeWithNormals {
         try (ShaderUse wrap = new ShaderUse(shader)) {
             // Upload matrices to the uniform variables
             int modelMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "modelMatrix");
-            int projectionMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "projectionMatrix");
-            int viewMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "viewMatrix");
+//            int projectionMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "projectionMatrix");
+//            int viewMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "viewMatrix");
 
             Matrix4x4 modelMatrix = Matrix4x4.translate(pos).$times(otherTransform);
 
-            GL20.glUniformMatrix4fv(projectionMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(projectionMatrix));
-            GL20.glUniformMatrix4fv(viewMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(cameraTranslate));
+//            GL20.glUniformMatrix4fv(projectionMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(projectionMatrix));
+//            GL20.glUniformMatrix4fv(viewMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(cameraTranslate));
             GL20.glUniformMatrix4fv(modelMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(modelMatrix));
 
             GL30.glBindVertexArray(vaoId);

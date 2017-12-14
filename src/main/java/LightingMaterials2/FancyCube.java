@@ -23,17 +23,17 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 class FancyCube extends Model {
     private final int vaoId;
 //    private final int textureId;
-    private final Texture texture, specularMap;
-    private final Shader shader;
+    private final TextureFromFile texture, specularMap;
+//    private final Shader shader;
     private final int VBO_INDEX_VERTICES = 0;
     private final int VBO_INDEX_NORMALS = 1;
     private final int VBO_INDEX_DIFFUSE_MAP = 2;
     private final Material material;
 
 
-    public FancyCube(Vector4 pos, Optional<Matrix4x4> scale, Optional<Matrix4x4> rotate, Shader shader, Material material, Texture texture, Texture specularMap) {
+    public FancyCube(Vector4 pos, Optional<Matrix4x4> scale, Optional<Matrix4x4> rotate, Material material, TextureFromFile texture, TextureFromFile specularMap) {
         super(pos, scale, rotate);
-        this.shader = shader;
+//        this.shader = shader;
         this.material = material;
         this.texture = texture;
         this.specularMap = specularMap;
@@ -113,7 +113,7 @@ class FancyCube extends Model {
 
 
 
-    public void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate) {
+    public void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate, Shader shader) {
         try (ShaderUse wrap = new ShaderUse(shader)) {
 //            shader.setVec3("material.ambient", material.getAmbient());
             shader.setInt("material.texture", 0);
@@ -124,13 +124,13 @@ class FancyCube extends Model {
 
             // Upload matrices to the uniform variables
             int modelMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "modelMatrix");
-            int projectionMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "projectionMatrix");
-            int viewMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "viewMatrix");
+//            int projectionMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "projectionMatrix");
+//            int viewMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "viewMatrix");
 
             Matrix4x4 modelMatrix = getModelMatrix();
 
-            GL20.glUniformMatrix4fv(projectionMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(projectionMatrix));
-            GL20.glUniformMatrix4fv(viewMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(cameraTranslate));
+//            GL20.glUniformMatrix4fv(projectionMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(projectionMatrix));
+//            GL20.glUniformMatrix4fv(viewMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(cameraTranslate));
             GL20.glUniformMatrix4fv(modelMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(modelMatrix));
 
             GL30.glBindVertexArray(vaoId);

@@ -24,6 +24,7 @@ public class BrightLighting {
         float halfStrength = 0.5f;
         float ambientStrength = 0.2f;
         float diffuseStrength = 0.9f;
+//        float diffuseStrength = 3f;
         float directionalModifier = 2f;
         float specularDirectionalForce = 0.0f;
 
@@ -38,6 +39,7 @@ public class BrightLighting {
         Vector3 directionalDir = new Vector3(-1, -1, 0);
 
         directional = new DirectionalLight(directionalDir, true, ambientDirectional, diffuseDirectional, specularDirectional);
+        directional.setEnabled(true);
 
         // Putting into a -1 to 1 space
         for (int i = 0; i < MAX_POINT_LIGHTS; i++) {
@@ -48,6 +50,7 @@ public class BrightLighting {
             Vector4 lightPos = new Vector4(pos, 0.1f, pos, 1);
             PointLight light = new PointLight(lightPos, standardLight, lampShader, true, i, ambient, diffuse, specular);
             points[i] = light;
+            light.setEnabled(false);
         }
     }
 

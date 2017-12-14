@@ -23,7 +23,7 @@ abstract public class Model {
         this.rotate = rotate;
     }
 
-    abstract public void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate);
+    abstract public void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate, Shader shader);
     protected Matrix4x4 getModelMatrix() {
         return ModelUtils.getModelMatrix(pos, scale, rotate);
     }

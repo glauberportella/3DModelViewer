@@ -9,14 +9,31 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.ByteBuffer;
 
-class Texture {
+interface Texture {
+    public int getTextureId();
+}
+
+class TextureFromExisting implements  Texture {
+    int textureId;
+
+    public int getTextureId() {
+        return textureId;
+    }
+
+    TextureFromExisting(int textureId) {
+        this.textureId = textureId;
+    }
+
+}
+
+class TextureFromFile implements Texture {
     public int getTextureId() {
         return textureId;
     }
 
     final private int textureId;
 
-    public Texture(String filename, PNGDecoder.Format inputFormat) {
+    public TextureFromFile(String filename, PNGDecoder.Format inputFormat) {
         // Create a new texture object in memory and bind it
         ByteBuffer buf = null;
         int tWidth = 0;

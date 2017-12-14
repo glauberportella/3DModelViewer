@@ -32,7 +32,7 @@ class Shader {
         GL20.glBindAttribLocation(shaderProgram, 0, "aPos");
         // Color information will be attribute 1
 //        GL20.glBindAttribLocation(shaderProgram, 1, "in_Color");
-        // Texture information will be attribute 2
+        // TextureFromFile information will be attribute 2
 //        GL20.glBindAttribLocation(shaderProgram, 2, "in_TextureCoord");
 
         glLinkProgram(shaderProgram);

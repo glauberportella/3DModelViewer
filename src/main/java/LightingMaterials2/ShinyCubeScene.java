@@ -10,24 +10,23 @@ import java.util.Optional;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL30.*;
 
 class ShinyCubeScene extends Scene {
     private final ArrayList<FancyCube> cubeModels = new ArrayList<>();
     private final ArrayList<FancyQuad> quadModels = new ArrayList<>();
     private final ArrayList<FancyCube> axisMarkers = new ArrayList<>();
-    private final Shader lightingShader;
+//    private final Shader lightingShader;
     private Camera camera;
     private final BrightLighting lighting;
     private boolean drawAxisMarkers = false;
+    private final Shader lightingShader = new Shader("../shaders/lighting_materials_vertex.glsl", "../shaders/lighting_materials2_fragment.glsl");
+    private final Shader basicFlatShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
 
     ShinyCubeScene() {
-        lightingShader = new Shader("../shaders/lighting_materials_vertex.glsl", "../shaders/lighting_materials2_fragment.glsl");
-        Shader basicFlatShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
         Materials materials = new Materials();
         lighting = new BrightLighting();
-        Texture texture = new Texture("../images/container2.png", PNGDecoder.Format.RGBA);
-        Texture specularMap = new Texture("../images/container2_specular.png", PNGDecoder.Format.RGBA);
+        TextureFromFile texture = new TextureFromFile("../images/container2.png", PNGDecoder.Format.RGBA);
+        TextureFromFile specularMap = new TextureFromFile("../images/container2_specular.png", PNGDecoder.Format.RGBA);
 
         // Scale, translate, then rotate.
         // Putting into a -1 to 1 space
@@ -45,7 +44,7 @@ class ShinyCubeScene extends Scene {
                     float zPos = z * (2.0f / numCubesZ) - 1.0f;
                     Vector4 pos = new Vector4(xPos, 0, zPos, 1);
                     Matrix4x4 scale = Matrix4x4.scale(0.1f); // to 0.05 box, taking up 25% of space
-                    FancyCube cube = new FancyCube(pos, Optional.of(scale), Optional.empty(), lightingShader, materials.get(0), texture, specularMap);
+                    FancyCube cube = new FancyCube(pos, Optional.of(scale), Optional.empty(), materials.get(0), texture, specularMap);
                     cubeModels.add(cube);
                 }
         }
@@ -53,28 +52,28 @@ class ShinyCubeScene extends Scene {
         {
             Matrix4x4 scale = Matrix4x4.scale(0.01f);
             // axis
-            axisMarkers.add(new FancyCube(new Vector4(0,0,0,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(0,0,0,1), Optional.of(scale), Optional.empty(), materials.get(0), texture, specularMap));
 
-            axisMarkers.add(new FancyCube(new Vector4(-1,0,-1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1,0,-1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1,0,1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(-1,0,1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1,0,-1,1), Optional.of(scale), Optional.empty(), materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1,0,-1,1), Optional.of(scale), Optional.empty(), materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1,0,1,1), Optional.of(scale), Optional.empty(), materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1,0,1,1), Optional.of(scale), Optional.empty(), materials.get(0), texture, specularMap));
 
-            axisMarkers.add(new FancyCube(new Vector4(-1,1,-1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1,1,-1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1,1,1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(-1,1,1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1,1,-1,1), Optional.of(scale), Optional.empty(), materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1,1,-1,1), Optional.of(scale), Optional.empty(), materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1,1,1,1), Optional.of(scale), Optional.empty(), materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1,1,1,1), Optional.of(scale), Optional.empty(), materials.get(0), texture, specularMap));
 
-            axisMarkers.add(new FancyCube(new Vector4(-1,-1,-1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1,-1,-1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1,-1,1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(-1,-1,1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1,-1,-1,1), Optional.of(scale), Optional.empty(), materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1,-1,-1,1), Optional.of(scale), Optional.empty(), materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1,-1,1,1), Optional.of(scale), Optional.empty(), materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1,-1,1,1), Optional.of(scale), Optional.empty(), materials.get(0), texture, specularMap));
 
         }
 
 
         {
-            Texture floorTexture = new Texture("../images/WM_IndoorWood-44_1024.png", PNGDecoder.Format.RGBA);
+            TextureFromFile floorTexture = new TextureFromFile("../images/WM_IndoorWood-44_1024.png", PNGDecoder.Format.RGBA);
 //            Optional<Matrix4x4> rotate = Optional.empty();
             Optional<Matrix4x4> rotate = Optional.of(Matrix4x4.rotateAroundXAxis(90));
 //            Optional<Matrix4x4> scale = Optional.empty();
@@ -84,7 +83,7 @@ class ShinyCubeScene extends Scene {
             // Goes -0.5f to 0.5f
             // Want it -2 to 2
             Material material = new Material("dull", null, null, null, 32);
-            FancyQuad floor = new FancyQuad(pos, scale, rotate, lightingShader, material, floorTexture, floorTexture, 10);
+            FancyQuad floor = new FancyQuad(pos, scale, rotate, material, floorTexture, floorTexture, 10);
             quadModels.add(floor);
         }
 
@@ -160,10 +159,10 @@ class ShinyCubeScene extends Scene {
         Matrix4x4 cameraTranslate = camera.getMatrix();
         lighting.draw(projectionMatrix, cameraTranslate, lightingShader, camera);
         if (drawAxisMarkers) {
-            axisMarkers.forEach(model -> model.draw(projectionMatrix, cameraTranslate));
+            axisMarkers.forEach(model -> model.draw(projectionMatrix, cameraTranslate, basicFlatShader));
         }
-        cubeModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate));
-        quadModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate));
+        cubeModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, lightingShader));
+        quadModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, lightingShader));
     }
 
 }

@@ -4,21 +4,41 @@ import enterthematrix.Matrix4x4;
 import enterthematrix.Vector3;
 import enterthematrix.Vector4;
 
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
+
 class DirectionalLight extends Light {
-    final private Vector3 direction;
+    final Vector3 direction;
+    private int shadowTexture;
+    boolean shadowsEnabled = false;
 
     public DirectionalLight(Vector3 direction, boolean enabled, Vector3 ambient, Vector3 diffuse, Vector3 specular) {
         super(enabled, ambient, diffuse, specular);
         this.direction = direction;
     }
 
-    @Override public void setupShader(Shader lightingShader) {
-        assert (lightingShader.isInUse());
+    @Override public void setupShader(Shader shader) {
+        assert (shader.isInUse());
         String lightText = "dirLight";
-        super.setupShaderImpl(lightingShader, lightText);
+        super.setupShaderImpl(shader, lightText);
         if (isEnabled()) {
-            lightingShader.setVec3(lightText + ".direction", direction);
+            shader.setVec3(lightText + ".direction", direction);
+
+            shader.setBoolean(lightText +".shadowsEnabled", shadowsEnabled);
+
+            if (shadowsEnabled) {
+                shader.setInt(lightText +".shadowMap", 0);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, shadowTexture);
+            }
         }
+    }
+
+    public void setShadowTexture(int shadowTexture) {
+        this.shadowTexture = shadowTexture;
+        shadowsEnabled = true;
     }
 
     @Override
