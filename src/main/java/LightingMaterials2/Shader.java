@@ -13,8 +13,12 @@ class Shader {
 
     private final int shaderProgram;
     private boolean inUse = false;
+    private final String vtxFilename;
+    private final String fragFilename;
 
     Shader(String vertexResourceFilename, String fragmentResourceFilename) {
+        this.vtxFilename = vertexResourceFilename;
+        this.fragFilename = fragmentResourceFilename;
         // Load the vertex shader
         int vertexShader = ShaderUtils.loadShader(this.getClass().getResource(vertexResourceFilename), GL20.GL_VERTEX_SHADER);
         // Load the fragment shader
@@ -29,7 +33,7 @@ class Shader {
         GL20.glBindAttribLocation(shaderProgram, 0, "aPos");
         // Color information will be attribute 1
 //        GL20.glBindAttribLocation(shaderProgram, 1, "in_Color");
-        // Texture information will be attribute 2
+        // TextureFromFile information will be attribute 2
 //        GL20.glBindAttribLocation(shaderProgram, 2, "in_TextureCoord");
 
         glLinkProgram(shaderProgram);

@@ -203,11 +203,12 @@ object Matrix4x4 {
     sum
   }
 
-  def lookAt(eye: Vector4, target: Vector4): Matrix4x4 = {
+  def lookAt(eye: Vector4, target: Vector4, verticallyUp: Vector4): Matrix4x4 = lookAt(eye.toVector3, target.toVector3, verticallyUp.toVector3)
+
+  def lookAt(eye: Vector3, target: Vector3, verticallyUp: Vector3): Matrix4x4 = {
     // This is really the reverse of where the camera is pointing
     val cameraDirection = (eye - target).normalize
     // https://learnopengl.com/#!Getting-started/Camera
-    val verticallyUp = Vector4(0f,1f,0f,1f)
     val right = verticallyUp.crossProduct(cameraDirection).normalize
     val up = cameraDirection.crossProduct(right)
 

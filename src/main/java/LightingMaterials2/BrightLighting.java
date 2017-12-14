@@ -4,20 +4,21 @@ import enterthematrix.Matrix4x4;
 import enterthematrix.Vector3;
 import enterthematrix.Vector4;
 
+import java.awt.*;
 import java.util.Arrays;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public class BrightLighting {
-    private final Light directional;
-    private final Light[] points;
+    final DirectionalLight directional;
+    final PointLight[] points;
     static final int MAX_POINT_LIGHTS = 4;
     private final Shader lampShader;
 
         BrightLighting() {
         Matrix4x4 standardLight = Matrix4x4.scale(0.01f);
         lampShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
-        points = new Light[MAX_POINT_LIGHTS];
+        points = new PointLight[MAX_POINT_LIGHTS];
 
         float fullStrength = 1.0f;
         float halfStrength = 0.5f;
@@ -45,7 +46,7 @@ public class BrightLighting {
 //            float pos = (float) Math.sin(HandyMaths.degreesToRadians(360 / MAX_POINT_LIGHTS) * i) * 0.1f;
             float pos = (i * (2.0f / MAX_POINT_LIGHTS)) - 1.0f;
             Vector4 lightPos = new Vector4(pos, 0.1f, pos, 1);
-            Light light = new PointLight(lightPos, standardLight, lampShader, true, i, ambient, diffuse, specular);
+            PointLight light = new PointLight(lightPos, standardLight, lampShader, true, i, ambient, diffuse, specular);
             points[i] = light;
         }
     }
