@@ -24,6 +24,7 @@ public class BrightLighting {
         float ambientStrength = 0.2f;
         float diffuseStrength = 0.9f;
         float directionalModifier = 2f;
+        float specularDirectionalForce = 0.0f;
 
         Vector3 ambient = new Vector3(ambientStrength, ambientStrength, ambientStrength);
         Vector3 diffuse = new Vector3(diffuseStrength, diffuseStrength, diffuseStrength);
@@ -31,7 +32,7 @@ public class BrightLighting {
 
         Vector3 ambientDirectional = new Vector3(ambientStrength * directionalModifier, ambientStrength * directionalModifier, ambientStrength * directionalModifier);
         Vector3 diffuseDirectional = new Vector3(diffuseStrength * directionalModifier, diffuseStrength * directionalModifier, diffuseStrength * directionalModifier);
-        Vector3 specularDirectional = new Vector3(fullStrength * directionalModifier, fullStrength * directionalModifier, fullStrength * directionalModifier);
+        Vector3 specularDirectional = new Vector3(specularDirectionalForce, specularDirectionalForce, specularDirectionalForce);
 
         Vector3 directionalDir = new Vector3(-1, -1, 0);
 

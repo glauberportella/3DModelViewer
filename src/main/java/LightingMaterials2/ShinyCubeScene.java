@@ -10,16 +10,20 @@ import java.util.Optional;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL30.*;
 
 class ShinyCubeScene extends Scene {
     private final ArrayList<FancyCube> cubeModels = new ArrayList<>();
     private final ArrayList<FancyQuad> quadModels = new ArrayList<>();
+    private final ArrayList<FancyCube> axisMarkers = new ArrayList<>();
     private final Shader lightingShader;
     private Camera camera;
     private final BrightLighting lighting;
+    private boolean drawAxisMarkers = false;
 
     ShinyCubeScene() {
         lightingShader = new Shader("../shaders/lighting_materials_vertex.glsl", "../shaders/lighting_materials2_fragment.glsl");
+        Shader basicFlatShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
         Materials materials = new Materials();
         lighting = new BrightLighting();
         Texture texture = new Texture("../images/container2.png", PNGDecoder.Format.RGBA);
@@ -44,6 +48,28 @@ class ShinyCubeScene extends Scene {
                     FancyCube cube = new FancyCube(pos, Optional.of(scale), Optional.empty(), lightingShader, materials.get(0), texture, specularMap);
                     cubeModels.add(cube);
                 }
+        }
+
+        {
+            Matrix4x4 scale = Matrix4x4.scale(0.01f);
+            // axis
+            axisMarkers.add(new FancyCube(new Vector4(0,0,0,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
+
+            axisMarkers.add(new FancyCube(new Vector4(-1,0,-1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1,0,-1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1,0,1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1,0,1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
+
+            axisMarkers.add(new FancyCube(new Vector4(-1,1,-1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1,1,-1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1,1,1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1,1,1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
+
+            axisMarkers.add(new FancyCube(new Vector4(-1,-1,-1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1,-1,-1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1,-1,1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1,-1,1,1), Optional.of(scale), Optional.empty(), basicFlatShader, materials.get(0), texture, specularMap));
+
         }
 
 
@@ -85,6 +111,10 @@ class ShinyCubeScene extends Scene {
 
         if (action == GLFW_PRESS) {
             lighting.handleKeyDown(key);
+
+            if (key == GLFW_KEY_KP_3) {
+                drawAxisMarkers = !drawAxisMarkers;
+            }
         }
     }
 
@@ -92,9 +122,46 @@ class ShinyCubeScene extends Scene {
         glClearColor(1f, 1f, 1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+//        int depthMapFBO = glGenFramebuffers();
+//    int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+//
+//        int depthMap = glGenTextures();
+//        glBindTexture(GL_TEXTURE_2D, depthMap);
+//        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, (double[]) null);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//
+//        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+//        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+//        // Not rendering colour data
+//        glDrawBuffer(GL_NONE);
+//        glReadBuffer(GL_NONE);
+//        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//
+//        // 1. first render to depth map
+//        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+//        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+//        glClear(GL_DEPTH_BUFFER_BIT);
+//        ConfigureShaderAndMatrices();
+//        RenderScene();
+//        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//
+//        // 2. then render scene as normal with shadow mapping (using depth map)
+//        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//        ConfigureShaderAndMatrices();
+//        glBindTexture(GL_TEXTURE_2D, depthMap);
+//        RenderScene();
+
+
         Matrix4x4 projectionMatrix = createPerspectiveProjectionMatrix(params);
         Matrix4x4 cameraTranslate = camera.getMatrix();
         lighting.draw(projectionMatrix, cameraTranslate, lightingShader, camera);
+        if (drawAxisMarkers) {
+            axisMarkers.forEach(model -> model.draw(projectionMatrix, cameraTranslate));
+        }
         cubeModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate));
         quadModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate));
     }
