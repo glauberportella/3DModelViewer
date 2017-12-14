@@ -3,6 +3,10 @@ package LightingMaterials2;
 import Useful.AppParams;
 import Useful.HandyMaths;
 import enterthematrix.Matrix4x4;
+import enterthematrix.Vector4;
+
+import java.util.ArrayList;
+import java.util.Optional;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
@@ -10,20 +14,7 @@ import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
 
 abstract public class Scene {
     protected Matrix4x4 createPerspectiveProjectionMatrix(AppParams params) {
-        float fieldOfView = params.fovDegrees;
-        float aspectRatio = (float)params.widthPixels / (float)params.heightPixels;
-        float near_plane = 0.001f;
-        float far_plane = 10f;
-
-        float y_scale = HandyMaths.coTangent(HandyMaths.degreesToRadians(fieldOfView / 2f));
-        float x_scale = y_scale / aspectRatio;
-        float frustum_length = far_plane - near_plane;
-
-        return new Matrix4x4(
-                x_scale, 0, 0, 0,
-                0, y_scale, 0, 0,
-                0, 0, - ((far_plane + near_plane) / frustum_length), -((2 * far_plane * near_plane)) / frustum_length,
-                0, 0, -1, 0);
+        return SceneUtils.createPerspectiveProjectionMatrix(params);
     }
 
     public void keyPressed(long window, int key, int scancode, int action, int mods) {
@@ -36,5 +27,46 @@ abstract public class Scene {
 
     abstract protected void keyPressedImpl(long window, int key, int scancode, int action, int mods);
     abstract public void draw(AppParams params);
+
+}
+
+class SceneUtils {
+    static public Matrix4x4 createPerspectiveProjectionMatrix(AppParams params) {
+        float fieldOfView = params.fovDegrees;
+        float aspectRatio = (float)params.widthPixels / (float)params.heightPixels;
+        float near_plane = 0.001f;
+        float far_plane = 1000f;
+
+        float y_scale = HandyMaths.coTangent(HandyMaths.degreesToRadians(fieldOfView / 2f));
+        float x_scale = y_scale / aspectRatio;
+        float frustum_length = far_plane - near_plane;
+
+        return new Matrix4x4(
+                x_scale, 0, 0, 0,
+                0, y_scale, 0, 0,
+                0, 0, - ((far_plane + near_plane) / frustum_length), -((2 * far_plane * near_plane)) / frustum_length,
+                0, 0, -1, 0);
+    }
+
+    static public Matrix4x4 createOrthoProjectionMatrix(float left, float right, float top, float bottom, float near, float far) {
+        Matrix4x4 m = new Matrix4x4(2.0f / (right - left), 0.0f, 0.0f, 0.0f,
+                0.0f,
+                2.0f / (top - bottom),
+                0.0f,
+                0.0f,
+
+                0.0f,
+                0.0f,
+                -2.0f / (far - near),
+                0.0f,
+
+                -(right + left) / (right - left),
+                -(top + bottom) / (top - bottom),
+                -(far + near) / (far - near),
+                1.0f
+        );
+
+        return m;
+    }
 
 }

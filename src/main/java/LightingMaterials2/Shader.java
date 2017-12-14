@@ -6,9 +6,6 @@ import org.lwjgl.opengl.GL20;
 
 import static org.lwjgl.opengl.GL20.*;
 
-/**
- * Think all shader operations have to be done inside a single glUseProgram block
- */
 class Shader {
     public int getShaderId() {
         return shaderProgram;

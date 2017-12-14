@@ -47,6 +47,7 @@ public class AppWrapper extends GLFWKeyCallback {
         if (action == GLFW_PRESS) {
             if (key == GLFW_KEY_KP_1) changeScene(0);
             else if (key == GLFW_KEY_KP_2) changeScene(1);
+            else if (key == GLFW_KEY_KP_3) changeScene(2);
             else if (key == GLFW_KEY_ESCAPE) glfwSetWindowShouldClose(window, true);
         }
 
@@ -125,8 +126,10 @@ public class AppWrapper extends GLFWKeyCallback {
 
         glEnable(GL_DEPTH_TEST);
 
+        Scene shadows = new ShinyCubeShadowsScene();
         Scene lit = new ShinyCubeScene();
         Scene gloomy = new GloomyCubeScene();
+        scenes.add(shadows);
         scenes.add(lit);
         scenes.add(gloomy);
 

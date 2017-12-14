@@ -14,7 +14,7 @@ public class BrightLighting {
     static final int MAX_POINT_LIGHTS = 4;
     private final Shader lampShader;
 
-    BrightLighting() {
+        BrightLighting() {
         Matrix4x4 standardLight = Matrix4x4.scale(0.01f);
         lampShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
         points = new Light[MAX_POINT_LIGHTS];
@@ -59,7 +59,7 @@ public class BrightLighting {
     }
 
 
-    void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate, Shader lightingShader, Camera camera) {
+    void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate, Shader lightingShader, ICamera camera) {
 //        float lightX = (float) (Math.sin(glfwGetTime())) * 0.1f + 0.2f;
 //        Vector4 newLightPos = new Vector4(lightX, 0.1f, lightX, 1);
 //        light.setPos(newLightPos);

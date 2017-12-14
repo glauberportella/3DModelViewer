@@ -183,7 +183,7 @@ object Matrix4x4 {
       cos + (x * x * (1 - cos)), (x * y * (1 - cos)) - (z * sin), (x * z * (1 - cos)) + (y * sin), 0,
       (y * x * (1 - cos)) + (z * sin), cos + (y * y * (1 - cos)), (y * z * (1 - cos)) - (x * sin), 0,
       (z * x * (1 - cos)) - (y * sin), (z * y * (1 - cos)) + (x * sin), cos + (z * z * (1 - cos)), 0,
-        0, 0, 0, 1
+      0, 0, 0, 1
     )
   }
   def rotateAroundAnyAxis(v: Vector4, angleDegrees: Float): Matrix4x4 = {
@@ -201,5 +201,43 @@ object Matrix4x4 {
     }
     //    }
     sum
+  }
+
+  def lookAt(eye: Vector4, target: Vector4): Matrix4x4 = {
+    // This is really the reverse of where the camera is pointing
+    val cameraDirection = (eye - target).normalize
+    // https://learnopengl.com/#!Getting-started/Camera
+    val verticallyUp = Vector4(0f,1f,0f,1f)
+    val right = verticallyUp.crossProduct(cameraDirection).normalize
+    val up = cameraDirection.crossProduct(right)
+
+    // Create a 4x4 orientation matrix from the right, up, and forward vectors
+    // This is transposed which is equivalent to performing an inverse
+    // if the matrix is orthonormalized (in this case, it is).
+    //    val orientation = Matrix4x4(
+    //      right.x, up.x, cameraDirection.x, 0,
+    //      right.y, up.y, cameraDirection.y, 0,
+    //      right.z, up.z, cameraDirection.z, 0,
+    //      0, 0, 0, 1)
+    val orientation = Matrix4x4(
+      right.x, right.y, right.z, 0,
+      up.x, up.y, up.z, 0,
+      cameraDirection.x, cameraDirection.y, cameraDirection.z, 0,
+      0, 0, 0, 1
+    )
+
+    // Create a 4x4 translation matrix.
+    // The eye position is negated which is equivalent
+    // to the inverse of the translation matrix.
+    // T(v)^-1 == T(-v)
+    val translation = Matrix4x4(
+      1, 0, 0, -eye.x,
+      0, 1, 0, -eye.y,
+      0, 0, 1, -eye.z,
+      0, 0, 0, 1)
+
+    // Combine the orientation and translation to compute
+    // the final view matrix
+    orientation * translation
   }
 }

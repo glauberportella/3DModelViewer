@@ -6,7 +6,7 @@ import enterthematrix.Vector4;
 class Camera {
     // Remember: normalized co-ords have to be between -1 to 1. If using a projection matrix (perspective or ortho),
     // this will normalize from whatever range we want into that.  Else, have to output in that range.
-    private final Vector4 initialPosition = new Vector4(0.2f, 0.05f, 0.2f, 0);
+    private final Vector4 initialPosition = new Vector4(0.2f, 0.f, 0.2f, 0);
 //    private final Vector4 initialPosition = new Vector4(0, 0, 0.1f, 0);
     private final Vector4 initialTarget = new Vector4(0, 0, 0, 0);
     // Note this is really the reverse direction from where we're facing - it's meant to be
