@@ -67,6 +67,12 @@ class Shader {
         glUniform1i(location, v);
     }
 
+    public void setBoolean(String name, boolean v) {
+        assertInUse();
+        int location = GL20.glGetUniformLocation(getShaderId(), name);
+        glUniform1i(location, v ? 1 : 0);
+    }
+
     public void setVec3(String name, float x, float y, float z) {
         assertInUse();
 
@@ -93,6 +99,10 @@ class Shader {
     public void stop() {
         glUseProgram(0);
         inUse = false;
+    }
+
+    public boolean isInUse() {
+        return inUse;
     }
 }
 

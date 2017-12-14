@@ -1,0 +1,75 @@
+package LightingMaterials2;
+
+import enterthematrix.Matrix4x4;
+import enterthematrix.Vector3;
+import enterthematrix.Vector4;
+
+abstract class Light {
+    protected final Vector3 ambient, diffuse, specular;
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    private boolean enabled;
+
+    public Light(boolean enabled, Vector3 ambient, Vector3 diffuse, Vector3 specular) {
+        this.enabled = enabled;
+        this.ambient = ambient;
+        this.diffuse = diffuse;
+        this.specular = specular;
+    }
+
+    abstract public void setupShader(Shader lightingShader);
+//    abstract public void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate, Shader lightingShader, Camera camera);
+
+
+    protected void setupShaderImpl(Shader lightingShader, String lightText) {
+        lightingShader.setBoolean(lightText + ".enabled", isEnabled());
+        if (isEnabled()) {
+            lightingShader.setVec3(lightText + ".ambient", ambient);
+            lightingShader.setVec3(lightText + ".diffuse", diffuse); // darken the light a bit to fit the scene
+            lightingShader.setVec3(lightText + ".specular", specular);
+        }
+    }
+
+    public abstract void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate, Shader lampShader);
+}
+
+class PointLight extends Light {
+    private final CubeWithNormals cube;
+    private int index;
+    private final Vector3 pos;
+
+    public PointLight(Vector4 pos, Matrix4x4 otherTransform, Shader shader, boolean enabled, int index, Vector3 ambient, Vector3 diffuse, Vector3 specular) {
+        super(enabled, ambient, diffuse, specular);
+        cube = new CubeWithNormals(pos, otherTransform, shader);
+        this.index = index;
+        this.pos = pos.toVector3();
+    }
+
+    @Override public void setupShader(Shader lightingShader) {
+        assert (lightingShader.isInUse());
+        String lightText = "pointLights[" + index + "]";
+        super.setupShaderImpl(lightingShader, lightText);
+        if (isEnabled()) {
+            lightingShader.setVec3(lightText + ".position", pos);
+            lightingShader.setFloat(lightText + ".constant", 1.0f);
+            lightingShader.setFloat(lightText + ".linear", 3.7f);
+            lightingShader.setFloat(lightText + ".quadratic", 5.8f);
+        }
+    }
+
+    @Override
+    public void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate, Shader lampShader) {
+        try (ShaderUse su2 = new ShaderUse(lampShader)) {
+            lampShader.setVec3("lamp_Color", diffuse);
+        }
+        cube.draw(projectionMatrix, cameraTranslate);
+    }
+
+}

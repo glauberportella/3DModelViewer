@@ -1,25 +1,22 @@
 package LightingMaterials2;
 
 import enterthematrix.Matrix4x4;
-import enterthematrix.Vector3;
 import enterthematrix.Vector4;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 class World {
     private final ArrayList<CubeWithNormalsAndMaterialsAndDiffuseMap> models = new ArrayList<>();
     private final Shader lightingShader;
-    private final Shader lampShader;
-    private Camera cameraPos;
-    private CubeWithNormals light;
+    private Camera camera;
+    private final Lighting lighting;
 
     World() {
         lightingShader = new Shader("../shaders/lighting_materials_vertex.glsl", "../shaders/lighting_materials2_fragment.glsl");
-        lampShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
         Materials materials = new Materials();
+        lighting = new Lighting();
 
         // Scale, translate, then rotate.
 //        {
@@ -44,16 +41,8 @@ class World {
                 }
         }
 
-        {
-            // The lamp cube
-            Vector4 lightPos = new Vector4(0.3f, 0.3f, 0, 1);
-            Matrix4x4 transform = Matrix4x4.scale(0.01f);
-            light = new CubeWithNormals(lightPos, transform, lampShader);
-        }
 
-
-
-        cameraPos = new Camera();
+        camera = new Camera();
 
     }
 
@@ -62,51 +51,26 @@ class World {
         float rotationDelta = 1.0f;
         float posDelta = 0.05f;
 
-        if (key == GLFW_KEY_UP) cameraPos.rotateUp(rotationDelta);
-        else if (key == GLFW_KEY_DOWN) cameraPos.rotateDown(rotationDelta);
-        else if (key == GLFW_KEY_LEFT) cameraPos.rotateLeft(rotationDelta);
-        else if (key == GLFW_KEY_RIGHT) cameraPos.rotateRight(rotationDelta);
-        else if (key == GLFW_KEY_W) cameraPos.moveForward(posDelta);
-        else if (key == GLFW_KEY_S) cameraPos.moveBackward(posDelta);
-        else if (key == GLFW_KEY_R) cameraPos.moveUp(posDelta);
-        else if (key == GLFW_KEY_F) cameraPos.moveDown(posDelta);
-        else if (key == GLFW_KEY_A) cameraPos.moveLeft(posDelta);
-        else if (key == GLFW_KEY_D) cameraPos.moveRight(posDelta);
+        if (key == GLFW_KEY_UP) camera.rotateUp(rotationDelta);
+        else if (key == GLFW_KEY_DOWN) camera.rotateDown(rotationDelta);
+        else if (key == GLFW_KEY_LEFT) camera.rotateLeft(rotationDelta);
+        else if (key == GLFW_KEY_RIGHT) camera.rotateRight(rotationDelta);
+        else if (key == GLFW_KEY_W) camera.moveForward(posDelta);
+        else if (key == GLFW_KEY_S) camera.moveBackward(posDelta);
+        else if (key == GLFW_KEY_R) camera.moveUp(posDelta);
+        else if (key == GLFW_KEY_F) camera.moveDown(posDelta);
+        else if (key == GLFW_KEY_A) camera.moveLeft(posDelta);
+        else if (key == GLFW_KEY_D) camera.moveRight(posDelta);
+
+        if (action == GLFW_PRESS) {
+            lighting.handleKeyDown(key);
+        }
     }
 
     public void draw(Matrix4x4 projectionMatrix) {
-        float lightX = (float) (Math.sin(glfwGetTime())) * 0.1f + 0.2f;
-        Vector4 newLightPos = new Vector4(lightX, 0.1f, lightX, 1);
-        light.setPos(newLightPos);
-
-//        Matrix4x4 transform = Matrix4x4.translate(light.getPos()).$times(Matrix4x4.scale(0.01f));
-        try (ShaderUse su = new ShaderUse(lightingShader)) {
-            float fullStrength = 1.0f;
-            float halfStrength = 0.5f;
-            float ambientStrength = 0.2f;
-            float diffuseStrength = 0.6f;
-
-//            Vector3 lightDiffuse = new Vector3(diffuseStrength * (float) Math.sin(glfwGetTime()), diffuseStrength * (float) Math.cos(glfwGetTime()), diffuseStrength);
-            Vector3 lightDiffuse = new Vector3(diffuseStrength, diffuseStrength, diffuseStrength);
-
-            lightingShader.setVec3("light.ambient", ambientStrength, ambientStrength, ambientStrength);
-            lightingShader.setVec3("light.diffuse", lightDiffuse); // darken the light a bit to fit the scene
-            lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-            lightingShader.setVec3("light.position", light.getPos().toVector3());
-            lightingShader.setVec3("viewPos", cameraPos.getPosition().toVector3());
-
-            lightingShader.setFloat("light.constant",  1.0f);
-            lightingShader.setFloat("light.linear",    3.7f);
-            lightingShader.setFloat("light.quadratic", 5.8f);
-
-            try (ShaderUse su2 = new ShaderUse(lampShader)) {
-                lampShader.setVec3("lamp_Color", lightDiffuse);
-            }
-        }
-
-        Matrix4x4 cameraTranslate = cameraPos.getMatrix();
+        Matrix4x4 cameraTranslate = camera.getMatrix();
+        lighting.draw(projectionMatrix, cameraTranslate, lightingShader, camera);
         models.forEach(model -> model.draw(projectionMatrix, cameraTranslate));
-        light.draw(projectionMatrix, cameraTranslate);
     }
 
 }

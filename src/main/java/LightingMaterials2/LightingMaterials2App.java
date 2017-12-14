@@ -2,6 +2,7 @@ package LightingMaterials2;
 
 import Useful.AppParams;
 import Useful.Drawable;
+import Useful.HandyMaths;
 import enterthematrix.Matrix4x4;
 import org.lwjgl.glfw.GLFWKeyCallback;
 
@@ -25,7 +26,7 @@ public class LightingMaterials2App extends GLFWKeyCallback implements Drawable {
         float near_plane = 0.001f;
         float far_plane = 10f;
 
-        float y_scale = this.coTangent(this.degreesToRadians(fieldOfView / 2f));
+        float y_scale = HandyMaths.coTangent(HandyMaths.degreesToRadians(fieldOfView / 2f));
         float x_scale = y_scale / aspectRatio;
         float frustum_length = far_plane - near_plane;
 
@@ -47,14 +48,6 @@ public class LightingMaterials2App extends GLFWKeyCallback implements Drawable {
         }
     }
 
-
-    private float coTangent(float angle) {
-        return (float)(1f / Math.tan(angle));
-    }
-
-    private float degreesToRadians(float degrees) {
-        return degrees * (float)(PI / 180d);
-    }
 
     private void createShaders() {
 
