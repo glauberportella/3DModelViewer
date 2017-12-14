@@ -7,6 +7,7 @@ import enterthematrix.Vector4;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE6;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 
 abstract class Light {
@@ -78,8 +79,8 @@ class PointLight extends Light {
             shader.setBoolean(lightText +".shadowsEnabled", shadowsEnabled);
 
             if (shadowsEnabled) {
-                shader.setInt(lightText +".shadowMap", 0);
-                glActiveTexture(GL_TEXTURE0);
+                shader.setInt(lightText +".shadowMap", index + 6);
+                glActiveTexture(GL_TEXTURE6 + index);
                 glBindTexture(GL_TEXTURE_2D, shadowTexture);
             }
         }

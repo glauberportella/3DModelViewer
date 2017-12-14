@@ -14,6 +14,9 @@ import java.util.Optional;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE5;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 import static org.lwjgl.opengl.GL30.*;
 
@@ -32,6 +35,7 @@ class ShinyCubeShadowsScene extends Scene {
     //    private final Shader standardShader = new Shader("../shaders/lighting_materials_vertex.glsl", "../shaders/lighting_materials2_fragment.glsl");
     private final Shader shadowGenShader = new Shader("../shaders/shadow_mapping.vtx", "../shaders/empty.frag");
     private final Shader passthroughShader = new Shader("../shaders/passthrough_vertex.glsl", "../shaders/passthrough_fragment.glsl");
+    private final Shader renderDepthMapShader = new Shader("../shaders/passthrough_vertex.glsl", "../shaders/render_depth_map_fragment.glsl");
     private boolean renderToDepth = true;
     private boolean renderDepthFramebuffer = true;
     private boolean drawFloor = true;
@@ -201,11 +205,19 @@ class ShinyCubeShadowsScene extends Scene {
         if (renderDepthFramebuffer) {
             // No need for depth as we're just drawing a quad
             glDisable(GL_DEPTH_TEST);
-            try (ShaderUse su = new ShaderUse(passthroughShader)) {
+            try (ShaderUse su = new ShaderUse(renderDepthMapShader)) {
+//                int depthMapLocation = GL20.glGetUniformLocation(standardShader.getShaderId(), "depthMap");
+//                GL20.glUniformMatrix4fv(depthMapLocation, false, MatrixLwjgl.convertMatrixToBuffer(lightSpaceMatrix));
                 Texture texture = new TextureFromExisting(textureToRender);
+
+                su.shader.setInt("depthMap", 5);
+
+                glActiveTexture(GL_TEXTURE5);
+                glBindTexture(GL_TEXTURE_2D, texture.getTextureId());
+
                 FancyQuad quad = new FancyQuad(new Vector4(0, 0, 0, 1), Optional.empty(), Optional.empty(), null, texture, texture, 1.0f);
 
-                quad.draw(null, null, passthroughShader);
+                quad.draw(null, null, su.shader);
             }
             glEnable(GL_DEPTH_TEST);
         }
@@ -238,7 +250,7 @@ class ShinyCubeShadowsScene extends Scene {
 
     private int renderSceneFromPosition(Vector4 position, Matrix4x4 lightProjection, String shaderPosName) {
         int depthMapFBO = glGenFramebuffers();
-        int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+        int SHADOW_WIDTH = 2048, SHADOW_HEIGHT = SHADOW_WIDTH;
 
 
         // Create a texture whcih the framebuffer will render too

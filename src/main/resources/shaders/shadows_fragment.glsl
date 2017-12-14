@@ -89,7 +89,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
         shadow = ShadowCalculation(FragPosLightSpaceDir, light.shadowMap);
       }
 
-//       return ((1.0 - shadow) * (ambient + diffuse + specular));
+       return ((1.0 - shadow) * (ambient + diffuse + specular));
 //     if (shadow > 0.5) {
 //        return vec3(1,0,0);
 //    }
@@ -104,7 +104,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
         vec3 projCoords = FragPosLightSpaceDir.xyz / FragPosLightSpaceDir.w;
         // transform to [0,1] range
         projCoords = projCoords * 0.5 + 0.5;
-//        return projCoords;
+        return projCoords;
         // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
         float closestDepth = texture(light.shadowMap, projCoords.xy).r;
         // get depth of current fragment from light's perspective
@@ -113,6 +113,8 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
         float shadowRet = currentDepth > closestDepth  ? 1.0 : 0.0;
         //return 1.0f;
         //return shadow;
+//        return vec3(texture(light.shadowMap, projCoords.xy));
+        return vec3(texture(light.shadowMap, projCoords.xy));
         shadow = 1 / (currentDepth - closestDepth);
 
        return ((1.0 - shadow) * (ambient + diffuse + specular));
@@ -176,12 +178,12 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, v
 
 //    return vec3(closestDepth, currentDepth, 0);
 
-      if (shadow > 0.5) {
-        return vec3(1,0,0);
-    }
-    else {
-    return ambient + diffuse + specular;
-    }
+//      if (shadow > 0.5) {
+//        return vec3(1,0,0);
+//    }
+//    else {
+//    return ambient + diffuse + specular;
+//    }
 
     return ((1.0 - shadow) * (ambient + diffuse + specular));
     //return (ambient + (diffuse + specular));
