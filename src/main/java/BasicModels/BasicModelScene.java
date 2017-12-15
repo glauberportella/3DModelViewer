@@ -38,10 +38,14 @@ class BasicModelScene extends Scene {
 
     BasicModelScene() {
         lighting = new BrightLighting(shaders);
-        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/cube.obj", "C:/dev/portfolio/3ddemo/out/production/resources/images");
+//        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/cube.obj", "C:/dev/portfolio/3ddemo/out/production/resources/images");
+//        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/LEGO_Man.obj", "C:/dev/portfolio/3ddemo/out/production/resources/images");
+        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/lego obj.obj", "C:/dev/portfolio/3ddemo/out/production/resources/models");
         meshes = new Mesh[meshData.length];
-        Mesh mesh = new Mesh(new Vector4(0,0,0,1), Optional.of(Matrix4x4.scale(0.1f)), Optional.empty(), meshData[0]);
-        meshes[0] = mesh;
+        for(int i = 0; i < meshData.length; i ++) {
+            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(Matrix4x4.scale(0.01f)), Optional.empty(), meshData[i]);
+            meshes[i] = mesh;
+        }
 
         Materials materials = new Materials();
         TextureFromFile texture = new TextureFromFile("../images/container2.png", PNGDecoder.Format.RGBA);
@@ -253,7 +257,11 @@ class BasicModelScene extends Scene {
             if (drawFloor) {
                 quadModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, shader));
             }
-            Arrays.stream(meshes).forEach(mesh -> mesh.draw(projectionMatrix, cameraTranslate, wrap.shader));
+//            Arrays.stream(meshes).forEach(mesh -> mesh.draw(projectionMatrix, cameraTranslate, wrap.shader));
+//            Arrays.stream(meshes).forEach(mesh -> mesh.draw(projectionMatrix, cameraTranslate, wrap.shader));
+            for (int i = 0; i < meshes.length; i ++) {
+                meshes[i].draw(projectionMatrix, cameraTranslate, wrap.shader);
+            }
         }
 
 //        try (ShaderUse wrap = new ShaderUse(shaders.modelShader)) {

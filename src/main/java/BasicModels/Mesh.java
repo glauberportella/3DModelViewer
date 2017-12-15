@@ -85,7 +85,7 @@ public class Mesh extends Model {
             glVertexAttribPointer(VBO_INDEX_VERTICES, 3, GL_FLOAT, false, 0, 0);
         }
 
-        {
+        if (data.normals != null) {
             FloatBuffer normalsBuffer = BufferUtils.createFloatBuffer(data.normals.length);
             normalsBuffer.put(data.normals);
             normalsBuffer.flip();

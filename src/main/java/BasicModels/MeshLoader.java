@@ -37,7 +37,7 @@ public class MeshLoader {
 
         AIScene aiScene = aiImportFile(resourcePath, flags);
         if (aiScene == null) {
-            System.out.println("Error loading model");
+            System.out.println("Error loading model " + resourcePath);
         }
 
         int numMaterials = aiScene.mNumMaterials();
@@ -85,16 +85,19 @@ public class MeshLoader {
         }
 
         AIVector3D.Buffer aiNormals = aiMesh.mNormals();
-        float[] normals = new float[aiNormals.remaining() * 3];
-        index = 0;
+        float[] normals = null;
+        if (aiNormals != null && aiNormals.remaining() > 0) {
+            normals = new float[aiNormals.remaining() * 3];
+            index = 0;
 
-        while (aiNormals.remaining() > 0) {
-            AIVector3D ai = aiNormals.get();
+            while (aiNormals.remaining() > 0) {
+                AIVector3D ai = aiNormals.get();
 //            normals.add(new Vector3(ai.x(), ai.y(), ai.z()));
-            normals[index] = aiNormals.x();
-            normals[index + 1] = aiNormals.y();
-            normals[index + 2] = aiNormals.z();
-            index += 3;
+                normals[index] = aiNormals.x();
+                normals[index + 1] = aiNormals.y();
+                normals[index + 2] = aiNormals.z();
+                index += 3;
+            }
         }
 
         AIFace.Buffer aiFaces = aiMesh.mFaces();

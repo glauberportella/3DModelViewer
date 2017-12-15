@@ -11,7 +11,7 @@ interface ICamera {
 class Camera implements ICamera {
     // Remember: normalized co-ords have to be between -1 to 1. If using a projection matrix (perspective or ortho),
     // this will normalize from whatever range we want into that.  Else, have to output in that range.
-    private final Vector4 initialPosition = new Vector4(0.5f, 0.5f, 0.5f, 0);
+    private final Vector4 initialPosition = new Vector4(1.5f, 1.5f, 1.5f, 0);
 //    private final Vector4 origin = new Vector4(0, 0, 0, 0);
 //    private final Vector4 initialPosition = new Vector4(0, 0, 0.1f, 0);
     private final Vector4 initialTarget = new Vector4(0, 0, 0, 0);
