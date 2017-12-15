@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: io.github.java-graphics:assimp:1.0.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.github.java-graphics/assimp/1.0.1/6fc18031f56969c5e449d3aef2a79f2fb88b24b5/assimp-1.0.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.github.java-graphics/assimp/1.0.1/f8cae985a124babbc9b8c58144d13629e2838e9/assimp-1.0.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

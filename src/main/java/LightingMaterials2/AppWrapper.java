@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -71,6 +72,9 @@ public class AppWrapper extends GLFWKeyCallback {
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
+        // Enable MSAA
+        glfwWindowHint(GLFW_SAMPLES, 4);
+
         // Create the window
         window = glfwCreateWindow(params.widthPixels, params.heightPixels, "Hello GloomyCubeScene!", NULL, NULL);
         if ( window == NULL )
@@ -125,6 +129,7 @@ public class AppWrapper extends GLFWKeyCallback {
         GL.createCapabilities();
 
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_MULTISAMPLE);
 
         Scene shadows = new ShinyCubeShadowsScene();
         Scene lit = new ShinyCubeScene();
