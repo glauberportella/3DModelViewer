@@ -1,9 +1,7 @@
-package LightingMaterials2;
-
-import static org.lwjgl.opengl.GL20.glUseProgram;
+package LightingMaterials2.Shaders;
 
 public class ShaderUse implements AutoCloseable {
-    final Shader shader;
+    public final Shader shader;
 
     public ShaderUse(Shader shader) {
         this.shader = shader;

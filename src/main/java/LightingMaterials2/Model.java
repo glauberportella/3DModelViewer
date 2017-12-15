@@ -1,5 +1,6 @@
 package LightingMaterials2;
 
+import LightingMaterials2.Shaders.Shader;
 import enterthematrix.Matrix4x4;
 import enterthematrix.Vector4;
 

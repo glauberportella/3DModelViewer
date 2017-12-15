@@ -1,10 +1,12 @@
 package LightingMaterials2;
 
+import LightingMaterials2.Shaders.Shader;
+import LightingMaterials2.Shaders.ShaderStore;
+import LightingMaterials2.Shaders.ShaderUse;
 import enterthematrix.Matrix4x4;
 import enterthematrix.Vector3;
 import enterthematrix.Vector4;
 
-import java.awt.*;
 import java.util.Arrays;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -12,13 +14,19 @@ import static org.lwjgl.glfw.GLFW.*;
 public class BrightLighting {
     final DirectionalLight directional;
     final PointLight[] points;
-    static final int MAX_POINT_LIGHTS = 4;
+    public static final int MAX_POINT_LIGHTS = 4;
     private final Shader lampShader;
 
-    BrightLighting() {
+    BrightLighting(ShaderStore shaders) {
+        lampShader = shaders.basicFlatShader;
         Matrix4x4 standardLight = Matrix4x4.scale(0.01f);
-        lampShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
+//        lampShader =  Shader.create("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
         points = new PointLight[MAX_POINT_LIGHTS];
+
+//        lampShader.addVariable(ShaderVariable.changesEveryRun("projectionMatrix"));
+//        lampShader.addVariable(ShaderVariable.changesEveryRun("viewMatrix"));
+//        lampShader.addVariable(ShaderVariable.changesEveryRun("modelMatrix"));
+//        lampShader.addVariable(ShaderVariable.changesEveryRun("lamp_Color"));
 
         float fullStrength = 1.0f;
         float halfStrength = 0.5f;
@@ -63,20 +71,19 @@ public class BrightLighting {
     }
 
 
-    void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate, Shader lightingShader, ICamera camera) {
+    void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate, Shader shader, ICamera camera) {
 //        float lightX = (float) (Math.sin(glfwGetTime())) * 0.1f + 0.2f;
 //        Vector4 newLightPos = new Vector4(lightX, 0.1f, lightX, 1);
 //        light.setPos(newLightPos);
 
-        try (ShaderUse su = new ShaderUse(lightingShader)) {
-            directional.setupShader(lightingShader);
+        try (ShaderUse su = new ShaderUse(shader)) {
+            directional.setupShader(shader);
 
             for (int i = 0; i < points.length; i ++) {
                 Light light = points[i];
-                light.setupShader(lightingShader);
+                light.setupShader(shader);
             };
 
-            lightingShader.setVec3("viewPos", camera.getPosition().toVector3());
         }
 
         directional.draw(projectionMatrix, cameraTranslate, lampShader);

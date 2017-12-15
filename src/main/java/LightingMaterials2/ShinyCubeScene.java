@@ -1,5 +1,7 @@
 package LightingMaterials2;
 
+import LightingMaterials2.Shaders.Shader;
+import LightingMaterials2.Shaders.ShaderStore;
 import Useful.AppParams;
 import de.matthiasmann.twl.utils.PNGDecoder;
 import enterthematrix.Matrix4x4;
@@ -19,12 +21,13 @@ class ShinyCubeScene extends Scene {
     private Camera camera;
     private final BrightLighting lighting;
     private boolean drawAxisMarkers = false;
-    private final Shader lightingShader = new Shader("../shaders/lighting_materials_vertex.glsl", "../shaders/lighting_materials2_fragment.glsl");
-    private final Shader basicFlatShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
+    private final ShaderStore shaders = new ShaderStore();
+    private final Shader lightingShader = Shader.create("../shaders/lighting_materials_vertex.glsl", "../shaders/lighting_materials2_fragment.glsl");
+    private final Shader basicFlatShader = Shader.create("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
 
     ShinyCubeScene() {
         Materials materials = new Materials();
-        lighting = new BrightLighting();
+        lighting = new BrightLighting(shaders);
         TextureFromFile texture = new TextureFromFile("../images/container2.png", PNGDecoder.Format.RGBA);
         TextureFromFile specularMap = new TextureFromFile("../images/container2_specular.png", PNGDecoder.Format.RGBA);
 

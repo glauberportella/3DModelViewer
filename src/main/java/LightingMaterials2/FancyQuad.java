@@ -1,5 +1,7 @@
 package LightingMaterials2;
 
+import LightingMaterials2.Shaders.Shader;
+import LightingMaterials2.Shaders.ShaderUse;
 import enterthematrix.Matrix4x4;
 import enterthematrix.Vector4;
 import matrixlwjgl.MatrixLwjgl;

@@ -1,5 +1,7 @@
 package LightingMaterials2;
 
+import LightingMaterials2.Shaders.Shader;
+import LightingMaterials2.Shaders.ShaderUse;
 import enterthematrix.Matrix4x4;
 import matrixlwjgl.MatrixLwjgl;
 import org.lwjgl.opengl.GL20;
@@ -10,7 +12,7 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class ShadowMap {
     int depthMapFBO = glGenFramebuffers();
-    final int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = SHADOW_WIDTH;
+    final int SHADOW_WIDTH = 2048, SHADOW_HEIGHT = SHADOW_WIDTH;
 
     // Create a texture which the framebuffer will setup too
     int textureId = glGenTextures();

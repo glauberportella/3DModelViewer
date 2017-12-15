@@ -1,15 +1,15 @@
 package LightingMaterials2;
 
-import Useful.HandyMaths;
+import LightingMaterials2.Shaders.Shader;
+import LightingMaterials2.Shaders.ShaderStore;
+import LightingMaterials2.Shaders.ShaderUse;
 import enterthematrix.Matrix4x4;
 import enterthematrix.Vector3;
 import enterthematrix.Vector4;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFW.glfwGetTime;
 
 public class GloomyLighting {
     private final Light directional;
@@ -19,7 +19,7 @@ public class GloomyLighting {
 
     GloomyLighting() {
         Matrix4x4 standardLight = Matrix4x4.scale(0.01f);
-        lampShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
+        lampShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl", false);
         points = new Light[MAX_POINT_LIGHTS];
 
         float fullStrength = 1.0f;

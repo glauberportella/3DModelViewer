@@ -1,12 +1,11 @@
 package LightingMaterials2;
 
+import LightingMaterials2.Shaders.Shader;
 import enterthematrix.Matrix4x4;
 import enterthematrix.Vector3;
-import enterthematrix.Vector4;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE3;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 
@@ -22,17 +21,17 @@ class DirectionalLight extends Light {
         assert (shader.isInUse());
         String lightText = "dirLight";
         super.setupShaderImpl(shader, lightText);
-        if (isEnabled()) {
+//        if (isEnabled()) {
             shader.setVec3(lightText + ".direction", direction);
 
             shader.setBoolean(lightText +".shadowsEnabled", shadowsEnabled);
 
-            if (shadowsEnabled) {
+//            if (shadowsEnabled) {
                 shader.setInt(lightText +".shadowMap", 3);
                 glActiveTexture(GL_TEXTURE3);
                 glBindTexture(GL_TEXTURE_2D, shadowTexture);
-            }
-        }
+//            }
+//        }
     }
 
 

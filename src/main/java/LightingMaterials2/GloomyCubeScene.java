@@ -1,5 +1,6 @@
 package LightingMaterials2;
 
+import LightingMaterials2.Shaders.Shader;
 import Useful.AppParams;
 import de.matthiasmann.twl.utils.PNGDecoder;
 import enterthematrix.Matrix4x4;
@@ -19,7 +20,7 @@ class GloomyCubeScene extends Scene {
     private final GloomyLighting lighting;
 
     GloomyCubeScene() {
-        lightingShader = new Shader("../shaders/lighting_materials_vertex.glsl", "../shaders/lighting_materials2_fragment.glsl");
+        lightingShader = Shader.create("../shaders/lighting_materials_vertex.glsl", "../shaders/lighting_materials2_fragment.glsl");
         Materials materials = new Materials();
         lighting = new GloomyLighting();
         TextureFromFile texture = new TextureFromFile("../images/container2.png", PNGDecoder.Format.RGBA);

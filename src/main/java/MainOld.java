@@ -28,7 +28,7 @@ public class MainOld {
 
         AppParams params = new AppParams();
         params.heightPixels = 600;
-        params.widthPixels = 600;
+        params.widthPixels = 800;
         params.fovDegrees = 90;
 
         init(params);

@@ -1,5 +1,8 @@
 package LightingMaterials2;
 
+import LightingMaterials2.Shaders.Shader;
+import LightingMaterials2.Shaders.ShaderStore;
+import LightingMaterials2.Shaders.ShaderUse;
 import Useful.AppParams;
 import de.matthiasmann.twl.utils.PNGDecoder;
 import enterthematrix.Matrix4x4;
@@ -8,6 +11,7 @@ import matrixlwjgl.MatrixLwjgl;
 import org.lwjgl.opengl.GL20;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -26,21 +30,18 @@ class ShinyCubeShadowsScene extends Scene {
     private final BrightLighting lighting;
     private boolean drawAxisMarkers = false;
     //    private final Shader shadowGenShader;
-    private final Shader basicFlatShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
-    //    private final Shader standardShader = new Shader("../shaders/shadows_vertex.glsl", "../shaders/shadows_fragment.glsl");
-    private final Shader standardShader = new Shader("../shaders/shadows_vertex.glsl", "../shaders/shadows_fragment.glsl");
-    //    private final Shader standardShader = new Shader("../shaders/lighting_materials_vertex.glsl", "../shaders/lighting_materials2_fragment.glsl");
-    private final Shader shadowGenShader = new Shader("../shaders/shadow_mapping.vtx", "../shaders/empty.frag");
-    private final Shader passthroughShader = new Shader("../shaders/passthrough_vertex.glsl", "../shaders/passthrough_fragment.glsl");
-    private final Shader renderDepthMapShader = new Shader("../shaders/passthrough_vertex.glsl", "../shaders/render_depth_map_fragment.glsl");
+    private final ShaderStore shaders = new ShaderStore();
+
+
     private boolean renderToDepth = true;
     private boolean renderDepthFramebuffer = true;
     private boolean drawFloor = true;
     private boolean shadowsEnabled = true;
 
     ShinyCubeShadowsScene() {
+        lighting = new BrightLighting(shaders);
+
         Materials materials = new Materials();
-        lighting = new BrightLighting();
         TextureFromFile texture = new TextureFromFile("../images/container2.png", PNGDecoder.Format.RGBA);
         TextureFromFile specularMap = new TextureFromFile("../images/container2_specular.png", PNGDecoder.Format.RGBA);
 
@@ -140,11 +141,13 @@ class ShinyCubeShadowsScene extends Scene {
     }
 
     @Override public void draw(AppParams params) {
+        shaders.reset();
+
         glClearColor(1f, 1f, 1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        try (ShaderUse su = new ShaderUse(standardShader)) {
-            standardShader.setBoolean("shadowsEnabled", shadowsEnabled);
+        try (ShaderUse su = new ShaderUse(shaders.standardShader)) {
+            shaders.standardShader.setBoolean("shadowsEnabled", shadowsEnabled);
         }
 
         Matrix4x4 projectionMatrix =  createPerspectiveProjectionMatrix(params);
@@ -167,7 +170,7 @@ class ShinyCubeShadowsScene extends Scene {
 //            Vector4 posToRenderFrom = new Vector4(0.1f, 0.2f, 0.1f, 1f);
 //        Vector4 posToRenderFrom = camera.getPosition();
 //            int depthMapTexture =
-                    renderSceneFromPosition(posToRenderFrom, lightProjection, "lightSpaceMatrixDir", lighting.directional.shadowMap);
+            renderSceneFromPosition(posToRenderFrom, lightProjection, "lightSpaceMatrixDir", lighting.directional.shadowMap);
 //            textureToRender = depthMapTexture;
 //            lighting.directional.setShadowTexture(depthMapTexture);
         }
@@ -177,7 +180,7 @@ class ShinyCubeShadowsScene extends Scene {
             if (light.isEnabled()) {
                 Vector4 posToRenderFrom = light.pos.toVector4();
 //                int depthMapTexture =
-                        renderSceneFromPosition(posToRenderFrom, lightProjection, "lightSpaceMatrixes[" + i + "]", light.shadowMap);
+                renderSceneFromPosition(posToRenderFrom, lightProjection, "lightSpaceMatrixes[" + i + "]", light.shadowMap);
 //                light.setShadowTexture(depthMapTexture);
             }
         }
@@ -188,7 +191,7 @@ class ShinyCubeShadowsScene extends Scene {
         //glBindTexture(GL_TEXTURE_2D, depthMapTexture);
 
         {
-            Shader shader = standardShader;
+            Shader shader = shaders.standardShader;
             Matrix4x4 cameraTranslate = camera.getMatrix();
             try (ShaderUse wrap = new ShaderUse(shader)) {
                 int projectionMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "projectionMatrix");
@@ -206,7 +209,7 @@ class ShinyCubeShadowsScene extends Scene {
         if (renderDepthFramebuffer) {
             // No need for depth as we're just drawing a quad
             glDisable(GL_DEPTH_TEST);
-            try (ShaderUse su = new ShaderUse(renderDepthMapShader)) {
+            try (ShaderUse su = new ShaderUse(shaders.renderDepthMapShader)) {
 //                int depthMapLocation = GL20.glGetUniformLocation(standardShader.getShaderId(), "depthMap");
 //                GL20.glUniformMatrix4fv(depthMapLocation, false, MatrixLwjgl.convertMatrixToBuffer(lightSpaceMatrix));
                 Texture texture = new TextureFromExisting(textureToRender);
@@ -235,17 +238,18 @@ class ShinyCubeShadowsScene extends Scene {
 //            GL20.glUniformMatrix4fv(projectionMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(projectionMatrix));
 //            GL20.glUniformMatrix4fv(viewMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(cameraTranslate));
 
-        Matrix4x4 projectionMatrix = null;
-        Matrix4x4 cameraTranslate = null;
+            Matrix4x4 projectionMatrix = null;
+            Matrix4x4 cameraTranslate = null;
 
-        lighting.draw(projectionMatrix, cameraTranslate, standardShader, camera);
-        if (drawAxisMarkers) {
-            axisMarkers.forEach(model -> model.draw(projectionMatrix, cameraTranslate, basicFlatShader));
-        }
-        cubeModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, shader));
-        if (drawFloor) {
-            quadModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, shader));
-        }
+            shader.setVec3("viewPos", camera.getPosition().toVector3());
+            lighting.draw(projectionMatrix, cameraTranslate, shader, camera);
+            if (drawAxisMarkers) {
+                axisMarkers.forEach(model -> model.draw(projectionMatrix, cameraTranslate, shaders.basicFlatShader));
+            }
+            cubeModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, shader));
+            if (drawFloor) {
+                quadModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, shader));
+            }
         }
     }
 
@@ -296,10 +300,10 @@ class ShinyCubeShadowsScene extends Scene {
 
         Matrix4x4 lightSpaceMatrix = lightProjection.$times(lightView);
 
-        try (ShaderUse su = new ShaderUse(shadowGenShader)) {
-            shadowMap.setup(shadowGenShader, lightSpaceMatrix);
+        try (ShaderUse su = new ShaderUse(shaders.shadowGenShader)) {
+            shadowMap.setup(shaders.shadowGenShader, lightSpaceMatrix);
 
-            renderScene(shadowGenShader);
+            renderScene(shaders.shadowGenShader);
         }
 
 //        Shader shader;
@@ -341,8 +345,8 @@ class ShinyCubeShadowsScene extends Scene {
 //            }
 //        }
 
-        try (ShaderUse wrap = new ShaderUse(standardShader)) {
-            int lightSpaceMatrixLocation = GL20.glGetUniformLocation(standardShader.getShaderId(), shaderPosName);
+        try (ShaderUse wrap = new ShaderUse(shaders.standardShader)) {
+            int lightSpaceMatrixLocation = GL20.glGetUniformLocation(wrap.shader.getShaderId(), shaderPosName);
             GL20.glUniformMatrix4fv(lightSpaceMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(lightSpaceMatrix));
         }
 
