@@ -12,8 +12,6 @@ import static org.lwjgl.opengl.GL13.glActiveTexture;
 
 class DirectionalLight extends Light {
     final Vector3 direction;
-    private int shadowTexture;
-    boolean shadowsEnabled = false;
 
     public DirectionalLight(Vector3 direction, boolean enabled, Vector3 ambient, Vector3 diffuse, Vector3 specular) {
         super(enabled, ambient, diffuse, specular);
@@ -37,10 +35,6 @@ class DirectionalLight extends Light {
         }
     }
 
-    public void setShadowTexture(int shadowTexture) {
-        this.shadowTexture = shadowTexture;
-        shadowsEnabled = true;
-    }
 
     @Override
     public void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate, Shader lampShader) {

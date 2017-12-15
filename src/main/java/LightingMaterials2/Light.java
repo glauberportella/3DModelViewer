@@ -12,6 +12,9 @@ import static org.lwjgl.opengl.GL13.glActiveTexture;
 
 abstract class Light {
     protected final Vector3 ambient, diffuse, specular;
+    final ShadowMap shadowMap;
+    protected int shadowTexture;
+    boolean shadowsEnabled = false;
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
@@ -23,11 +26,18 @@ abstract class Light {
 
     private boolean enabled;
 
+    public void setShadowTexture(int shadowTexture) {
+        this.shadowTexture = shadowTexture;
+        shadowsEnabled = true;
+    }
+
     public Light(boolean enabled, Vector3 ambient, Vector3 diffuse, Vector3 specular) {
+        shadowMap = new ShadowMap();
         this.enabled = enabled;
         this.ambient = ambient;
         this.diffuse = diffuse;
         this.specular = specular;
+        setShadowTexture(shadowMap.textureId);
     }
 
     abstract public void setupShader(Shader lightingShader);
@@ -50,8 +60,6 @@ class PointLight extends Light {
     private final CubeWithNormals cube;
     private int index;
     Vector3 pos;
-    private int shadowTexture;
-    boolean shadowsEnabled = false;
 
     public PointLight(Vector4 pos, Matrix4x4 otherTransform, Shader shader, boolean enabled, int index, Vector3 ambient, Vector3 diffuse, Vector3 specular) {
         super(enabled, ambient, diffuse, specular);
@@ -94,8 +102,4 @@ class PointLight extends Light {
         cube.draw(projectionMatrix, cameraTranslate);
     }
 
-    public void setShadowTexture(int shadowTexture) {
-        this.shadowTexture = shadowTexture;
-        shadowsEnabled = true;
-    }
 }
