@@ -1,5 +1,5 @@
 
-package LightingMaterials2;
+package BasicModels;
 
 import Useful.AppParams;
 import org.lwjgl.Version;
@@ -131,8 +131,10 @@ public class AppWrapper extends GLFWKeyCallback {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_MULTISAMPLE);
 
+        Scene models = new BasicModelScene();
         Scene shadows = new ShinyCubeShadowsScene();
         Scene gloomy = new GloomyCubeScene();
+        scenes.add(models);
         scenes.add(shadows);
         scenes.add(gloomy);
 

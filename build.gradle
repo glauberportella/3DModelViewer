@@ -51,7 +51,7 @@ dependencies {
     compile group: 'org.scala-lang', name: 'scala-library', version: '2.12.4'
 
     // https://mvnrepository.com/artifact/io.github.java-graphics/assimp
-    compile group: 'io.github.java-graphics', name: 'assimp', version: '1.0.1'
+//    compile group: 'io.github.java-graphics', name: 'assimp', version: '1.0.1'
 
     // https://www.lwjgl.org/customize
     compile "org.lwjgl:lwjgl:$lwjglVersion"
