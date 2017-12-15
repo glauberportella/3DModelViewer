@@ -44,7 +44,7 @@ public class BrightLighting {
         Vector3 directionalDir = new Vector3(-0.5f, -0.5f, -0.5f);
 
         directional = new DirectionalLight(directionalDir, true, ambientDirectional, diffuseDirectional, specularDirectional);
-        directional.setEnabled(true);
+        directional.setEnabled(false);
 
         // Putting into a -1 to 1 space
         for (int i = 0; i < MAX_POINT_LIGHTS; i++) {
@@ -55,7 +55,7 @@ public class BrightLighting {
             Vector4 lightPos = new Vector4(pos, 0.5f, pos, 1);
             PointLight light = new PointLight(lightPos, standardLight, lampShader, true, i, ambient, diffuse, specular);
             points[i] = light;
-            light.setEnabled(false);
+//            light.setEnabled(false);
         }
     }
 

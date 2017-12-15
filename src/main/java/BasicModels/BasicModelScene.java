@@ -250,9 +250,9 @@ class BasicModelScene extends Scene {
                 axisMarkers.forEach(model -> model.draw(projectionMatrix, cameraTranslate, shaders.basicFlatShader));
             }
 //            cubeModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, shader));
-//            if (drawFloor) {
-//                quadModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, shader));
-//            }
+            if (drawFloor) {
+                quadModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, shader));
+            }
             Arrays.stream(meshes).forEach(mesh -> mesh.draw(projectionMatrix, cameraTranslate, wrap.shader));
         }
 

@@ -161,7 +161,8 @@ public class Mesh extends Model {
 //            int projectionMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "projectionMatrix");
 //            int viewMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "viewMatrix");
 
-            Matrix4x4 modelMatrix = Matrix4x4.identity();// Matrix4x4.translate(pos).$times(otherTransform);
+//            Matrix4x4 modelMatrix = Matrix4x4.identity();// Matrix4x4.translate(pos).$times(otherTransform);
+            Matrix4x4 modelMatrix = getModelMatrix();
 
 //            GL20.glUniformMatrix4fv(projectionMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(projectionMatrix));
 //            GL20.glUniformMatrix4fv(viewMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(cameraTranslate));
