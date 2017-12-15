@@ -12,6 +12,8 @@ import java.util.Optional;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE5;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 import static org.lwjgl.opengl.GL30.*;
 
@@ -58,7 +60,8 @@ class ShinyCubeShadowsScene extends Scene {
                     float xPos = x * (2.0f / numCubesX) - 1.0f;
                     float zPos = z * (2.0f / numCubesZ) - 1.0f;
                     Vector4 pos = new Vector4(xPos, 0, zPos, 1);
-                    Matrix4x4 scale = Matrix4x4.scale(0.16f); // to 0.05 box, taking up 25% of space
+//                    Matrix4x4 scale = Matrix4x4.scale(0.16f); // to 0.05 box, taking up 25% of space
+                    Matrix4x4 scale = Matrix4x4.scale(0.1f); // to 0.05 box, taking up 25% of space
                     FancyCube cube = new FancyCube(pos, Optional.of(scale), Optional.empty(), materials.get(0), texture, specularMap);
                     cubeModels.add(cube);
                 }
@@ -95,8 +98,9 @@ class ShinyCubeShadowsScene extends Scene {
             Optional<Matrix4x4> scale = Optional.of(Matrix4x4.scale(4));
 //            Vector4 pos = new Vector4(-2f, -0.5f, -2f, 1);
 //            Vector4 pos = new Vector4(0,-0.05f,0, 1);
-            Vector4 pos = new Vector4(0,-0.5f,0, 1);
-            // Goes -0.5f to 0.5f
+            Vector4 pos = new Vector4(0,-0.2f,0, 1);
+//            Vector4 pos = new Vector4(0,-0.5f,0, 1);
+            // Goes -0.5f to 0.5fc
             // Want it -2 to 2
             Material material = new Material("dull", null, null, null, 32);
             FancyQuad floor = new FancyQuad(pos, scale, rotate, material, floorTexture, floorTexture, 10);
@@ -157,10 +161,10 @@ class ShinyCubeShadowsScene extends Scene {
         Matrix4x4 lightProjection = SceneUtils.createOrthoProjectionMatrix(-1f, 1f, 1f, -1f, 0.001f, 1.5f);
 
 //        if (lighting.directional.isEnabled() && lighting.directional.shadowsEnabled) {
-        int textureToRender = 0;
+        int textureToRender = lighting.directional.shadowTexture;
         if (lighting.directional.isEnabled()) {
-//            Vector4 posToRenderFrom = lighting.directional.direction.toVector4();
-            Vector4 posToRenderFrom = new Vector4(0.1f, 0.2f, 0.1f, 1f);
+            Vector4 posToRenderFrom = (lighting.directional.direction.$times(-1)).toVector4();
+//            Vector4 posToRenderFrom = new Vector4(0.1f, 0.2f, 0.1f, 1f);
 //        Vector4 posToRenderFrom = camera.getPosition();
 //            int depthMapTexture =
                     renderSceneFromPosition(posToRenderFrom, lightProjection, "lightSpaceMatrixDir", lighting.directional.shadowMap);
@@ -199,25 +203,25 @@ class ShinyCubeShadowsScene extends Scene {
             }
         }
 
-//        if (renderDepthFramebuffer) {
-//            // No need for depth as we're just drawing a quad
-//            glDisable(GL_DEPTH_TEST);
-//            try (ShaderUse su = new ShaderUse(renderDepthMapShader)) {
-////                int depthMapLocation = GL20.glGetUniformLocation(standardShader.getShaderId(), "depthMap");
-////                GL20.glUniformMatrix4fv(depthMapLocation, false, MatrixLwjgl.convertMatrixToBuffer(lightSpaceMatrix));
-//                Texture texture = new TextureFromExisting(textureToRender);
-//
-//                su.shader.setInt("depthMap", 5);
-//
-//                glActiveTexture(GL_TEXTURE5);
-//                glBindTexture(GL_TEXTURE_2D, texture.getTextureId());
-//
-//                FancyQuad quad = new FancyQuad(new Vector4(0, 0, 0, 1), Optional.empty(), Optional.empty(), null, texture, texture, 1.0f);
-//
-//                quad.draw(null, null, su.shader);
-//            }
-//            glEnable(GL_DEPTH_TEST);
-//        }
+        if (renderDepthFramebuffer) {
+            // No need for depth as we're just drawing a quad
+            glDisable(GL_DEPTH_TEST);
+            try (ShaderUse su = new ShaderUse(renderDepthMapShader)) {
+//                int depthMapLocation = GL20.glGetUniformLocation(standardShader.getShaderId(), "depthMap");
+//                GL20.glUniformMatrix4fv(depthMapLocation, false, MatrixLwjgl.convertMatrixToBuffer(lightSpaceMatrix));
+                Texture texture = new TextureFromExisting(textureToRender);
+
+                su.shader.setInt("depthMap", 5);
+
+                glActiveTexture(GL_TEXTURE5);
+                glBindTexture(GL_TEXTURE_2D, texture.getTextureId());
+
+                FancyQuad quad = new FancyQuad(new Vector4(0, 0, 0, 1), Optional.empty(), Optional.empty(), null, texture, texture, 1.0f);
+
+                quad.draw(null, null, su.shader);
+            }
+            glEnable(GL_DEPTH_TEST);
+        }
 
 
     }

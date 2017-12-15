@@ -55,19 +55,29 @@ in vec4 FragPosLightSpaceDir;
 in vec4 FragPosLightSpacePoint[NR_POINT_LIGHTS];
 
 
-float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadowMap)
+float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadowMap, vec3 normal, vec3 lightDir)
 {
+
+
     // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+
+            if(projCoords.z > 1.0)
+                return 0.0;
+
+
     // transform to [0,1] range
     projCoords = projCoords * 0.5 + 0.5;
+
+
     // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
     float closestDepth = texture(shadowMap, projCoords.xy).r;
     // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
 
     // Bias gets rid of weird moire pattern
-    float bias = 0.005;
+//    float bias = 0.005;
+    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
 
     // check whether current frag pos is in shadow
     float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
@@ -90,7 +100,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 
       float shadow = 0;
       if (shadowsEnabled) {
-        shadow = ShadowCalculation(FragPosLightSpaceDir, light.shadowMap);
+        shadow = ShadowCalculation(FragPosLightSpaceDir, light.shadowMap, normal, lightDir);
       }
 
        return ((1.0 - shadow) * (ambient + diffuse + specular));
@@ -151,7 +161,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, v
 
     float shadow = 0;
     if (shadowsEnabled && light.shadowsEnabled) {
-        shadow = ShadowCalculation(fragPosLightSpace, light.shadowMap);
+        shadow = ShadowCalculation(fragPosLightSpace, light.shadowMap, normal, lightDir);
     }
 
     vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, TexCoords));

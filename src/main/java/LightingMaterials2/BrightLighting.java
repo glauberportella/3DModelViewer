@@ -15,7 +15,7 @@ public class BrightLighting {
     static final int MAX_POINT_LIGHTS = 4;
     private final Shader lampShader;
 
-        BrightLighting() {
+    BrightLighting() {
         Matrix4x4 standardLight = Matrix4x4.scale(0.01f);
         lampShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
         points = new PointLight[MAX_POINT_LIGHTS];
@@ -36,7 +36,7 @@ public class BrightLighting {
         Vector3 diffuseDirectional = new Vector3(diffuseStrength * directionalModifier, diffuseStrength * directionalModifier, diffuseStrength * directionalModifier);
         Vector3 specularDirectional = new Vector3(specularDirectionalForce, specularDirectionalForce, specularDirectionalForce);
 
-        Vector3 directionalDir = new Vector3(-1, -1, 0);
+        Vector3 directionalDir = new Vector3(-0.5f, -0.5f, -0.5f);
 
         directional = new DirectionalLight(directionalDir, true, ambientDirectional, diffuseDirectional, specularDirectional);
         directional.setEnabled(true);
@@ -47,7 +47,7 @@ public class BrightLighting {
             // Put in a circle
 //            float pos = (float) Math.sin(HandyMaths.degreesToRadians(360 / MAX_POINT_LIGHTS) * i) * 0.1f;
             float pos = (i * (2.0f / MAX_POINT_LIGHTS)) - 1.0f;
-            Vector4 lightPos = new Vector4(pos, 0.1f, pos, 1);
+            Vector4 lightPos = new Vector4(pos, 0.5f, pos, 1);
             PointLight light = new PointLight(lightPos, standardLight, lampShader, true, i, ambient, diffuse, specular);
             points[i] = light;
             light.setEnabled(false);
