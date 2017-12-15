@@ -6,7 +6,8 @@ import java.util.Arrays;
 public class ShaderStore {
     public final Shader basicFlatShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl", false);
     //    private final Shader standardShader = new Shader("../shaders/shadows_vertex.glsl", "../shaders/shadows_fragment.glsl");
-    public final Shader standardShader = new Shader("../shaders/shadows_vertex.glsl", "../shaders/shadows_fragment.glsl", false);
+//    public final Shader standardShader = new Shader("../shaders/shadows_vertex.glsl", "../shaders/shadows_fragment.glsl", false);
+    public final Shader standardShader = new Shader("../shaders/model_vertex.glsl", "../shaders/model_fragment.glsl", false);
     //    private final Shader standardShader = new Shader("../shaders/lighting_materials_vertex.glsl", "../shaders/lighting_materials2_fragment.glsl");
     public final Shader shadowGenShader = Shader.create("../shaders/shadow_mapping.vtx", "../shaders/empty.frag", true);
     public final Shader passthroughShader = new Shader("../shaders/passthrough_vertex.glsl", "../shaders/passthrough_fragment.glsl", true);

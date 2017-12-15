@@ -234,6 +234,8 @@ class BasicModelScene extends Scene {
 
     private void renderScene(Shader shader) {
 //        assert (shader.isInUse());
+        Matrix4x4 projectionMatrix = null;
+        Matrix4x4 cameraTranslate = null;
         try (ShaderUse wrap = new ShaderUse(shader)) {
 //            int projectionMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "projectionMatrix");
 //            int viewMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "viewMatrix");
@@ -241,8 +243,6 @@ class BasicModelScene extends Scene {
 //            GL20.glUniformMatrix4fv(projectionMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(projectionMatrix));
 //            GL20.glUniformMatrix4fv(viewMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(cameraTranslate));
 
-            Matrix4x4 projectionMatrix = null;
-            Matrix4x4 cameraTranslate = null;
 
             shader.setVec3("viewPos", camera.getPosition().toVector3());
             lighting.draw(projectionMatrix, cameraTranslate, shader, camera);
@@ -250,11 +250,16 @@ class BasicModelScene extends Scene {
                 axisMarkers.forEach(model -> model.draw(projectionMatrix, cameraTranslate, shaders.basicFlatShader));
             }
 //            cubeModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, shader));
-            Arrays.stream(meshes).forEach(mesh -> mesh.draw(projectionMatrix, cameraTranslate, shader));
 //            if (drawFloor) {
 //                quadModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, shader));
 //            }
+            Arrays.stream(meshes).forEach(mesh -> mesh.draw(projectionMatrix, cameraTranslate, wrap.shader));
         }
+
+//        try (ShaderUse wrap = new ShaderUse(shaders.modelShader)) {
+//            Arrays.stream(meshes).forEach(mesh -> mesh.draw(projectionMatrix, cameraTranslate, wrap.shader));
+//        }
+
     }
 
     private void renderSceneFromPosition(Vector4 position, Matrix4x4 lightProjection, String shaderPosName, ShadowMap shadowMap) {

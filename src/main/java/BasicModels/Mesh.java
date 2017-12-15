@@ -107,21 +107,24 @@ public class Mesh extends Model {
 //            glVertexAttribPointer(VBO_INDEX_TEXTURE, 2, GL_FLOAT, false, 0, 0);
 //        }
 
-        {
-            IntBuffer indicesBuffer = BufferUtils.createIntBuffer(data.indices.length);
-            indicesBuffer.put(data.indices);
-            indicesBuffer.flip();
-
-            // VBO 3 = indices
-            vboIndicesId = GL15.glGenBuffers();
-            GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboIndicesId);
-            GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL15.GL_STATIC_DRAW);
-        }
 
         // Deselect VAO
         GL30.glBindVertexArray(0);
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        {
+            IntBuffer indicesBuffer = BufferUtils.createIntBuffer(data.indices.length);
+            indicesBuffer.put(data.indices);
+            indicesBuffer.flip();
+
+            // Create a new VBO for the indices and select it (bind)
+            // Note this isn't bound into the VAO. Not sure why for this example.
+            vboIndicesId = GL15.glGenBuffers();
+            GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboIndicesId);
+            GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL15.GL_STATIC_DRAW);
+        }
+
     }
 
 
@@ -168,7 +171,7 @@ public class Mesh extends Model {
             glEnableVertexAttribArray(VBO_INDEX_VERTICES);
             glEnableVertexAttribArray(VBO_INDEX_NORMALS);
 //            glEnableVertexAttribArray(VBO_INDEX_TEXTURE);
-            glEnableVertexAttribArray(VBO_INDEX_INDICES);
+//            glEnableVertexAttribArray(VBO_INDEX_INDICES);
 
 //            glActiveTexture(GL_TEXTURE0);
 //            glBindTexture(GL_TEXTURE_2D, texture.getTextureId());
@@ -179,7 +182,7 @@ public class Mesh extends Model {
             GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboIndicesId);
 
             // Draw the vertices
-            GL11.glDrawElements(GL11.GL_TRIANGLES, data.indicesCount, GL11.GL_UNSIGNED_BYTE, 0);
+            GL11.glDrawElements(GL11.GL_TRIANGLES, data.indicesCount, GL11.GL_UNSIGNED_INT, 0);
 
 //            GL11.glDrawElements(GL11.GL_TRIANGLES, 0, 36);
 
@@ -187,8 +190,8 @@ public class Mesh extends Model {
             glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
             GL20.glDisableVertexAttribArray(VBO_INDEX_VERTICES);
             GL20.glDisableVertexAttribArray(VBO_INDEX_NORMALS);
-            GL20.glDisableVertexAttribArray(VBO_INDEX_TEXTURE);
-            GL20.glDisableVertexAttribArray(VBO_INDEX_INDICES);
+//            GL20.glDisableVertexAttribArray(VBO_INDEX_TEXTURE);
+//            GL20.glDisableVertexAttribArray(VBO_INDEX_INDICES);
             GL30.glBindVertexArray(0);
         }
     }}
