@@ -9,6 +9,7 @@ import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 
+import java.net.URISyntaxException;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 
@@ -33,7 +34,11 @@ public class AppWrapper extends GLFWKeyCallback {
         params.fovDegrees = 90;
 
         init(params);
-        loop(params);
+        try {
+            loop(params);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
 
         // Free the window callbacks and destroy the window
         glfwFreeCallbacks(window);
@@ -120,7 +125,7 @@ public class AppWrapper extends GLFWKeyCallback {
         currentScene = scene;
     }
 
-    private void loop(AppParams params) {
+    private void loop(AppParams params) throws URISyntaxException {
         // This line is critical for LWJGL's interoperation with GLFW's
         // OpenGL context, or any context that is managed externally.
         // LWJGL detects the context that is current in the current thread,

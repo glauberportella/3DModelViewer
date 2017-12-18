@@ -1,8 +1,21 @@
 group 'com.grahampople'
 version '1.0-SNAPSHOT'
 
-apply plugin: 'java'
+buildscript {
+    ext.kotlin_version = '1.2.10'
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
 apply plugin: 'scala'
+apply plugin: 'java'
+apply plugin: 'kotlin'
 
 sourceCompatibility = 1.8
 
@@ -25,15 +38,44 @@ switch ( OperatingSystem.current() ) {
         break
 }
 
+
+//project('vendor/assimp') {
+////    task('hello').doLast(cl)
+//}
+
 project.ext.lwjglVersion = "3.1.5"
+project.ext.kotlin_version = "1.2.10"
 
 repositories {
     mavenCentral()
+    maven { url "https://dl.bintray.com/kotlin/kotlin-dev" }
+    maven { url 'https://jitpack.io' }
 }
+
+//allprojects {
+//    repositories {
+//    }
+//}
+
+//sourceSets {
+//    main.kotlin.srcDirs += 'vendor/assimp/src/main/kotlin'
+//}
+
 
 dependencies {
     // https://mvnrepository.com/artifact/org.l33tlabs.twl/pngdecoder
     compile group: 'org.l33tlabs.twl', name: 'pngdecoder', version: '1.0'
+
+    compile 'com.github.kotlin-graphics:uno-sdk:f9a47461db6eb4e398563d6414d291fd88d38132'
+    compile 'io.github.microutils:kotlin-logging:1.4.6'
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+//    compile 'com.github.kotlin-graphics:glm:0.1'
+// https://mvnrepository.com/artifact/io.github.java-graphics/glm
+//    compile group: 'io.github.java-graphics', name: 'glm', version: '1.0.1'
+
 
     // https://mvnrepository.com/artifact/org.joml/joml
 //    compile group: 'org.joml', name: 'joml', version: '1.9.6'
@@ -49,6 +91,8 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.scala-lang/scala-library
     compile group: 'org.scala-lang', name: 'scala-library', version: '2.12.4'
+
+//    compile 'com.github.kotlin-graphics:uno-sdk:f9a47461db6eb4e398563d6414d291fd88d38132'
 
     // https://mvnrepository.com/artifact/io.github.java-graphics/assimp
 //    compile group: 'io.github.java-graphics', name: 'assimp', version: '1.0.1'
@@ -66,4 +110,15 @@ dependencies {
     compile "org.lwjgl:lwjgl-openal:$lwjglVersion:$lwjglNatives"
     compile "org.lwjgl:lwjgl-opengl:$lwjglVersion:$lwjglNatives"
     compile "org.lwjgl:lwjgl-stb:$lwjglVersion:$lwjglNatives"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }

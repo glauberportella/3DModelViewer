@@ -1,2 +1,4 @@
 rootProject.name = '3ddemo'
 
+includeBuild('vendor/assimp') {}
+
