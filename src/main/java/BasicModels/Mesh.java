@@ -53,6 +53,7 @@ public class Mesh extends Model {
     Mesh(Vector4 pos, Optional<Matrix4x4> scale, Optional<Matrix4x4> rotate, MeshData data) {
         super(pos, scale, rotate);
         this.data = data;
+        this.indicesToDraw = data.indicesCount;
 //        this.vertices = data.vertices;
 //        this.normals = normals;
 //        this.indicesCount = indices.length;

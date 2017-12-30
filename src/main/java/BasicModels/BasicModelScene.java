@@ -59,10 +59,16 @@ class BasicModelScene extends Scene {
         this.app = app;
         lighting = new BrightLighting(app, shaders);
 
+//        if (key == GLFW_KEY_KP_9) drawAxisMarkers = !drawAxisMarkers;
+//        else if (key == GLFW_KEY_KP_8) renderToDepth = !renderToDepth;
+//        else if (key == GLFW_KEY_KP_7) renderDepthFramebuffer = !renderDepthFramebuffer;
+//        else if (key == GLFW_KEY_KP_6) drawFloor = !drawFloor;
+//        else if (key == GLFW_KEY_KP_5) shadowsEnabled = !shadowsEnabled;
+
         ui.add(BlipUICheckbox.create("Model", drawModel, (v) -> drawModel = v, Optional.empty()));
 //                            BlipUICheckbox.create("Axis markers", drawAxisMarkers, (v) -> drawAxisMarkers = v, Optional.empty()),
-        ui.add(BlipUICheckbox.create("Floor", drawFloor, (v) -> drawFloor = v, Optional.empty()));
-        ui.add(BlipUICheckbox.create("Shadows", shadowsEnabled, (v) -> shadowsEnabled = v, Optional.empty()));
+        ui.add(BlipUICheckbox.create("Floor", drawFloor, (v) -> drawFloor = v, Optional.of(GLFW_KEY_KP_6)));
+        ui.add(BlipUICheckbox.create("Shadows", shadowsEnabled, (v) -> shadowsEnabled = v, Optional.of(GLFW_KEY_KP_5)));
 
 //        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/cube.obj", "C:/dev/portfolio/3ddemo/out/production/resources/images");
         MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("../models/cube.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
@@ -176,15 +182,15 @@ class BasicModelScene extends Scene {
         else if (key == GLFW_KEY_A) camera.moveLeft(posDelta);
         else if (key == GLFW_KEY_D) camera.moveRight(posDelta);
 
-        if (action == GLFW_PRESS) {
-            lighting.handleKeyDown(key);
-
-            if (key == GLFW_KEY_KP_9) drawAxisMarkers = !drawAxisMarkers;
-            else if (key == GLFW_KEY_KP_8) renderToDepth = !renderToDepth;
-            else if (key == GLFW_KEY_KP_7) renderDepthFramebuffer = !renderDepthFramebuffer;
-            else if (key == GLFW_KEY_KP_6) drawFloor = !drawFloor;
-            else if (key == GLFW_KEY_KP_5) shadowsEnabled = !shadowsEnabled;
-        }
+//        if (action == GLFW_PRESS) {
+//            lighting.handleKeyDown(key);
+//
+////            if (key == GLFW_KEY_KP_9) drawAxisMarkers = !drawAxisMarkers;
+////            else if (key == GLFW_KEY_KP_8) renderToDepth = !renderToDepth;
+////            else if (key == GLFW_KEY_KP_7) renderDepthFramebuffer = !renderDepthFramebuffer;
+////            else if (key == GLFW_KEY_KP_6) drawFloor = !drawFloor;
+////            else if (key == GLFW_KEY_KP_5) shadowsEnabled = !shadowsEnabled;
+//        }
     }
 
     @Override public void draw(AppParams params) {

@@ -17,6 +17,7 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.lwjgl.assimp.Assimp.*;
@@ -41,44 +42,73 @@ public class MeshLoader {
 
 
     public static MeshData[] load(URI resourcePath, String texturesDir, int flags) {
+//    public static MeshData[] load(String path, String texturesDir, int flags) {
         // https://learnopengl.com/#!Model-Loading/Assimp great guide to Assimp
+
+//        URI uri = URI.create(path);
+//        String fullPath = "file://" + uri.getPath();
+
+        // Assimp general:
+        // Gives 24 vertices for a simple cube, rather than 8.
+        // https://sourceforge.net/p/assimp/discussion/817654/thread/026e9640/
+        // Basically, because of UV texture co-ords, it needs to duplicate vertices.
+
+        // Hmmm... Issues with Kotlin Assimp
+        // 1. Can't import everything e.g. IronMan fails mysteriously
+        // 2. Doesn't seem to import well e.g. cube produces 6 quads rather than the requested triangles.
         AiScene aiScene = new Importer().readFile(resourcePath, flags);
 
+        // But LGJWL Assimp issues:
+        // 1. Can't make heads nor tails out of how to parse the materials
+        // 2. Also not always clean imports, e.g. weird glitches on Lego.
+        AIScene aiScene2 = aiImportFile(resourcePath.getPath().substring(1), flags);
 
-//        AIScene aiScene = aiImportFile(resourcePath, flags);
-        if (aiScene == null) {
-            System.out.println("Error loading model " + resourcePath);
-        }
+//        if (aiScene == null || aiScene2 == null) {
+//            System.out.println("Error loading model " + resourcePath);
+//        }
 
 //                MeshData[] meshes = new MeshData[numMeshes];
 //        MeshData[] meshes = new MeshData[0];
 
-//        ArrayList<AiMaterial> materials = aiScene.getMaterials();
+        ArrayList<AiMaterial> materials2 = aiScene.getMaterials();
 //        materials.forEach(mat -> {
 //            mat.
 //        });
 //        PointerBuffer aiMaterials = aiScene.mMaterials();
 //        List<Material> materials = new ArrayList<>();
-//        for (int i = 0; i < numMaterials; i++) {
-//            AIMaterial aiMaterial = AIMaterial.create(aiMaterials.get(i));
+//        for (int i = 0; i < materials2.size(); i++) {
+//            AiMaterial mat = materials2.get(i);
 ////            processMaterial(aiMaterial, materials, texturesDir);
-//            aiMaterial.mProperties().get(AI_MATKEY_COLOR_DIFFUSE);
+////            aiMaterial.mProperties().get(AI_MATKEY_COLOR_DIFFUSE);
+//
+//
+////            mat.getShininess();
+////            Material m = new Material(mat.getName(), mat.get);
 //
 //            int x=1;
 //        }
 
 
-        List<AiMaterial> materials = new ArrayList<>();
+//        List<AiMaterial> materials = new ArrayList<>();
 
-        int numMeshes = aiScene.getNumMeshes();
-        ArrayList<AiMesh> aiMeshes = aiScene.getMeshes();
+        int numMeshes = aiScene2.mNumMeshes();
+        PointerBuffer aiMeshes = aiScene2.mMeshes();
         MeshData[] meshes = new MeshData[numMeshes];
+//        Mesh[] meshes = new Mesh[numMeshes];
         for (int i = 0; i < numMeshes; i++) {
-            AiMesh aiMesh = aiMeshes.get(i);
+            AIMesh aiMesh = AIMesh.create(aiMeshes.get(i));
             int x=1;
-            MeshData mesh = processMesh(aiMesh, materials);
+            MeshData mesh = processMesh(aiMesh, materials2);
             meshes[i] = mesh;
         }
+//        int numMeshes = aiScene.getNumMeshes();
+//        ArrayList<AiMesh> aiMeshes = aiScene.getMeshes();
+//        for (int i = 0; i < numMeshes; i++) {
+//            AiMesh aiMesh = aiMeshes.get(i);
+//            int x=1;
+//            MeshData mesh = processMesh(aiMesh, materials);
+//            meshes[i] = mesh;
+//        }
 
 
         return meshes;
@@ -104,7 +134,7 @@ public class MeshLoader {
 //    }
 
     @Deprecated
-    private static MeshData processMesh(AIMesh aiMesh, List<Material> materials) {
+    private static MeshData processMesh(AIMesh aiMesh, List<AiMaterial> materials) {
 //        List<Vector3> vertices = new ArrayList<>();
 //        List<Vector3> normals = new ArrayList<>();
 //        List<Vector3> textures = new ArrayList<>();
@@ -158,6 +188,10 @@ public class MeshLoader {
         for (int i = 0; i < indices.size(); i ++) {
             indicesArray[i] = indices.get(i);
         }
+
+        AiMaterial material = materials.get(aiMesh.mMaterialIndex());
+//        aiMesh.mMaterialIndex()
+
         // .toArray(indicesArray);
 
 //        PointerBuffer textureBuf = aiMesh.mTextureCoords();
@@ -182,6 +216,7 @@ public class MeshLoader {
 
 
 //        Mesh mesh = new Mesh(vertices, normals, indicesArray, textureBufFloat);
+//        MeshData mesh = new MeshData(vertices, normals, indicesArray, null, Optional.of(material));
         MeshData mesh = new MeshData(vertices, normals, indicesArray, null);
 
 //        Material material;
@@ -279,6 +314,7 @@ public class MeshLoader {
 
 
 //        Mesh mesh = new Mesh(vertices, normals, indicesArray, textureBufFloat);
+//        MeshData mesh = new MeshData(vertices, normals, indicesArray, null, Optional.empty());
         MeshData mesh = new MeshData(vertices, normals, indicesArray, null);
 
 //        Material material;
