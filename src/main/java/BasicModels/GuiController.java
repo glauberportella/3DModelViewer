@@ -7,7 +7,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 
 public class GuiController implements BlipHandler {
     @FXML public ChoiceBox scene;
@@ -56,12 +55,13 @@ public class GuiController implements BlipHandler {
 
     @Override
     public void handle(Blip blip) {
-        if (blip instanceof BlipUIClear) {
+        if (blip instanceof BlipSceneReset) {
             Platform.runLater(() -> others.getChildren().clear());
         }
         else if (blip instanceof BlipUI) {
             if (blip instanceof BlipUIAddCheckbox) {
                 BlipUIAddCheckbox v = (BlipUIAddCheckbox) blip;
+
                 CheckBox control = new CheckBox();
                 control.setSelected(v.initialState);
                 control.selectedProperty().addListener(new ChangeListener<Boolean>() {
@@ -85,6 +85,14 @@ public class GuiController implements BlipHandler {
                     others.getChildren().add(label);
                 });
 
+                if (v.shortcut.isPresent()) {
+                    BlipInputAddKeyboardShortcut shortcut = BlipInputAddKeyboardShortcut.create(v.shortcut.get(), () -> {
+                        boolean checked = control.selectedProperty().get();
+                        control.selectedProperty().set(!checked);
+                        v.onChanged.accept(!checked);
+                    });
+                    app.handle(shortcut);
+                }
             }
         }
     }

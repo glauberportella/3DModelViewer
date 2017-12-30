@@ -25,6 +25,34 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
     private ArrayList<Scene> scenes = new ArrayList<>();
     private long window;
     private final BlipHandler app;
+    private final ShortcutHandler shortcuts = new ShortcutHandler();
+
+    @Override
+    public void handle(Blip blip) {
+        if (blip instanceof BlipInputChangeScene) {
+            changeScene(((BlipInputChangeScene) blip).getScene());
+        }
+        else if (blip instanceof BlipInputAnyWindowClosed) {
+            glfwSetWindowShouldClose(window, true);
+        }
+        else if (blip instanceof BlipInputKeyPressed) {
+            handleKeyboardInput((BlipInputKeyPressed) blip);
+        }
+
+        if (currentScene != null) {
+            currentScene.handle(blip);
+        }
+        shortcuts.handle(blip);
+    }
+
+    private void handleKeyboardInput(BlipInputKeyPressed blip) {
+        if (blip.action == GLFW_PRESS) {
+            if (blip.keycode == GLFW_KEY_KP_1) app.handle(new BlipInputChangeScene(0));
+            else if (blip.keycode == GLFW_KEY_KP_2) app.handle(new BlipInputChangeScene(1));
+            else if (blip.keycode == GLFW_KEY_KP_3) app.handle(new BlipInputChangeScene(2));
+            else if (blip.keycode == GLFW_KEY_ESCAPE) app.handle(new BlipInputOpenGlWindowClosed());
+        }
+    }
 
     public AppWrapper(BlipHandler app) {
         this.app = app;
@@ -81,14 +109,8 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
     }
 
     @Override public void invoke(long window, int key, int scancode, int action, int mods) {
-        if (action == GLFW_PRESS) {
-            if (key == GLFW_KEY_KP_1) app.handle(new BlipInputChangeScene(0));
-            else if (key == GLFW_KEY_KP_2) app.handle(new BlipInputChangeScene(1));
-            else if (key == GLFW_KEY_KP_3) app.handle(new BlipInputChangeScene(2));
-            else if (key == GLFW_KEY_ESCAPE) app.handle(new BlipInputOpenGlWindowClosed());
-        }
-
         currentScene.keyPressedImpl(window, key, scancode, action, mods);
+        app.handle(BlipInputKeyPressed.create(key, action));
     }
 
 
@@ -155,7 +177,7 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
     }
 
     public void changeScene(int index) {
-        app.handle(new BlipUIClear());
+        app.handle(new BlipSceneReset());
 
         Scene scene = scenes.get(index);
         currentScene = scene;
@@ -197,17 +219,4 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
         }
     }
 
-    @Override
-    public void handle(Blip blip) {
-        if (blip instanceof BlipInputChangeScene) {
-            changeScene(((BlipInputChangeScene) blip).getScene());
-        }
-        else if (blip instanceof BlipInputAnyWindowClosed) {
-            glfwSetWindowShouldClose(window, true);
-        }
-
-        if (currentScene != null) {
-            currentScene.handle(blip);
-        }
-    }
 }

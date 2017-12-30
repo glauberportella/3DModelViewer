@@ -15,7 +15,6 @@ import java.util.function.Consumer;
 
 class BlipUI implements Blip {}
 
-class BlipUIClear extends BlipUI {}
 
 class BlipUIAddCheckbox extends BlipUI {
     public String name;
@@ -44,3 +43,4 @@ class BlipUIAddSection extends BlipUI {
 
     }
 }
+
