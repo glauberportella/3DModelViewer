@@ -98,7 +98,7 @@ class PointLight extends Light {
         try (ShaderUse su2 = new ShaderUse(lampShader)) {
             lampShader.setVec3("lamp_Color", diffuse);
         }
-        cube.draw(projectionMatrix, cameraTranslate);
+        cube.draw(projectionMatrix, cameraTranslate, lampShader);
     }
 
 }

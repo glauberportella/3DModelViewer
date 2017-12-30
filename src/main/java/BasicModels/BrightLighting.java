@@ -20,7 +20,6 @@ public class BrightLighting implements BlipHandler{
 
     BrightLighting(BlipHandler app, ShaderStore shaders) {
         this.app = app;
-
         lampShader = shaders.basicFlatShader;
         Matrix4x4 standardLight = Matrix4x4.scale(0.01f);
 //        lampShader =  Shader.create("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
@@ -79,21 +78,21 @@ public class BrightLighting implements BlipHandler{
 //        else if (key == GLFW_KEY_4) points[3].setEnabled(!points[3].isEnabled());
     }
 
+    void setupShader(Shader shader) {
+        try (ShaderUse su = new ShaderUse(shader)) {
+            directional.setupShader(su.shader);
+
+            for (int i = 0; i < points.length; i ++) {
+                Light light = points[i];
+                light.setupShader(su.shader);
+            }
+        }
+    }
 
     void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate, Shader shader, ICamera camera) {
 //        float lightX = (float) (Math.sin(glfwGetTime())) * 0.1f + 0.2f;
 //        Vector4 newLightPos = new Vector4(lightX, 0.1f, lightX, 1);
 //        light.setPos(newLightPos);
-
-        try (ShaderUse su = new ShaderUse(shader)) {
-            directional.setupShader(shader);
-
-            for (int i = 0; i < points.length; i ++) {
-                Light light = points[i];
-                light.setupShader(shader);
-            };
-
-        }
 
         directional.draw(projectionMatrix, cameraTranslate, lampShader);
         Arrays.stream(points).forEach(light -> light.draw(projectionMatrix, cameraTranslate, lampShader));

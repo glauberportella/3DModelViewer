@@ -30,7 +30,6 @@ class CubeWithNormals {
 
     private Vector4 pos;
     private final Matrix4x4 otherTransform;
-    private final Shader shader;
     private final int VBO_INDEX_VERTICES = 0;
     private final int VBO_INDEX_NORMALS = 1;
 
@@ -41,7 +40,7 @@ class CubeWithNormals {
     public CubeWithNormals(Vector4 pos, Matrix4x4 otherTransform, Shader shader) {
         this.pos = pos;
         this.otherTransform = otherTransform;
-        this.shader = shader;
+//        this.shader = shader;
 
         float vertices[] = {
                 -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -111,7 +110,7 @@ class CubeWithNormals {
         GL30.glBindVertexArray(0);
     }
 
-    public void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate) {
+    public void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate, Shader shader) {
         try (ShaderUse wrap = new ShaderUse(shader)) {
             // Upload matrices to the uniform variables
             int modelMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "modelMatrix");
