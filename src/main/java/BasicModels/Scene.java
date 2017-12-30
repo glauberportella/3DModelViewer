@@ -6,7 +6,7 @@ import enterthematrix.Matrix4x4;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-abstract public class Scene {
+abstract public class Scene implements BlipHandler {
     protected Matrix4x4 createPerspectiveProjectionMatrix(AppParams params) {
         return SceneUtils.createPerspectiveProjectionMatrix(params);
     }

@@ -147,7 +147,7 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
         glfwSetKeyCallback(window, this);
         glfwSetWindowCloseCallback(window, (i) -> {
             app.handle(new BlipInputOpenGlWindowClosed());
-                });
+        });
 
 //		glfwSetInputMode(id, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 //		glfwSetInputMode(id, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
@@ -155,8 +155,12 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
     }
 
     public void changeScene(int index) {
+        app.handle(new BlipUIClear());
+
         Scene scene = scenes.get(index);
         currentScene = scene;
+
+        app.handle(new BlipSceneStart());
     }
 
     private void loop(AppParams params) throws URISyntaxException {
@@ -170,8 +174,8 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_MULTISAMPLE);
 
-        Scene models = new BasicModelScene();
-        Scene shadows = new ShinyCubeShadowsScene();
+        Scene models = new BasicModelScene(app);
+        Scene shadows = new ShinyCubeShadowsScene(app);
         Scene gloomy = new GloomyCubeScene();
         scenes.add(models);
         scenes.add(shadows);
@@ -200,6 +204,10 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
         }
         else if (blip instanceof BlipInputAnyWindowClosed) {
             glfwSetWindowShouldClose(window, true);
+        }
+
+        if (currentScene != null) {
+            currentScene.handle(blip);
         }
     }
 }

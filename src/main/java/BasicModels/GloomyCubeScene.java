@@ -25,6 +25,7 @@ class GloomyCubeScene extends Scene {
         TextureFromFile texture = new TextureFromFile("../images/container2.png", PNGDecoder.Format.RGBA);
         TextureFromFile specularMap = new TextureFromFile("../images/container2_specular.png", PNGDecoder.Format.RGBA);
 
+
         // Scale, translate, then rotate.
         // Putting into a -1 to 1 space
         {
@@ -99,4 +100,8 @@ class GloomyCubeScene extends Scene {
         quadModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, lightingShader));
     }
 
+    @Override
+    public void handle(Blip blip) {
+
+    }
 }

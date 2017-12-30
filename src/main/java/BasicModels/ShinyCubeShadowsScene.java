@@ -34,8 +34,14 @@ class ShinyCubeShadowsScene extends Scene {
     private boolean drawFloor = true;
     private boolean shadowsEnabled = true;
 
-    ShinyCubeShadowsScene() {
-        lighting = new BrightLighting(shaders);
+
+    @Override
+    public void handle(Blip blip) {
+
+    }
+
+    ShinyCubeShadowsScene(BlipHandler app) {
+        lighting = new BrightLighting(app, shaders);
 
         Materials materials = new Materials();
         TextureFromFile texture = new TextureFromFile("../images/container2.png", PNGDecoder.Format.RGBA);

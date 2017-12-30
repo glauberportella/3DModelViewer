@@ -40,8 +40,14 @@ class BasicModelScene extends Scene {
     private boolean drawFloor = true;
     private boolean shadowsEnabled = true;
 
-    BasicModelScene() throws URISyntaxException {
-        lighting = new BrightLighting(shaders);
+
+    @Override
+    public void handle(Blip blip) {
+        lighting.handle(blip);
+    }
+
+    BasicModelScene(BlipHandler app) throws URISyntaxException {
+        lighting = new BrightLighting(app, shaders);
 //        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/cube.obj", "C:/dev/portfolio/3ddemo/out/production/resources/images");
 //        MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("../models/cube.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
         MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("../models/lego obj.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
@@ -380,5 +386,6 @@ class BasicModelScene extends Scene {
 
 //        return textureId;
     }
+
 
 }

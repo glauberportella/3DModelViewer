@@ -5,16 +5,20 @@ import enterthematrix.Vector3;
 import enterthematrix.Vector4;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public class BrightLighting {
+public class BrightLighting implements BlipHandler{
     final DirectionalLight directional;
     final PointLight[] points;
     public static final int MAX_POINT_LIGHTS = 4;
     private final Shader lampShader;
+    BlipHandler app;
 
-    BrightLighting(ShaderStore shaders) {
+    BrightLighting(BlipHandler app, ShaderStore shaders) {
+        this.app = app;
+
         lampShader = shaders.basicFlatShader;
         Matrix4x4 standardLight = Matrix4x4.scale(0.01f);
 //        lampShader =  Shader.create("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl");
@@ -46,6 +50,7 @@ public class BrightLighting {
         directional = new DirectionalLight(directionalDir, true, ambientDirectional, diffuseDirectional, specularDirectional);
         directional.setEnabled(false);
 
+
         // Putting into a -1 to 1 space
         for (int i = 0; i < MAX_POINT_LIGHTS; i++) {
 
@@ -55,16 +60,21 @@ public class BrightLighting {
             Vector4 lightPos = new Vector4(pos, 0.5f, pos, 1);
             PointLight light = new PointLight(lightPos, standardLight, lampShader, true, i, ambient, diffuse, specular);
             points[i] = light;
+
+            final int x = i;
+
 //            light.setEnabled(false);
         }
+
     }
 
     void handleKeyDown(int key) {
-        if (key == GLFW_KEY_0) directional.setEnabled(!directional.isEnabled());
-        else if (key == GLFW_KEY_1) points[0].setEnabled(!points[0].isEnabled());
-        else if (key == GLFW_KEY_2) points[1].setEnabled(!points[1].isEnabled());
-        else if (key == GLFW_KEY_3) points[2].setEnabled(!points[2].isEnabled());
-        else if (key == GLFW_KEY_4) points[3].setEnabled(!points[3].isEnabled());
+//        if (key == GLFW_KEY_0) directional.setEnabled(!directional.isEnabled());
+//        if (key == GLFW_KEY_0) directional.setEnabled(!directional.isEnabled());
+//        else if (key == GLFW_KEY_1) points[0].setEnabled(!points[0].isEnabled());
+//        else if (key == GLFW_KEY_2) points[1].setEnabled(!points[1].isEnabled());
+//        else if (key == GLFW_KEY_3) points[2].setEnabled(!points[2].isEnabled());
+//        else if (key == GLFW_KEY_4) points[3].setEnabled(!points[3].isEnabled());
     }
 
 
@@ -87,4 +97,17 @@ public class BrightLighting {
         Arrays.stream(points).forEach(light -> light.draw(projectionMatrix, cameraTranslate, lampShader));
     }
 
+    @Override
+    public void handle(Blip blip) {
+        if (blip instanceof BlipSceneStart) {
+            app.handle(BlipUIAddCheckbox.create("Directional", directional.isEnabled(), directional::setEnabled, Optional.of(GLFW_KEY_0)));
+
+            for (int i = 0; i < MAX_POINT_LIGHTS; i++) {
+                final int x = i;
+                app.handle(BlipUIAddCheckbox.create("Point " + i, points[i].isEnabled(), (v) -> {
+                    points[x].setEnabled(v);
+                }, Optional.of(GLFW_KEY_1 + i)));
+            }
+        }
+    }
 }

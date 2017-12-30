@@ -12,15 +12,18 @@ import javafx.stage.WindowEvent;
 import java.io.IOException;
 import java.net.URL;
 
+
 public class MainGui extends Application implements BlipHandler {
     private BasicModels.AppWrapper app;
     private Stage primaryStage;
+    private GuiController gui;
 
     public static void main(String[] args) {
         launch(args);
     }
 
     public void handle(Blip blip) {
+        gui.handle(blip);
         app.handle(blip);
 
         if (blip instanceof BlipInputAnyWindowClosed) {
@@ -43,9 +46,9 @@ public class MainGui extends Application implements BlipHandler {
             FXMLLoader loader = new FXMLLoader(resource);
             root = loader.load();
             assert (root != null);
-            GuiController controller = loader.getController();
-            assert (controller != null);
-            controller.setApp(this);
+            gui = loader.getController();
+            assert (gui != null);
+            gui.setApp(this);
         } catch (IOException e) {
             e.printStackTrace();
         }
