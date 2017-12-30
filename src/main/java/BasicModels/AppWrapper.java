@@ -185,8 +185,8 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
         Scene scene = scenes.get(index);
         currentScene = scene;
 
-        app.handle(BlipUIAddTitledSection.create("Scenes",
-                BlipUIAddComboBox.create(Optional.of("Scene"), new ArrayList<>(Arrays.asList(
+        app.handle(BlipUITitledSection.create("Scenes",
+                BlipUIComboBox.create(Optional.of("Scene"), new ArrayList<>(Arrays.asList(
                         ComboBoxItem.create("Scene 1", () -> app.handle(new BlipInputChangeScene(0)), Optional.of(GLFW_KEY_KP_1)),
                         ComboBoxItem.create("Scene 2", () -> app.handle(new BlipInputChangeScene(1)), Optional.of(GLFW_KEY_KP_2)),
                         ComboBoxItem.create("Scene 3", () -> app.handle(new BlipInputChangeScene(2)), Optional.of(GLFW_KEY_KP_3))

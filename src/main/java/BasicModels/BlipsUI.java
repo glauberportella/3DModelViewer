@@ -1,8 +1,5 @@
 package BasicModels;
 
-import org.immutables.value.Value;
-import scala.Int;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,18 +16,36 @@ class BlipUI implements Blip {}
 class BlipUIContainer extends BlipUI {}
 
 
-class BlipUIAddCheckbox extends BlipUI {
+class BlipUICheckbox extends BlipUI {
     public String name;
     public boolean initialState;
     public Consumer<Boolean> onChanged;
     Optional<Integer> shortcut;
 
-    static BlipUIAddCheckbox create(String name, boolean initialState, Consumer<Boolean> onChanged, Optional<Integer> shortcut) {
-        BlipUIAddCheckbox out = new BlipUIAddCheckbox();
+    private BlipUICheckbox() {}
+
+    static BlipUICheckbox create(String name, boolean initialState, Consumer<Boolean> onChanged, Optional<Integer> shortcut) {
+        BlipUICheckbox out = new BlipUICheckbox();
         out.name = name;
         out.initialState = initialState;
         out.onChanged = onChanged;
         out.shortcut = shortcut;
+        return out;
+    }
+}
+
+class BlipUITextField extends BlipUI {
+    public Optional<String> label;
+    public String initialState;
+    public Consumer<String> onChanged;
+
+    private BlipUITextField() {}
+
+    static BlipUITextField create(Optional<String> label, String initialState, Consumer<String> onChanged) {
+        BlipUITextField out = new BlipUITextField();
+        out.label = label;
+        out.initialState = initialState;
+        out.onChanged = onChanged;
         return out;
     }
 }
@@ -51,49 +66,49 @@ class ComboBoxItem {
     }
 }
 
-class BlipUIAddComboBox extends BlipUI {
+class BlipUIComboBox extends BlipUI {
     public Optional<String> label;
     public List<ComboBoxItem> items;
 
-    private BlipUIAddComboBox() {}
+    private BlipUIComboBox() {}
 
-    static BlipUIAddComboBox create(Optional<String> label, List<ComboBoxItem> items) {
-        BlipUIAddComboBox out = new BlipUIAddComboBox();
+    static BlipUIComboBox create(Optional<String> label, List<ComboBoxItem> items) {
+        BlipUIComboBox out = new BlipUIComboBox();
         out.label = label;
         out.items = items;
         return out;
     }
 }
 
-class BlipUIAddTitledSection extends BlipUI {
+class BlipUITitledSection extends BlipUI {
     public BlipUIContainer content;
     public String name;
 
-    private BlipUIAddTitledSection() { }
+    private BlipUITitledSection() { }
 
-    static BlipUIAddTitledSection create(String name, BlipUIContainer content) {
-        BlipUIAddTitledSection out = new BlipUIAddTitledSection();
+    static BlipUITitledSection create(String name, BlipUIContainer content) {
+        BlipUITitledSection out = new BlipUITitledSection();
         out.name = name;
         out.content = content;
         return out;
     }
 
-    static BlipUIAddTitledSection create(String name, BlipUI con) {
-        BlipUIAddTitledSection out = new BlipUIAddTitledSection();
-        BlipUIContainer content = BlipUIAddHStack.create(Arrays.asList(con));
+    static BlipUITitledSection create(String name, BlipUI con) {
+        BlipUITitledSection out = new BlipUITitledSection();
+        BlipUIContainer content = BlipUIHStack.create(Arrays.asList(con));
         out.name = name;
         out.content = content;
         return out;
     }
 }
 
-class BlipUIAddHStack extends BlipUIContainer {
+class BlipUIHStack extends BlipUIContainer {
     public List<BlipUI> elements = new ArrayList<BlipUI>();
 
-    private BlipUIAddHStack() { }
+    private BlipUIHStack() { }
 
-    static BlipUIAddHStack create(List<BlipUI> elements) {
-        BlipUIAddHStack out = new BlipUIAddHStack();
+    static BlipUIHStack create(List<BlipUI> elements) {
+        BlipUIHStack out = new BlipUIHStack();
         out.elements = elements;
         return out;
     }

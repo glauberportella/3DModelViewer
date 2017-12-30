@@ -56,18 +56,21 @@ public class GuiController implements BlipHandler {
     }
 
     private Node createNode(BlipUI blip) {
-        if (blip instanceof BlipUIAddCheckbox) {
-            BlipUIAddCheckbox v = (BlipUIAddCheckbox) blip;
+        if (blip instanceof BlipUICheckbox) {
+            BlipUICheckbox v = (BlipUICheckbox) blip;
             return createCheckbox(v);
         }
-        else if (blip instanceof BlipUIAddComboBox) {
-            return createComboBox((BlipUIAddComboBox) blip);
+        else if (blip instanceof BlipUIComboBox) {
+            return createComboBox((BlipUIComboBox) blip);
         }
-        else if (blip instanceof BlipUIAddTitledSection) {
-            return createTitledSection((BlipUIAddTitledSection) blip);
+        else if (blip instanceof BlipUITextField) {
+            return createTextField((BlipUITextField) blip);
         }
-        else if (blip instanceof BlipUIAddHStack) {
-            return createHBox((BlipUIAddHStack) blip);
+        else if (blip instanceof BlipUITitledSection) {
+            return createTitledSection((BlipUITitledSection) blip);
+        }
+        else if (blip instanceof BlipUIHStack) {
+            return createHBox((BlipUIHStack) blip);
         }
         else {
             assert (false);
@@ -75,7 +78,7 @@ public class GuiController implements BlipHandler {
         }
     }
 
-    private Node createCheckbox(BlipUIAddCheckbox v) {
+    private Node createCheckbox(BlipUICheckbox v) {
         CheckBox control = new CheckBox();
         control.setSelected(v.initialState);
         control.selectedProperty().addListener(new ChangeListener<Boolean>() {
@@ -115,7 +118,32 @@ public class GuiController implements BlipHandler {
 
     }
 
-    private Node createComboBox(BlipUIAddComboBox v) {
+    private Node createTextField(BlipUITextField v) {
+        TextField control = new TextField();
+        control.setText(v.initialState);
+        control.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
+                v.onChanged.accept(t1);
+            }
+        });
+
+        if (v.label.isPresent()) {
+            Label label = new Label();
+            label.setLabelFor(control);
+            label.setText(v.label.get());
+
+            HBox box = new HBox();
+            box.getChildren().add(label);
+            box.getChildren().add(control);
+            return box;
+        }
+        else {
+            return control;
+        }
+
+    }
+    private Node createComboBox(BlipUIComboBox v) {
         ComboBox control = new ComboBox();
         List<String> itemssAsStrings = v.items.stream().map(it -> it.value).collect(Collectors.toList());
         control.setItems(FXCollections.observableArrayList(itemssAsStrings));
@@ -164,7 +192,7 @@ public class GuiController implements BlipHandler {
         }
     }
 
-    private Node createHBox(BlipUIAddHStack v) {
+    private Node createHBox(BlipUIHStack v) {
 
         HBox control = new HBox();
         control.setPadding(new Insets(padding, padding, padding, padding));
@@ -174,7 +202,7 @@ public class GuiController implements BlipHandler {
         return control;
     }
 
-    private Node createTitledSection(BlipUIAddTitledSection v) {
+    private Node createTitledSection(BlipUITitledSection v) {
         TitledPane control = new TitledPane();
         control.setPadding(new Insets(padding, padding, padding, padding));
         control.setText(v.name);

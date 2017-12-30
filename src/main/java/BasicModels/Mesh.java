@@ -30,6 +30,7 @@ public class Mesh extends Model {
 
     private final MeshData data;
     private final int vaoId, vboIndicesId;
+    private int indicesToDraw;
     //    private final int textureId;
 //    private final Texture texture, specularMap;
 
@@ -112,7 +113,6 @@ public class Mesh extends Model {
             GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboIndicesId);
             GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL15.GL_STATIC_DRAW);
         }
-
     }
 
 
@@ -172,7 +172,7 @@ public class Mesh extends Model {
 
             // Draw the vertices
 //            GL11.glDrawElements(GL11.GL_TRIANGLES, data.indicesCount, GL11.GL_UNSIGNED_INT, 0);
-            GL11.glDrawElements(GL11.GL_TRIANGLES, 6, GL11.GL_UNSIGNED_INT, 0);
+            GL11.glDrawElements(GL11.GL_TRIANGLES, indicesToDraw, GL11.GL_UNSIGNED_INT, 0);
 
             // Put everything back to default (deselect)
             glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -182,4 +182,13 @@ public class Mesh extends Model {
 //            GL20.glDisableVertexAttribArray(VBO_INDEX_INDICES);
             GL30.glBindVertexArray(0);
         }
-    }}
+    }
+
+    public void setIndicesToDraw(int indicesToDraw) {
+        this.indicesToDraw = indicesToDraw;
+    }
+
+    public int getIndicesToDraw() {
+        return indicesToDraw;
+    }
+}

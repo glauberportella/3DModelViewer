@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL20;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.lwjgl.assimp.Assimp.aiProcess_FixInfacingNormals;
@@ -42,25 +43,27 @@ class BasicModelScene extends Scene {
     private boolean drawModel = true;
     private boolean shadowsEnabled = true;
 
+    private List<BlipUI> ui = new ArrayList<BlipUI>();
+
 
     @Override
     public void handle(Blip blip) {
         lighting.handle(blip);
 
         if (blip instanceof BlipSceneStart) {
-            app.handle(BlipUIAddTitledSection.create("Scene",
-                    BlipUIAddHStack.create(new ArrayList<>(Arrays.asList(
-                            BlipUIAddCheckbox.create("Model", drawModel, (v) -> drawModel = v, Optional.empty()),
-//                            BlipUIAddCheckbox.create("Axis markers", drawAxisMarkers, (v) -> drawAxisMarkers = v, Optional.empty()),
-                            BlipUIAddCheckbox.create("Floor", drawFloor, (v) -> drawFloor = v, Optional.empty()),
-                            BlipUIAddCheckbox.create("Shadows", shadowsEnabled, (v) -> shadowsEnabled = v, Optional.empty())
-                    )))));
+            app.handle(BlipUITitledSection.create("Scene", BlipUIHStack.create(ui)));
         }
     }
 
     BasicModelScene(BlipHandler app) throws URISyntaxException {
         this.app = app;
         lighting = new BrightLighting(app, shaders);
+
+        ui.add(BlipUICheckbox.create("Model", drawModel, (v) -> drawModel = v, Optional.empty()));
+//                            BlipUICheckbox.create("Axis markers", drawAxisMarkers, (v) -> drawAxisMarkers = v, Optional.empty()),
+        ui.add(BlipUICheckbox.create("Floor", drawFloor, (v) -> drawFloor = v, Optional.empty()));
+        ui.add(BlipUICheckbox.create("Shadows", shadowsEnabled, (v) -> shadowsEnabled = v, Optional.empty()));
+
 //        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/cube.obj", "C:/dev/portfolio/3ddemo/out/production/resources/images");
         MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("../models/cube.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
 //        MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("../models/lego obj.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
@@ -72,6 +75,16 @@ class BasicModelScene extends Scene {
         for(int i = 0; i < meshData.length; i ++) {
 //            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(Matrix4x4.scale(0.1f)), Optional.empty(), meshData[i]);
             Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(meshScale), Optional.empty(), meshData[i]);
+            final int x = i;
+            ui.add(BlipUITextField.create(Optional.of("Mesh indices"), String.valueOf(meshData[i].indices.length), (v) -> {
+                int indices = meshData[x].indices.length;
+                try {
+                    indices = Integer.parseInt(v);
+                }
+                catch(Exception e) {
+                }
+                mesh.setIndicesToDraw(indices);
+            }));
             meshes[i] = mesh;
         }
 

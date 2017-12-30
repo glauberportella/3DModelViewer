@@ -104,16 +104,16 @@ public class BrightLighting implements BlipHandler{
         if (blip instanceof BlipSceneStart) {
             List<BlipUI> elements = new ArrayList<>();
 
-            elements.add(BlipUIAddCheckbox.create("Directional", directional.isEnabled(), directional::setEnabled, Optional.of(GLFW_KEY_0)));
+            elements.add(BlipUICheckbox.create("Directional", directional.isEnabled(), directional::setEnabled, Optional.of(GLFW_KEY_0)));
 
             for (int i = 0; i < MAX_POINT_LIGHTS; i++) {
                 final int x = i;
-                elements.add(BlipUIAddCheckbox.create("Point " + i, points[i].isEnabled(), (v) -> {
+                elements.add(BlipUICheckbox.create("Point " + i, points[i].isEnabled(), (v) -> {
                     points[x].setEnabled(v);
                 }, Optional.of(GLFW_KEY_1 + i)));
             }
 
-            app.handle(BlipUIAddTitledSection.create("Lighting", BlipUIAddHStack.create(elements)));
+            app.handle(BlipUITitledSection.create("Lighting", BlipUIHStack.create(elements)));
         }
     }
 }
