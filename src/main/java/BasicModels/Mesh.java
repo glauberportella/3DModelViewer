@@ -1,8 +1,10 @@
 package BasicModels;
 
+import com.jogamp.opengl.math.Matrix4;
 import enterthematrix.Matrix4x4;
 import enterthematrix.Vector3;
 import enterthematrix.Vector4;
+import kotlin.internal.contracts.Returns;
 import matrixlwjgl.MatrixLwjgl;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
@@ -23,20 +25,6 @@ import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
-
-class MeshData {
-    protected final float[] vertices, normals;
-    protected final int[] indices;
-    protected final int indicesCount;
-
-    public MeshData(float[] vertices, float[] normals, int[] indices, FloatBuffer textureBufFloat) {
-        this.vertices = vertices;
-        this.normals = normals;
-        this.indices = indices;
-        this.indicesCount = indices.length;
-    }
-
-}
 
 public class Mesh extends Model {
 

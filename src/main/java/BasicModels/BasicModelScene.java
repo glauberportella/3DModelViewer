@@ -23,6 +23,7 @@ import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
 class BasicModelScene extends Scene {
+    private final BlipHandler app;
     private final ArrayList<FancyCube> cubeModels = new ArrayList<>();
     private final ArrayList<FancyQuad> quadModels = new ArrayList<>();
     private final ArrayList<FancyCube> axisMarkers = new ArrayList<>();
@@ -38,15 +39,27 @@ class BasicModelScene extends Scene {
     private boolean renderToDepth = true;
     private boolean renderDepthFramebuffer = false;
     private boolean drawFloor = true;
+    private boolean drawModel = true;
     private boolean shadowsEnabled = true;
 
 
     @Override
     public void handle(Blip blip) {
         lighting.handle(blip);
+
+        if (blip instanceof BlipSceneStart) {
+            app.handle(BlipUIAddTitledSection.create("Scene",
+                    BlipUIAddHStack.create(new ArrayList<>(Arrays.asList(
+                            BlipUIAddCheckbox.create("Model", drawModel, (v) -> drawModel = v, Optional.empty()),
+//                            BlipUIAddCheckbox.create("Axis markers", drawAxisMarkers, (v) -> drawAxisMarkers = v, Optional.empty()),
+                            BlipUIAddCheckbox.create("Floor", drawFloor, (v) -> drawFloor = v, Optional.empty()),
+                            BlipUIAddCheckbox.create("Shadows", shadowsEnabled, (v) -> shadowsEnabled = v, Optional.empty())
+                    )))));
+        }
     }
 
     BasicModelScene(BlipHandler app) throws URISyntaxException {
+        this.app = app;
         lighting = new BrightLighting(app, shaders);
 //        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/cube.obj", "C:/dev/portfolio/3ddemo/out/production/resources/images");
 //        MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("../models/cube.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
@@ -55,8 +68,10 @@ class BasicModelScene extends Scene {
 //        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/lego obj.obj", "C:/dev/portfolio/3ddemo/out/production/resources/models");
 //        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/IronMan.obj", "C:/dev/portfolio/3ddemo/out/production/resources/models");
         meshes = new Mesh[meshData.length];
+        Matrix4x4 meshScale = MeshDataUtils.getInitialScaleMatrix(meshData);
         for(int i = 0; i < meshData.length; i ++) {
-            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(Matrix4x4.scale(0.1f)), Optional.empty(), meshData[i]);
+//            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(Matrix4x4.scale(0.1f)), Optional.empty(), meshData[i]);
+            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(meshScale), Optional.empty(), meshData[i]);
             meshes[i] = mesh;
         }
 
@@ -272,8 +287,10 @@ class BasicModelScene extends Scene {
             }
 //            Arrays.stream(meshes).forEach(mesh -> mesh.draw(projectionMatrix, cameraTranslate, wrap.shader));
 //            Arrays.stream(meshes).forEach(mesh -> mesh.draw(projectionMatrix, cameraTranslate, wrap.shader));
-            for (int i = 0; i < meshes.length; i ++) {
-                meshes[i].draw(projectionMatrix, cameraTranslate, wrap.shader);
+            if (drawModel) {
+                for (int i = 0; i < meshes.length; i++) {
+                    meshes[i].draw(projectionMatrix, cameraTranslate, wrap.shader);
+                }
             }
         }
 

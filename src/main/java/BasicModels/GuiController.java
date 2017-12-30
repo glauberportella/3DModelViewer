@@ -6,6 +6,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -17,6 +18,7 @@ public class GuiController implements BlipHandler {
     //    @FXML public ChoiceBox scene;
     @FXML public HBox others;
 
+    private double padding = 5.0;
     private MainGui app;
 
     public GuiController() {
@@ -165,6 +167,7 @@ public class GuiController implements BlipHandler {
     private Node createHBox(BlipUIAddHStack v) {
 
         HBox control = new HBox();
+        control.setPadding(new Insets(padding, padding, padding, padding));
         v.elements.forEach(item -> {
             control.getChildren().add(createNode(item));
         });
@@ -172,8 +175,8 @@ public class GuiController implements BlipHandler {
     }
 
     private Node createTitledSection(BlipUIAddTitledSection v) {
-
         TitledPane control = new TitledPane();
+        control.setPadding(new Insets(padding, padding, padding, padding));
         control.setText(v.name);
         control.setContent(createNode(v.content));
         control.setCollapsible(false);
