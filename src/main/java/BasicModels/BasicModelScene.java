@@ -43,7 +43,8 @@ class BasicModelScene extends Scene {
     BasicModelScene() throws URISyntaxException {
         lighting = new BrightLighting(shaders);
 //        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/cube.obj", "C:/dev/portfolio/3ddemo/out/production/resources/images");
-        MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("../models/cube.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
+//        MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("../models/cube.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
+        MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("../models/lego obj.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
 //        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/LEGO_Man.obj", "C:/dev/portfolio/3ddemo/out/production/resources/images");
 //        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/lego obj.obj", "C:/dev/portfolio/3ddemo/out/production/resources/models");
 //        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/IronMan.obj", "C:/dev/portfolio/3ddemo/out/production/resources/models");

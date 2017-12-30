@@ -20,12 +20,28 @@ import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public class AppWrapper extends GLFWKeyCallback {
-    Scene currentScene;
-    ArrayList<Scene> scenes = new ArrayList<>();
+public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
+    private Scene currentScene;
+    private ArrayList<Scene> scenes = new ArrayList<>();
     private long window;
+    private final BlipHandler app;
 
-    public void run() {
+    public AppWrapper(BlipHandler app) {
+        this.app = app;
+    }
+
+    public void runNonBlocking() {
+        Runnable run = new Runnable() {
+            @Override
+            public void run() {
+                AppWrapper.this.run();
+            }
+        };
+        Thread thread = new Thread(run);
+        thread.start();
+    }
+
+    private AppParams runPre() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 
         AppParams params = new AppParams();
@@ -34,12 +50,10 @@ public class AppWrapper extends GLFWKeyCallback {
         params.fovDegrees = 90;
 
         init(params);
-        try {
-            loop(params);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        return params;
+    }
 
+    private void runPost() {
         // Free the window callbacks and destroy the window
         glfwFreeCallbacks(window);
         glfwDestroyWindow(window);
@@ -49,12 +63,29 @@ public class AppWrapper extends GLFWKeyCallback {
         glfwSetErrorCallback(null).free();
     }
 
+    public void run() {
+        AppParams params = runPre();
+        try {
+            loop(params);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        runPost();
+    }
+
+    public void setShouldClose(boolean fromOpenGlWindows) {
+        glfwSetWindowShouldClose(window, true);
+//        if (fromOpenGlWindows) {
+//            onClose.run();
+//        }
+    }
+
     @Override public void invoke(long window, int key, int scancode, int action, int mods) {
         if (action == GLFW_PRESS) {
-            if (key == GLFW_KEY_KP_1) changeScene(0);
-            else if (key == GLFW_KEY_KP_2) changeScene(1);
-            else if (key == GLFW_KEY_KP_3) changeScene(2);
-            else if (key == GLFW_KEY_ESCAPE) glfwSetWindowShouldClose(window, true);
+            if (key == GLFW_KEY_KP_1) app.handle(new BlipInputChangeScene(0));
+            else if (key == GLFW_KEY_KP_2) app.handle(new BlipInputChangeScene(1));
+            else if (key == GLFW_KEY_KP_3) app.handle(new BlipInputChangeScene(2));
+            else if (key == GLFW_KEY_ESCAPE) app.handle(new BlipInputOpenGlWindowClosed());
         }
 
         currentScene.keyPressedImpl(window, key, scancode, action, mods);
@@ -114,13 +145,16 @@ public class AppWrapper extends GLFWKeyCallback {
         glfwShowWindow(window);
 
         glfwSetKeyCallback(window, this);
+        glfwSetWindowCloseCallback(window, (i) -> {
+            app.handle(new BlipInputOpenGlWindowClosed());
+                });
 
 //		glfwSetInputMode(id, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 //		glfwSetInputMode(id, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
     }
 
-    private void changeScene(int index) {
+    public void changeScene(int index) {
         Scene scene = scenes.get(index);
         currentScene = scene;
     }
@@ -156,6 +190,16 @@ public class AppWrapper extends GLFWKeyCallback {
             // invoked during this call.
             glfwPollEvents();
 
+        }
+    }
+
+    @Override
+    public void handle(Blip blip) {
+        if (blip instanceof BlipInputChangeScene) {
+            changeScene(((BlipInputChangeScene) blip).getScene());
+        }
+        else if (blip instanceof BlipInputAnyWindowClosed) {
+            glfwSetWindowShouldClose(window, true);
         }
     }
 }
