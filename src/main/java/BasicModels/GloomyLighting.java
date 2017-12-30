@@ -23,7 +23,7 @@ public class GloomyLighting {
         float halfStrength = 0.5f;
         float ambientStrength = 0.2f;
         float diffuseStrength = 0.6f;
-        float directionalModifier = 0.1f;
+        float directionalModifier = 1.0f;
 
         Vector3 ambient = new Vector3(ambientStrength, ambientStrength, ambientStrength);
         Vector3 diffuse = new Vector3(diffuseStrength, diffuseStrength, diffuseStrength);

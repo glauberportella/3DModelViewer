@@ -30,14 +30,14 @@ class ShinyCubeShadowsScene extends Scene {
 
 
     private boolean renderToDepth = true;
-    private boolean renderDepthFramebuffer = true;
+    private boolean renderDepthFramebuffer = false;
     private boolean drawFloor = true;
     private boolean shadowsEnabled = true;
 
 
     @Override
     public void handle(Blip blip) {
-
+        lighting.handle(blip);
     }
 
     ShinyCubeShadowsScene(BlipHandler app) {

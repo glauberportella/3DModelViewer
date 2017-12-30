@@ -12,6 +12,8 @@ import org.lwjgl.system.MemoryStack;
 import java.net.URISyntaxException;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Optional;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -22,6 +24,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
     private Scene currentScene;
+    // Keep these around so they can save their lighting etc.
     private ArrayList<Scene> scenes = new ArrayList<>();
     private long window;
     private final BlipHandler app;
@@ -47,10 +50,10 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
 
     private void handleKeyboardInput(BlipInputKeyPressed blip) {
         if (blip.action == GLFW_PRESS) {
-            if (blip.keycode == GLFW_KEY_KP_1) app.handle(new BlipInputChangeScene(0));
-            else if (blip.keycode == GLFW_KEY_KP_2) app.handle(new BlipInputChangeScene(1));
-            else if (blip.keycode == GLFW_KEY_KP_3) app.handle(new BlipInputChangeScene(2));
-            else if (blip.keycode == GLFW_KEY_ESCAPE) app.handle(new BlipInputOpenGlWindowClosed());
+//            if (blip.keycode == GLFW_KEY_KP_1) app.handle(new BlipInputChangeScene(0));
+//            else if (blip.keycode == GLFW_KEY_KP_2) app.handle(new BlipInputChangeScene(1));
+//            else if (blip.keycode == GLFW_KEY_KP_3) app.handle(new BlipInputChangeScene(2));
+            if (blip.keycode == GLFW_KEY_ESCAPE) app.handle(new BlipInputOpenGlWindowClosed());
         }
     }
 
@@ -182,7 +185,16 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
         Scene scene = scenes.get(index);
         currentScene = scene;
 
+        app.handle(BlipUIAddTitledSection.create("Scene",
+                BlipUIAddComboBox.create(Optional.of("Scene"), new ArrayList<>(Arrays.asList(
+                        ComboBoxItem.create("Scene 1", () -> app.handle(new BlipInputChangeScene(0)), Optional.of(GLFW_KEY_KP_1)),
+                        ComboBoxItem.create("Scene 2", () -> app.handle(new BlipInputChangeScene(1)), Optional.of(GLFW_KEY_KP_2)),
+                        ComboBoxItem.create("Scene 3", () -> app.handle(new BlipInputChangeScene(2)), Optional.of(GLFW_KEY_KP_3))
+                )))));
+
         app.handle(new BlipSceneStart());
+
+
     }
 
     private void loop(AppParams params) throws URISyntaxException {
@@ -199,11 +211,13 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
         Scene models = new BasicModelScene(app);
         Scene shadows = new ShinyCubeShadowsScene(app);
         Scene gloomy = new GloomyCubeScene();
+
         scenes.add(models);
         scenes.add(shadows);
         scenes.add(gloomy);
 
         changeScene(0);
+
 
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.

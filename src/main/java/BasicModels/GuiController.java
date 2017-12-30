@@ -3,13 +3,18 @@ package BasicModels;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class GuiController implements BlipHandler {
-    @FXML public ChoiceBox scene;
+    //    @FXML public ChoiceBox scene;
     @FXML public HBox others;
 
     private MainGui app;
@@ -19,25 +24,6 @@ public class GuiController implements BlipHandler {
     }
 
     @FXML public void initialize() {
-        scene.valueProperty().addListener(new ChangeListener<String>() {
-            @Override public void changed(ObservableValue value, String old, String n) {
-                System.out.println("Changed to " + n);
-                int sceneIdx = 0;
-                switch (n) {
-                    case "Scene 1":
-                        sceneIdx = 0;
-                        break;
-                    case "Scene 2":
-                        sceneIdx = 1;
-                        break;
-                    case "Scene 3":
-                        sceneIdx = 2;
-                        break;
-                }
-                app.handle(new BlipInputChangeScene(sceneIdx));
-
-            }
-        });
     }
 
 
@@ -49,7 +35,7 @@ public class GuiController implements BlipHandler {
         this.app = app;
     }
 
-    private void addControl(Control control) {
+    private void addNode(Node control) {
         Platform.runLater(() -> others.getChildren().add(control));
     }
 
@@ -59,41 +45,138 @@ public class GuiController implements BlipHandler {
             Platform.runLater(() -> others.getChildren().clear());
         }
         else if (blip instanceof BlipUI) {
-            if (blip instanceof BlipUIAddCheckbox) {
-                BlipUIAddCheckbox v = (BlipUIAddCheckbox) blip;
+            handleBuildUI((BlipUI) blip);
+        }
+    }
 
-                CheckBox control = new CheckBox();
-                control.setSelected(v.initialState);
-                control.selectedProperty().addListener(new ChangeListener<Boolean>() {
-                    @Override
-                    public void changed(ObservableValue<? extends Boolean> observableValue, Boolean aBoolean, Boolean t1) {
-                        v.onChanged.accept(t1);
+    private void handleBuildUI(BlipUI blip) {
+        addNode(createNode(blip));
+    }
+
+    private Node createNode(BlipUI blip) {
+        if (blip instanceof BlipUIAddCheckbox) {
+            BlipUIAddCheckbox v = (BlipUIAddCheckbox) blip;
+            return createCheckbox(v);
+        }
+        else if (blip instanceof BlipUIAddComboBox) {
+            return createComboBox((BlipUIAddComboBox) blip);
+        }
+        else if (blip instanceof BlipUIAddTitledSection) {
+            return createTitledSection((BlipUIAddTitledSection) blip);
+        }
+        else if (blip instanceof BlipUIAddHStack) {
+            return createHBox((BlipUIAddHStack) blip);
+        }
+        else {
+            assert (false);
+            return null;
+        }
+    }
+
+    private Node createCheckbox(BlipUIAddCheckbox v) {
+        CheckBox control = new CheckBox();
+        control.setSelected(v.initialState);
+        control.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observableValue, Boolean aBoolean, Boolean t1) {
+                v.onChanged.accept(t1);
+            }
+        });
+
+        Label label = new Label();
+        label.setLabelFor(control);
+        label.setText(v.name);
+        label.setOnMouseClicked(mouseEvent -> {
+            boolean checked = control.selectedProperty().get();
+            control.selectedProperty().set(!checked);
+            v.onChanged.accept(!checked);
+        });
+
+//        Platform.runLater(() -> {
+//            others.getChildren().add(control);
+//            others.getChildren().add(label);
+//        });
+
+        if (v.shortcut.isPresent()) {
+            BlipInputAddKeyboardShortcut shortcut = BlipInputAddKeyboardShortcut.create(v.shortcut.get(), () -> {
+                boolean checked = control.selectedProperty().get();
+                control.selectedProperty().set(!checked);
+                v.onChanged.accept(!checked);
+            });
+            app.handle(shortcut);
+        }
+
+        HBox box = new HBox();
+        box.getChildren().add(label);
+        box.getChildren().add(control);
+        return box;
+
+    }
+
+    private Node createComboBox(BlipUIAddComboBox v) {
+        ComboBox control = new ComboBox();
+        List<String> itemssAsStrings = v.items.stream().map(it -> it.value).collect(Collectors.toList());
+        control.setItems(FXCollections.observableArrayList(itemssAsStrings));
+        control.valueProperty().addListener(new ChangeListener<String>() {
+            @Override public void changed(ObservableValue value, String old, String n) {
+                v.items.forEach(item -> {
+                    if (item.value.equals(n)) {
+                        item.onSelected.run();
                     }
                 });
-
-                Label label = new Label();
-                label.setLabelFor(control);
-                label.setText(v.name);
-                label.setOnMouseClicked(mouseEvent -> {
-                    boolean checked = control.selectedProperty().get();
-                    control.selectedProperty().set(!checked);
-                    v.onChanged.accept(!checked);
-                });
-
-                Platform.runLater(() -> {
-                    others.getChildren().add(control);
-                    others.getChildren().add(label);
-                });
-
-                if (v.shortcut.isPresent()) {
-                    BlipInputAddKeyboardShortcut shortcut = BlipInputAddKeyboardShortcut.create(v.shortcut.get(), () -> {
-                        boolean checked = control.selectedProperty().get();
-                        control.selectedProperty().set(!checked);
-                        v.onChanged.accept(!checked);
-                    });
-                    app.handle(shortcut);
-                }
             }
+        });
+//        control.valueProperty().setValue(itemssAsStrings.get(0));
+
+        v.items.forEach(item -> {
+            if (item.shortcut.isPresent()) {
+                BlipInputAddKeyboardShortcut shortcut = BlipInputAddKeyboardShortcut.create(item.shortcut.get(), () -> {
+                    control.valueProperty().setValue(item.value);
+                    item.onSelected.run();
+                });
+                app.handle(shortcut);
+            }
+
+        });
+
+        if (v.label.isPresent()) {
+            Label label = new Label();
+            label.setLabelFor(control);
+            label.setText(v.label.get());
+
+//            Platform.runLater(() -> {
+//                others.getChildren().add(label);
+//                others.getChildren().add(control);
+//            });
+
+            HBox box = new HBox();
+            box.getChildren().add(label);
+            box.getChildren().add(control);
+            return box;
         }
+        else {
+//            Platform.runLater(() -> {
+//                others.getChildren().add(control);
+//            });
+            return control;
+        }
+    }
+
+    private Node createHBox(BlipUIAddHStack v) {
+
+        HBox control = new HBox();
+        v.elements.forEach(item -> {
+            control.getChildren().add(createNode(item));
+        });
+        return control;
+    }
+
+    private Node createTitledSection(BlipUIAddTitledSection v) {
+
+        TitledPane control = new TitledPane();
+        control.setText(v.name);
+        control.setContent(createNode(v.content));
+        control.setCollapsible(false);
+        return control;
     }
 }

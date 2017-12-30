@@ -4,7 +4,9 @@ import enterthematrix.Matrix4x4;
 import enterthematrix.Vector3;
 import enterthematrix.Vector4;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -100,14 +102,18 @@ public class BrightLighting implements BlipHandler{
     @Override
     public void handle(Blip blip) {
         if (blip instanceof BlipSceneStart) {
-            app.handle(BlipUIAddCheckbox.create("Directional", directional.isEnabled(), directional::setEnabled, Optional.of(GLFW_KEY_0)));
+            List<BlipUI> elements = new ArrayList<>();
+
+            elements.add(BlipUIAddCheckbox.create("Directional", directional.isEnabled(), directional::setEnabled, Optional.of(GLFW_KEY_0)));
 
             for (int i = 0; i < MAX_POINT_LIGHTS; i++) {
                 final int x = i;
-                app.handle(BlipUIAddCheckbox.create("Point " + i, points[i].isEnabled(), (v) -> {
+                elements.add(BlipUIAddCheckbox.create("Point " + i, points[i].isEnabled(), (v) -> {
                     points[x].setEnabled(v);
                 }, Optional.of(GLFW_KEY_1 + i)));
             }
+
+            app.handle(BlipUIAddTitledSection.create("Lighting", BlipUIAddHStack.create(elements)));
         }
     }
 }
