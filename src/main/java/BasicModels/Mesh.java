@@ -171,9 +171,8 @@ public class Mesh extends Model {
             GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboIndicesId);
 
             // Draw the vertices
-            GL11.glDrawElements(GL11.GL_TRIANGLES, data.indicesCount, GL11.GL_UNSIGNED_INT, 0);
-
-//            GL11.glDrawElements(GL11.GL_TRIANGLES, 0, 36);
+//            GL11.glDrawElements(GL11.GL_TRIANGLES, data.indicesCount, GL11.GL_UNSIGNED_INT, 0);
+            GL11.glDrawElements(GL11.GL_TRIANGLES, 6, GL11.GL_UNSIGNED_INT, 0);
 
             // Put everything back to default (deselect)
             glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);

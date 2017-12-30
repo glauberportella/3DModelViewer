@@ -11,6 +11,11 @@ import java.util.Set;
 
 import static org.lwjgl.opengl.GL20.*;
 
+/**
+ * This is an attempt to provide some safety checking on the OpenGL shaders.  Feels very easy to forget to provide
+ * needed data, for example
+ */
+
 enum ShaderVariableRequired {
     CHANGES_INFREQUENTLY,
     CHANGES_EVERY_RUN

@@ -6,6 +6,8 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -86,6 +88,12 @@ public class MainGui extends Application implements BlipHandler {
                 //app.setShouldClose(false);
             }
         });
+        primaryStage.addEventHandler(KeyEvent.KEY_PRESSED, (key) -> {
+            if(key.getCode() == KeyCode.ESCAPE) {
+                handle(new BlipInputGuiWindowClosed());
+            }
+        });
+
 
 
     }
