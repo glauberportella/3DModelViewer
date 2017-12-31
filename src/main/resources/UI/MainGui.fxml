@@ -6,8 +6,9 @@
 <?import javafx.collections.FXCollections?>
 <?import java.lang.String?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <!--<StackPane fx:controller="BasicModels.GuiController" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">-->
-<StackPane fx:controller="BasicModels.GuiController" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane fx:controller="BasicModels.GuiController" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <!--<ChoiceBox fx:id="scene" value="Scene 1" >-->
             <!--<items>-->
@@ -19,7 +20,7 @@
             <!--</items>-->
         <!--</ChoiceBox>-->
 
-        <HBox fx:id="others" >
-        </HBox>
+        <VBox fx:id="others" >
+        </VBox>
     </children>
 </StackPane>

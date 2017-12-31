@@ -26,6 +26,7 @@ void main()
 {
     FragPos = vec3(modelMatrix * vec4(aPos, 1.0));
     //Normal = mat3(transpose(inverse(modelMatrix))) * aNormal;
+//    Normal = transpose(inverse(mat3(modelMatrix))) * aNormal;
     Normal = transpose(inverse(mat3(modelMatrix))) * aNormal;
     TexCoords = aTexCoords;
     FragPosLightSpaceDir = lightSpaceMatrixDir * vec4(FragPos, 1.0);

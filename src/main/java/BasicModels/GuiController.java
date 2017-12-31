@@ -10,13 +10,14 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class GuiController implements BlipHandler {
     //    @FXML public ChoiceBox scene;
-    @FXML public HBox others;
+    @FXML public VBox others;
 
     private double padding = 5.0;
     private MainGui app;

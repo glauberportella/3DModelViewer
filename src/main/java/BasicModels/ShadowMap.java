@@ -71,8 +71,9 @@ public class ShadowMap {
         shader = shadowGenShader;
 
         try (ShaderUse su = new ShaderUse(shader)) {
-            int lightSpaceMatrixLocation = GL20.glGetUniformLocation(shadowGenShader.getShaderId(), "lightSpaceMatrix");
-            GL20.glUniformMatrix4fv(lightSpaceMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(lightSpaceMatrix));
+//            int lightSpaceMatrixLocation = GL20.glGetUniformLocation(shadowGenShader.getShaderId(), "lightSpaceMatrix");
+//            GL20.glUniformMatrix4fv(lightSpaceMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(lightSpaceMatrix));
+            shader.setMatrix("lightSpaceMatrix", lightSpaceMatrix);
 
             glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
             glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);

@@ -1,13 +1,13 @@
 package BasicModels;
 
 import Useful.ShaderUtils;
+import enterthematrix.Matrix4x4;
 import enterthematrix.Vector3;
+import matrixlwjgl.MatrixLwjgl;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL32;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.lwjgl.opengl.GL20.*;
 
@@ -55,16 +55,30 @@ class ShaderVariableUse {
     private final Set<String> variableUseEver = new HashSet<>();
     private boolean first = true;
     private final String vtxFilename, fragFilename;
+    private final Optional<String> geoFilename;
     private final String boilerplate;
     private final boolean ignoreUnknownVariables;
     private boolean usedThisRun = false;
-    private final boolean logErrors = false;
 
-    ShaderVariableUse(String vtxFilename, String fragFilename, boolean ignoreUnknownVariables) {
+    public boolean isLogErrors() {
+        return logErrors;
+    }
+
+    public void setLogErrors(boolean logErrors) {
+        this.logErrors = logErrors;
+    }
+
+    private boolean logErrors;
+    // Actually lots of times we want to set a shader variable, draw something, change it
+    private final boolean logAlreadySetErrors = false;
+
+    ShaderVariableUse(String vtxFilename, String fragFilename, Optional<String> geoFilename, boolean ignoreUnknownVariables, boolean logErrors) {
         this.vtxFilename = vtxFilename;
         this.fragFilename = fragFilename;
+        this.geoFilename = geoFilename;
         this.ignoreUnknownVariables = ignoreUnknownVariables;
-        boilerplate = " shader=(" + vtxFilename + ", " + fragFilename + ")";
+        this.logErrors = logErrors;
+        boilerplate = " shader=(" + vtxFilename + ", " + fragFilename + ", " + geoFilename + ")";
     }
 
     public void addVariable(ShaderVariable v) {
@@ -90,7 +104,7 @@ class ShaderVariableUse {
 
             if (var.required == ShaderVariableRequired.CHANGES_EVERY_RUN) {
                 if (count >= 1) {
-                    if (logErrors) {
+                    if (logErrors && logAlreadySetErrors) {
                         System.err.println("Setting shader variable '" + name + "' but it has already been set" + boilerplate);
                     }
                 }
@@ -107,7 +121,7 @@ class ShaderVariableUse {
 
                     if (var.required == ShaderVariableRequired.CHANGES_EVERY_RUN) {
                         int count = variableUseThisRun.get(name);
-                        if (count != 1) {
+                        if (count == 0) {
                             if (logErrors) {
                                 System.err.println("Shader variable '" + name + "' has not been set" + boilerplate);
                             }
@@ -143,34 +157,47 @@ public class Shader {
 
     // Prefer using the ShaderStore over directly creating   Allows more safety
     public static Shader create(String vertexResourceFilename, String fragmentResourceFilename) {
-        return new Shader(vertexResourceFilename, fragmentResourceFilename, false);
+        return new Shader(vertexResourceFilename, fragmentResourceFilename,Optional.empty(), false, false);
     }
 
     public  static Shader create(String vertexResourceFilename, String fragmentResourceFilename, boolean ignoreUnknownVariables) {
-        return new Shader(vertexResourceFilename, fragmentResourceFilename, ignoreUnknownVariables);
+        return new Shader(vertexResourceFilename, fragmentResourceFilename, Optional.empty(),ignoreUnknownVariables, false);
     }
 
-    public Shader(String vertexResourceFilename, String fragmentResourceFilename, boolean ignoreUnknownVariables) {
+    public  static Shader create(String vertexResourceFilename, String fragmentResourceFilename, Optional<String> geometryResourceFilename, boolean ignoreUnknownVariables, boolean logErrors) {
+        return new Shader(vertexResourceFilename, fragmentResourceFilename, Optional.empty(), ignoreUnknownVariables, logErrors);
+    }
+
+    public Shader(String vertexResourceFilename, String fragmentResourceFilename, Optional<String> geometryResourceFilename, boolean ignoreUnknownVariables, boolean logErrors) {
         this.vtxFilename = vertexResourceFilename;
         this.fragFilename = fragmentResourceFilename;
 //        this.ignoreUnknownVariables = ignoreUnknownVariables;
-        variables = new ShaderVariableUse(vtxFilename, fragFilename, ignoreUnknownVariables);
+        variables = new ShaderVariableUse(vtxFilename, fragFilename, geometryResourceFilename, ignoreUnknownVariables, logErrors);
         // Load the vertex shader
         int vertexShader = ShaderUtils.loadShader(AppWrapper.class.getResource(vertexResourceFilename), GL20.GL_VERTEX_SHADER);
         // Load the fragment shader
         int fragmentShader = ShaderUtils.loadShader(AppWrapper.class.getResource(fragmentResourceFilename), GL20.GL_FRAGMENT_SHADER);
+
 
         // Final steps to use the shaders
         shaderProgram = glCreateProgram();
         glAttachShader(shaderProgram, vertexShader);
         glAttachShader(shaderProgram, fragmentShader);
 
+
+
         // Position information will be attribute 0
         GL20.glBindAttribLocation(shaderProgram, 0, "aPos");
         // Color information will be attribute 1
-//        GL20.glBindAttribLocation(shaderProgram, 1, "in_Color");
+        GL20.glBindAttribLocation(shaderProgram, 1, "aNormal");
         // TextureFromFile information will be attribute 2
-//        GL20.glBindAttribLocation(shaderProgram, 2, "in_TextureCoord");
+        GL20.glBindAttribLocation(shaderProgram, 2, "aTexCoords");
+
+        if (geometryResourceFilename.isPresent()) {
+            int geometryShader = ShaderUtils.loadShader(AppWrapper.class.getResource(geometryResourceFilename.get()), GL32.GL_GEOMETRY_SHADER);
+            glAttachShader(shaderProgram, geometryShader);
+        }
+
 
         glLinkProgram(shaderProgram);
         GL20.glValidateProgram(shaderProgram);
@@ -225,19 +252,23 @@ public class Shader {
         variables.checkSettingVariable(name);
         assertInUse();
 
-//        try (ShaderUse wrap = new ShaderUse(this)) {
         int location = GL20.glGetUniformLocation(getShaderId(), name);
-//            if (location == -1) {
-//                System.err.println("Could not get shader " + name);
-//                assert (location != -1);
-//            }
         glUniform3f(location, x, y, z);
-//        }
+    }
 
+    public void setMatrix(String name, Matrix4x4 matrix) {
+        variables.checkSettingVariable(name);
+        assertInUse();
+        int matrixLocation = GL20.glGetUniformLocation(getShaderId(), name);
+        GL20.glUniformMatrix4fv(matrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(matrix));
     }
 
     public void setVec3(String name, Vector3 vec) {
         setVec3(name, vec.x(), vec.y(), vec.z());
+    }
+
+    public void setCheckErrors(boolean v) {
+        variables.setLogErrors(v);
     }
 
     public void use() {

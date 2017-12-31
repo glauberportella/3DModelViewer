@@ -16,7 +16,7 @@ public class GloomyLighting {
 
     GloomyLighting() {
         Matrix4x4 standardLight = Matrix4x4.scale(0.01f);
-        lampShader = new Shader("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl", false);
+        lampShader = Shader.create("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl", false);
         points = new Light[MAX_POINT_LIGHTS];
 
         float fullStrength = 1.0f;
@@ -44,7 +44,10 @@ public class GloomyLighting {
 //            float pos = (float) Math.sin(HandyMaths.degreesToRadians(360 / MAX_POINT_LIGHTS) * i) * 0.1f;
             float pos = (i * (2.0f / MAX_POINT_LIGHTS)) - 1.0f;
             Vector4 lightPos = new Vector4(pos, 0.1f, pos, 1);
-            Light light = new PointLight(lightPos, standardLight, lampShader, true, i, ambient, diffuse, specular);
+            float constant = 1.0f;
+            float linear = 0.7f;
+            float quadratic = 1.8f;
+            Light light = new PointLight(lightPos, standardLight, lampShader, true, i, ambient, diffuse, specular, constant, linear, quadratic);
             points[i] = light;
         }
     }

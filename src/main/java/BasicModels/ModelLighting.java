@@ -9,19 +9,23 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_0;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_1;
 
-public class BrightLighting implements BlipHandler{
+public class ModelLighting implements BlipHandler{
     final DirectionalLight directional;
     final PointLight[] points;
     public static final int MAX_POINT_LIGHTS = 4;
     private final Shader lampShader;
-    private BlipHandler app;
-    private final float defaultConstant = 1.0f;
-    private final float defaultLinear = 0.7f;
-    private final float defaultQuadratic = 1.8f;
+    BlipHandler app;
+//    private final float defaultConstant = 1.0f;
+//    private final float defaultLinear = 0.7f;
+//    private final float defaultQuadratic = 1.8f;
+    private final float defaultConstant = 0.01f;
+    private final float defaultLinear = 0.01f;
+    private final float defaultQuadratic = 0.2f;
 
-    BrightLighting(BlipHandler app, ShaderStore shaders) {
+    ModelLighting(BlipHandler app, ShaderStore shaders) {
         this.app = app;
         lampShader = shaders.basicFlatShader;
         Matrix4x4 standardLight = Matrix4x4.scale(0.01f);
@@ -35,16 +39,15 @@ public class BrightLighting implements BlipHandler{
 
         float fullStrength = 1.0f;
         float halfStrength = 0.5f;
-        float ambientStrength = 0.6f;
+        float ambientStrength = 0.4f;
         float diffuseStrength = 0.9f;
 //        float diffuseStrength = 3f;
         float directionalModifier = 2f;
         float specularDirectionalForce = 0.0f;
-        float pointModifier = 50f;
 
-        Vector3 ambient = new Vector3(ambientStrength * pointModifier, ambientStrength * pointModifier, ambientStrength * pointModifier);
-        Vector3 diffuse = new Vector3(diffuseStrength * pointModifier, diffuseStrength * pointModifier, diffuseStrength * pointModifier);
-        Vector3 specular = new Vector3(fullStrength * pointModifier, fullStrength * pointModifier, fullStrength * pointModifier);
+        Vector3 ambient = new Vector3(ambientStrength, ambientStrength, ambientStrength);
+        Vector3 diffuse = new Vector3(diffuseStrength, diffuseStrength, diffuseStrength);
+        Vector3 specular = new Vector3(fullStrength, fullStrength, fullStrength);
 
         Vector3 ambientDirectional = new Vector3(ambientStrength * directionalModifier, ambientStrength * directionalModifier, ambientStrength * directionalModifier);
         Vector3 diffuseDirectional = new Vector3(diffuseStrength * directionalModifier, diffuseStrength * directionalModifier, diffuseStrength * directionalModifier);
@@ -53,7 +56,7 @@ public class BrightLighting implements BlipHandler{
         Vector3 directionalDir = new Vector3(-0.5f, -0.5f, -0.5f);
 
         directional = new DirectionalLight(directionalDir, true, ambientDirectional, diffuseDirectional, specularDirectional);
-//        directional.setEnabled(false);
+        directional.setEnabled(false);
 
 
         // Putting into a -1 to 1 space
@@ -62,7 +65,7 @@ public class BrightLighting implements BlipHandler{
             // Put in a circle
 //            float pos = (float) Math.sin(HandyMaths.degreesToRadians(360 / MAX_POINT_LIGHTS) * i) * 0.1f;
             float pos = (i * (2.0f / MAX_POINT_LIGHTS)) - 1.0f;
-            Vector4 lightPos = new Vector4(pos, 0.5f, pos, 1);
+            Vector4 lightPos = new Vector4(pos, 1f, pos, 1);
             PointLight light = new PointLight(lightPos, standardLight, lampShader, true, i, ambient, diffuse, specular, defaultConstant, defaultLinear, defaultQuadratic);
             points[i] = light;
 

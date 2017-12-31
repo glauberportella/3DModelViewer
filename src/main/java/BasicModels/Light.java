@@ -57,11 +57,40 @@ abstract class Light {
 
 class PointLight extends Light {
     private final CubeWithNormals cube;
-    private int index;
+    private final int index;
     Vector3 pos;
 
-    public PointLight(Vector4 pos, Matrix4x4 otherTransform, Shader shader, boolean enabled, int index, Vector3 ambient, Vector3 diffuse, Vector3 specular) {
+    public float getConstant() {
+        return constant;
+    }
+
+    public void setConstant(float constant) {
+        this.constant = constant;
+    }
+
+    public float getLinear() {
+        return linear;
+    }
+
+    public void setLinear(float linear) {
+        this.linear = linear;
+    }
+
+    public float getQuadratic() {
+        return quadratic;
+    }
+
+    public void setQuadratic(float quadratic) {
+        this.quadratic = quadratic;
+    }
+
+    private float constant, linear, quadratic;
+
+    public PointLight(Vector4 pos, Matrix4x4 otherTransform, Shader shader, boolean enabled, int index, Vector3 ambient, Vector3 diffuse, Vector3 specular, float constant, float linear, float quadratic) {
         super(enabled, ambient, diffuse, specular);
+        this.constant = constant;
+        this.linear = linear;
+        this.quadratic = quadratic;
         cube = new CubeWithNormals(pos, otherTransform, shader);
         this.index = index;
         this.pos = pos.toVector3();
@@ -80,9 +109,9 @@ class PointLight extends Light {
 //            shader.setFloat(lightText + ".constant", 1.0f);
 //            shader.setFloat(lightText + ".linear", 0.05f);
 //            shader.setFloat(lightText + ".quadratic", 0.2f);
-            shader.setFloat(lightText + ".constant", 1.0f);
-            shader.setFloat(lightText + ".linear", 0.7f);
-            shader.setFloat(lightText + ".quadratic", 1.8f);
+            shader.setFloat(lightText + ".constant", constant);
+            shader.setFloat(lightText + ".linear", linear);
+            shader.setFloat(lightText + ".quadratic", quadratic);
             shader.setBoolean(lightText +".shadowsEnabled", shadowsEnabled);
 
 //            if (shadowsEnabled) {
@@ -95,10 +124,12 @@ class PointLight extends Light {
 
     @Override
     public void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate, Shader lampShader) {
-        try (ShaderUse su2 = new ShaderUse(lampShader)) {
-            lampShader.setVec3("lamp_Color", diffuse);
+        if (isEnabled()) {
+            try (ShaderUse wrap = new ShaderUse(lampShader)) {
+                wrap.shader.setVec3("lamp_Color", diffuse);
+            }
+            cube.draw(projectionMatrix, cameraTranslate, lampShader);
         }
-        cube.draw(projectionMatrix, cameraTranslate, lampShader);
     }
 
 }

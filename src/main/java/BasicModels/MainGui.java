@@ -21,6 +21,9 @@ public class MainGui extends Application implements BlipHandler {
     private GuiController gui;
 
     public static void main(String[] args) {
+
+        System.out.println("Started!");
+        System.err.println("Started!");
         launch(args);
     }
 

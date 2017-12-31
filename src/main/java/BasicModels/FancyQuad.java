@@ -125,11 +125,12 @@ class FancyQuad extends Model {
             }
 
             // Upload matrices to the uniform variables
-            int modelMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "modelMatrix");
+//            int modelMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "modelMatrix");
 
             Matrix4x4 modelMatrix = getModelMatrix();
+            shader.setMatrix("modelMatrix", modelMatrix);
 
-            GL20.glUniformMatrix4fv(modelMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(modelMatrix));
+//            GL20.glUniformMatrix4fv(modelMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(modelMatrix));
 
             GL30.glBindVertexArray(vaoId);
             glEnableVertexAttribArray(VBO_INDEX_VERTICES);
