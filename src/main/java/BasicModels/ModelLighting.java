@@ -71,9 +71,10 @@ public class ModelLighting implements BlipHandler{
 
             final int x = i;
 
-//            light.setEnabled(false);
+            light.setEnabled(false);
         }
 
+        points[0].setEnabled(true);
     }
 
     void handleKeyDown(int key) {

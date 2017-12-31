@@ -11,7 +11,10 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
+import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,8 +22,9 @@ public class GuiController implements BlipHandler {
     //    @FXML public ChoiceBox scene;
     @FXML public VBox others;
 
-    private double padding = 5.0;
+    private final double padding = 5.0;
     private MainGui app;
+    private Stage stage;
 
     public GuiController() {
 
@@ -34,8 +38,9 @@ public class GuiController implements BlipHandler {
         System.out.println("Fired!");
     }
 
-    public void setApp(MainGui app) {
+    public void setApp(MainGui app, Stage stage) {
         this.app = app;
+        this.stage = stage;
     }
 
     private void addNode(Node control) {
@@ -73,10 +78,38 @@ public class GuiController implements BlipHandler {
         else if (blip instanceof BlipUIHStack) {
             return createHBox((BlipUIHStack) blip);
         }
+        else if (blip instanceof BlipUIFileDialogButton) {
+            return createFileDialogButton((BlipUIFileDialogButton) blip);
+        }
         else {
             assert (false);
             return null;
         }
+    }
+
+    private Node createFileDialogButton(BlipUIFileDialogButton v) {
+        Runnable onButtonClicked = () -> {
+            FileChooser fileChooser = new FileChooser();
+            v.initialDir.ifPresent(file -> fileChooser.setInitialDirectory(file));
+            fileChooser.setTitle(v.dialogTitle);
+            File file = fileChooser.showOpenDialog(stage);
+            if (file != null) {
+                v.onFileSelected.accept(file);
+            }
+        };
+
+        Button control = new Button();
+        control.setText(v.label);
+        control.setOnMouseClicked((event) -> {
+            onButtonClicked.run();
+                });
+
+        if (v.shortcut.isPresent()) {
+            BlipInputAddKeyboardShortcut shortcut = BlipInputAddKeyboardShortcut.create(v.shortcut.get(), onButtonClicked::run);
+            app.handle(shortcut);
+        }
+
+        return control;
     }
 
     private Node createCheckbox(BlipUICheckbox v) {

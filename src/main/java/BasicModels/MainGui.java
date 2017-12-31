@@ -53,7 +53,7 @@ public class MainGui extends Application implements BlipHandler {
             assert (root != null);
             gui = loader.getController();
             assert (gui != null);
-            gui.setApp(this);
+            gui.setApp(this, primaryStage);
         } catch (IOException e) {
             e.printStackTrace();
         }

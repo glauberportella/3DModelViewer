@@ -1,5 +1,6 @@
 package BasicModels;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,7 +16,6 @@ import java.util.function.Consumer;
 class BlipUI implements Blip {}
 class BlipUIContainer extends BlipUI {}
 
-
 class BlipUICheckbox extends BlipUI {
     public String name;
     public boolean initialState;
@@ -30,6 +30,42 @@ class BlipUICheckbox extends BlipUI {
         out.initialState = initialState;
         out.onChanged = onChanged;
         out.shortcut = shortcut;
+        return out;
+    }
+}
+
+class BlipUIButton extends BlipUI {
+    public String label;
+    public Runnable onClicked;
+    Optional<Integer> shortcut;
+
+    private BlipUIButton() {}
+
+    static BlipUIButton create(String label, boolean initialState, Runnable onClicked, Optional<Integer> shortcut) {
+        BlipUIButton out = new BlipUIButton();
+        out.label = label;
+        out.onClicked = onClicked;
+        out.shortcut = shortcut;
+        return out;
+    }
+}
+
+class BlipUIFileDialogButton extends BlipUI {
+    public String label;
+    public Consumer<File> onFileSelected;
+    public String dialogTitle;
+    Optional<Integer> shortcut;
+    Optional<File> initialDir;
+
+    private BlipUIFileDialogButton() {}
+
+    static BlipUIFileDialogButton create(String label, String dialogTitle, Consumer<File> onFileSelected, Optional<Integer> shortcut, Optional<File> initialDir) {
+        BlipUIFileDialogButton out = new BlipUIFileDialogButton();
+        out.label = label;
+        out.dialogTitle = dialogTitle;
+        out.onFileSelected = onFileSelected;
+        out.shortcut = shortcut;
+        out.initialDir = initialDir;
         return out;
     }
 }

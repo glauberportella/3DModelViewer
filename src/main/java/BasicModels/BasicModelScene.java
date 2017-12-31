@@ -4,14 +4,10 @@ import Useful.AppParams;
 import de.matthiasmann.twl.utils.PNGDecoder;
 import enterthematrix.Matrix4x4;
 import enterthematrix.Vector4;
-import matrixlwjgl.MatrixLwjgl;
-import org.lwjgl.opengl.GL20;
 
+import java.io.File;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.lwjgl.assimp.Assimp.aiProcess_FixInfacingNormals;
 import static org.lwjgl.assimp.Assimp.aiProcess_JoinIdenticalVertices;
@@ -23,6 +19,41 @@ import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
+interface BlipBasicModelScene extends Blip {
+    void handle(BasicModelScene scene);
+}
+class BlipBasicModelSceneLoadModel implements BlipBasicModelScene {
+    File file;
+    BlipBasicModelSceneLoadModel(File file) {
+        this.file = file;
+    }
+
+    @Override public void handle(BasicModelScene scene) {
+        MeshData[] meshData = MeshLoader.load(file.toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
+        Mesh[] meshes = new Mesh[meshData.length];
+        Matrix4x4 meshScale = MeshDataUtils.getInitialScaleMatrix(meshData);
+        List<BlipUI> ui = new ArrayList<BlipUI>();
+
+        for(int i = 0; i < meshData.length; i ++) {
+//            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(Matrix4x4.scale(0.1f)), Optional.empty(), meshData[i]);
+            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(meshScale), Optional.empty(), meshData[i]);
+            final int x = i;
+            ui.add(BlipUITextField.create(Optional.of("Mesh indices"), String.valueOf(meshData[i].indices.length), (v) -> {
+                int indices = meshData[x].indices.length;
+                try {
+                    indices = Integer.parseInt(v);
+                }
+                catch(Exception e) {
+                }
+                mesh.setIndicesToDraw(indices);
+            }));
+            meshes[i] = mesh;
+        }
+
+        scene.changeData(meshes, ui);
+    }
+}
+
 class BasicModelScene extends Scene {
     private final BlipHandler app;
     private final ArrayList<FancyCube> cubeModels = new ArrayList<>();
@@ -33,7 +64,7 @@ class BasicModelScene extends Scene {
     private final ModelLighting lighting;
     //    private final Shader shadowGenShader;
     private final ShaderStore shaders = new ShaderStore();
-    private final Mesh[] meshes;
+    private Mesh[] meshes;
 
 
     private boolean drawAxisMarkers = false;
@@ -45,7 +76,9 @@ class BasicModelScene extends Scene {
     private boolean shadowsEnabled = true;
     private boolean debugShader = false;
 
-    private List<BlipUI> ui = new ArrayList<BlipUI>();
+    private List<BlipUI> modelUI = new ArrayList<BlipUI>();
+    private final List<BlipUI> basicUi = new ArrayList<BlipUI>();
+    private final Queue<BlipBasicModelScene> queued = new ArrayDeque<>();
 
 
     @Override
@@ -53,26 +86,49 @@ class BasicModelScene extends Scene {
         lighting.handle(blip);
 
         if (blip instanceof BlipSceneStart) {
-            app.handle(BlipUITitledSection.create("Scene", BlipUIHStack.create(ui)));
+            List<BlipUI> uiComplete = new ArrayList<>(basicUi);
+            uiComplete.addAll(modelUI);
+            app.handle(BlipUITitledSection.create("Scene", BlipUIHStack.create(uiComplete)));
         }
     }
+
+//    private void loadFile(File file) {
+//        MeshData[] meshData = MeshLoader.load(file.toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
+//        meshes = new Mesh[meshData.length];
+//        Matrix4x4 meshScale = MeshDataUtils.getInitialScaleMatrix(meshData);
+//        for(int i = 0; i < meshData.length; i ++) {
+////            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(Matrix4x4.scale(0.1f)), Optional.empty(), meshData[i]);
+//            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(meshScale), Optional.empty(), meshData[i]);
+//            final int x = i;
+//            modelUI.add(BlipUITextField.create(Optional.of("Mesh indices"), String.valueOf(meshData[i].indices.length), (v) -> {
+//                int indices = meshData[x].indices.length;
+//                try {
+//                    indices = Integer.parseInt(v);
+//                }
+//                catch(Exception e) {
+//                }
+//                mesh.setIndicesToDraw(indices);
+//            }));
+//            meshes[i] = mesh;
+//        }
+//    }
 
     BasicModelScene(BlipHandler app) throws URISyntaxException {
         this.app = app;
         lighting = new ModelLighting(app, shaders);
 
-//        if (key == GLFW_KEY_KP_9) drawAxisMarkers = !drawAxisMarkers;
-//        else if (key == GLFW_KEY_KP_8) renderToDepth = !renderToDepth;
-//        else if (key == GLFW_KEY_KP_7) renderDepthFramebuffer = !renderDepthFramebuffer;
-//        else if (key == GLFW_KEY_KP_6) drawFloor = !drawFloor;
-//        else if (key == GLFW_KEY_KP_5) shadowsEnabled = !shadowsEnabled;
+        File initialDir = new File(System.getProperty("user.dir"));
+        basicUi.add(BlipUIFileDialogButton.create("Load", "Choose Model File", (file) -> {
+            // Cause this will fire in its own thread, and we don't want to trash the meshdata mid-scene
+            queued.add(new BlipBasicModelSceneLoadModel(file));
+        }, Optional.of(GLFW_KEY_O), Optional.of(initialDir)));
 
-        ui.add(BlipUICheckbox.create("Model", drawModel, (v) -> drawModel = v, Optional.empty()));
-        ui.add(BlipUICheckbox.create("Axis markers", drawAxisMarkers, (v) -> drawAxisMarkers = v, Optional.empty()));
-        ui.add(BlipUICheckbox.create("Floor", drawFloor, (v) -> drawFloor = v, Optional.of(GLFW_KEY_KP_6)));
-        ui.add(BlipUICheckbox.create("Shadows", shadowsEnabled, (v) -> shadowsEnabled = v, Optional.of(GLFW_KEY_KP_5)));
-        ui.add(BlipUICheckbox.create("Lights", renderLightsEnabled, (v) -> renderLightsEnabled = v, Optional.empty()));
-        ui.add(BlipUICheckbox.create("Debug Shader", debugShader, (v) -> {
+        basicUi.add(BlipUICheckbox.create("Model", drawModel, (v) -> drawModel = v, Optional.empty()));
+        basicUi.add(BlipUICheckbox.create("Axis markers", drawAxisMarkers, (v) -> drawAxisMarkers = v, Optional.empty()));
+        basicUi.add(BlipUICheckbox.create("Floor", drawFloor, (v) -> drawFloor = v, Optional.of(GLFW_KEY_KP_6)));
+        basicUi.add(BlipUICheckbox.create("Shadows", shadowsEnabled, (v) -> shadowsEnabled = v, Optional.of(GLFW_KEY_KP_5)));
+        basicUi.add(BlipUICheckbox.create("Lights", renderLightsEnabled, (v) -> renderLightsEnabled = v, Optional.empty()));
+        basicUi.add(BlipUICheckbox.create("Debug Shader", debugShader, (v) -> {
             debugShader = v;
             shaders.debugShader.setCheckErrors(debugShader);
             shaders.standardShader.setCheckErrors(!debugShader);
@@ -91,7 +147,7 @@ class BasicModelScene extends Scene {
 //            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(Matrix4x4.scale(0.1f)), Optional.empty(), meshData[i]);
             Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(meshScale), Optional.empty(), meshData[i]);
             final int x = i;
-            ui.add(BlipUITextField.create(Optional.of("Mesh indices"), String.valueOf(meshData[i].indices.length), (v) -> {
+            modelUI.add(BlipUITextField.create(Optional.of("Mesh indices"), String.valueOf(meshData[i].indices.length), (v) -> {
                 int indices = meshData[x].indices.length;
                 try {
                     indices = Integer.parseInt(v);
@@ -214,6 +270,15 @@ class BasicModelScene extends Scene {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        queued.forEach(blip -> {
+            blip.handle(this);
+//            if (blip instanceof BlipBasicModelSceneLoadModel) {
+//                BlipBasicModelSceneLoadModel v = (BlipBasicModelSceneLoadModel) blip;
+//                v.handle(this);
+//            }
+        });
+        queued.clear();
+
         try (ShaderUse wrap = new ShaderUse(getMainShader())) {
             wrap.shader.setBoolean("shadowsEnabled", shadowsEnabled);
         }
@@ -332,4 +397,8 @@ class BasicModelScene extends Scene {
     }
 
 
+    public void changeData(Mesh[] meshes, List<BlipUI> modelUi) {
+        this.meshes = meshes;
+        this.modelUI = modelUi;
+    }
 }
