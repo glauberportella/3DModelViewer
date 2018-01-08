@@ -3,15 +3,14 @@ package BasicModels;
 import Useful.AppParams;
 import de.matthiasmann.twl.utils.PNGDecoder;
 import enterthematrix.Matrix4x4;
+import enterthematrix.Vector3;
 import enterthematrix.Vector4;
 
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.stream.Collectors;
 
-import static org.lwjgl.assimp.Assimp.aiProcess_FixInfacingNormals;
-import static org.lwjgl.assimp.Assimp.aiProcess_JoinIdenticalVertices;
-import static org.lwjgl.assimp.Assimp.aiProcess_Triangulate;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE5;
@@ -19,65 +18,33 @@ import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
-interface BlipBasicModelScene extends Blip {
-    void handle(BasicModelScene scene);
-}
-class BlipBasicModelSceneLoadModel implements BlipBasicModelScene {
-    File file;
-    BlipBasicModelSceneLoadModel(File file) {
-        this.file = file;
-    }
 
-    @Override public void handle(BasicModelScene scene) {
-        MeshData[] meshData = MeshLoader.load(file.toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
-        Mesh[] meshes = new Mesh[meshData.length];
-        Matrix4x4 meshScale = MeshDataUtils.getInitialScaleMatrix(meshData);
-        List<BlipUI> ui = new ArrayList<BlipUI>();
-
-        for(int i = 0; i < meshData.length; i ++) {
-//            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(Matrix4x4.scale(0.1f)), Optional.empty(), meshData[i]);
-            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(meshScale), Optional.empty(), meshData[i]);
-            final int x = i;
-            ui.add(BlipUITextField.create(Optional.of("Mesh indices"), String.valueOf(meshData[i].indices.length), (v) -> {
-                int indices = meshData[x].indices.length;
-                try {
-                    indices = Integer.parseInt(v);
-                }
-                catch(Exception e) {
-                }
-                mesh.setIndicesToDraw(indices);
-            }));
-            meshes[i] = mesh;
-        }
-
-        scene.changeData(meshes, ui);
-    }
-}
-
-class BasicModelScene extends Scene {
+class FlockingScene extends Scene {
     private final BlipHandler app;
-    private final ArrayList<FancyCube> cubeModels = new ArrayList<>();
+    private final ArrayList<BirdController> birds = new ArrayList<>();
+    //    private final ArrayList<Model> models = new ArrayList<>();
     private final ArrayList<FancyQuad> quadModels = new ArrayList<>();
     private final ArrayList<FancyCube> axisMarkers = new ArrayList<>();
     //    private final Shader standardShader;
     private CameraRotatingAroundOrigin camera;
-    private final ModelLighting lighting;
+    private final FlockingLighting lighting;
     //    private final Shader shadowGenShader;
-    private final ShaderStore shaders = new ShaderStore();
+    private final ShaderStoreFlocking shaders = new ShaderStoreFlocking();
     private Mesh[] meshes;
 
-
-    private boolean drawAxisMarkers = false;
+    private Material birdMaterial, birdLeaderMaterial;
+    private boolean drawAxisMarkers = true;
     private boolean renderToDepth = true;
     private boolean renderDepthFramebuffer = false;
     private boolean drawFloor = false;
     private boolean drawModel = true;
     private boolean renderLightsEnabled = true;
     private boolean shadowsEnabled = true;
-    private boolean debugShader = true;
+    private boolean debugShader = false;
 
     private List<BlipUI> modelUI = new ArrayList<BlipUI>();
     private final List<BlipUI> basicUi = new ArrayList<BlipUI>();
+    private final List<BlipUI> birdUi = new ArrayList<BlipUI>();
     private final Queue<BlipBasicModelScene> queued = new ArrayDeque<>();
 
 
@@ -89,12 +56,13 @@ class BasicModelScene extends Scene {
             List<BlipUI> uiComplete = new ArrayList<>(basicUi);
             uiComplete.addAll(modelUI);
             app.handle(BlipUITitledSection.create("Scene", BlipUIHStack.create(uiComplete)));
+            app.handle(BlipUITitledSection.create("Bird", BlipUIHStack.create(birdUi)));
         }
     }
 
-    BasicModelScene(BlipHandler app) throws URISyntaxException {
+    FlockingScene(BlipHandler app) throws URISyntaxException {
         this.app = app;
-        lighting = new ModelLighting(app, shaders);
+        lighting = new FlockingLighting(app, shaders);
 
         File initialDir = new File(System.getProperty("user.dir"));
         basicUi.add(BlipUIFileDialogButton.create("Load", "Choose Model File", (file) -> {
@@ -107,37 +75,46 @@ class BasicModelScene extends Scene {
         basicUi.add(BlipUICheckbox.create("Floor", drawFloor, (v) -> drawFloor = v, Optional.of(GLFW_KEY_KP_6)));
         basicUi.add(BlipUICheckbox.create("Shadows", shadowsEnabled, (v) -> shadowsEnabled = v, Optional.of(GLFW_KEY_KP_5)));
         basicUi.add(BlipUICheckbox.create("Lights", renderLightsEnabled, (v) -> renderLightsEnabled = v, Optional.empty()));
-        basicUi.add(BlipUICheckbox.create("Debug Shader", debugShader, (v) -> {
-            debugShader = v;
-            shaders.debugShader.setCheckErrors(debugShader);
-            shaders.standardShader.setCheckErrors(!debugShader);
-        }, Optional.empty()));
+        basicUi.add(BlipUIButton.create("Tick", () -> doOneTick(), Optional.of(GLFW_KEY_SPACE)));
 
-//        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/cube.obj", "C:/dev/portfolio/3ddemo/out/production/resources/images");
-//        MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("../models/cube.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
-        MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("../models/cube.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate);
-//        MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("../models/IronMan.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
-//        MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("../models/lego obj.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
-//        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/LEGO_Man.obj", "C:/dev/portfolio/3ddemo/out/production/resources/images");
-//        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/lego obj.obj", "C:/dev/portfolio/3ddemo/out/production/resources/models");
-//        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/IronMan.obj", "C:/dev/portfolio/3ddemo/out/production/resources/models");
-        meshes = new Mesh[meshData.length];
-        Matrix4x4 meshScale = MeshDataUtils.getInitialScaleMatrix(meshData);
-        for(int i = 0; i < meshData.length; i ++) {
-//            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(Matrix4x4.scale(0.1f)), Optional.empty(), meshData[i]);
-            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(meshScale), Optional.empty(), meshData[i]);
-            final int x = i;
-            modelUI.add(BlipUITextField.create(Optional.of("Mesh indices"), String.valueOf(meshData[i].indices.length), (v) -> {
-                int indices = meshData[x].indices.length;
-                try {
-                    indices = Integer.parseInt(v);
-                }
-                catch(Exception e) {
-                }
-                mesh.setIndicesToDraw(indices);
-            }));
-            meshes[i] = mesh;
-        }
+        birdLeaderMaterial = new Material("Bird", new Vector3(1.0f, 0, 0), Vector3.fill(1f), Vector3.fill(1f), 32.0f);
+        birdMaterial = new Material("Bird", Vector3.fill(1f), Vector3.fill(1f), Vector3.fill(1.0f), 32.0f);
+
+        birdUi.add(BlipUITextField.create(Optional.of("Bird Ambient"), String.valueOf(birdMaterial.getAmbient().x()), (v) -> {
+            float value = birdMaterial.getAmbient().x();
+            try {
+                value = Float.parseFloat(v);
+            }
+            catch (Exception e) {}
+            birdMaterial = new Material(birdMaterial.getName(), Vector3.fill(value), birdMaterial.getDiffuse(), birdMaterial.getSpecular(), birdMaterial.getShininess());
+        }));
+
+        birdUi.add(BlipUITextField.create(Optional.of("Bird Diffuse"), String.valueOf(birdMaterial.getAmbient().x()), (v) -> {
+            float value = birdMaterial.getDiffuse().x();
+            try {
+                value = Float.parseFloat(v);
+            }
+            catch (Exception e) {}
+            birdMaterial = new Material(birdMaterial.getName(), birdMaterial.getAmbient(), Vector3.fill(value), birdMaterial.getSpecular(), birdMaterial.getShininess());
+        }));
+
+        birdUi.add(BlipUITextField.create(Optional.of("Specular"), String.valueOf(birdMaterial.getAmbient().x()), (v) -> {
+            float value = birdMaterial.getSpecular().x();
+            try {
+                value = Float.parseFloat(v);
+            }
+            catch (Exception e) {}
+            birdMaterial = new Material(birdMaterial.getName(), birdMaterial.getAmbient(), birdMaterial.getDiffuse(), Vector3.fill(value), birdMaterial.getShininess());
+        }));
+
+        birdUi.add(BlipUITextField.create(Optional.of("Shininess"), String.valueOf(birdMaterial.getAmbient().x()), (v) -> {
+            float value = birdMaterial.getShininess();
+            try {
+                value = Float.parseFloat(v);
+            }
+            catch (Exception e) {}
+            birdMaterial = new Material(birdMaterial.getName(), Vector3.fill(value), birdMaterial.getDiffuse(), birdMaterial.getSpecular(), value);
+        }));
 
         Materials materials = new Materials();
         TextureFromFile texture = new TextureFromFile("../images/container2.png", PNGDecoder.Format.RGBA);
@@ -145,26 +122,37 @@ class BasicModelScene extends Scene {
 
         // Scale, translate, then rotate.
         // Putting into a -1 to 1 space
-//        {
-//            int numCubesX = 10;
-//            int numCubesZ = 10;
-//
-//            // Cubes!
-//            for (int x = 0; x < numCubesX; x ++)
-//                for (int z = 0; z < numCubesZ; z ++) {
-//                    if (x == 0 && z == 0) continue;
-//                    // Cube goes -0.5f to 0.5f
-//                    // Want 10 cubes in a -1 to 1 space
-//                    // So each cube can be max 0.2 across, spaced every 0.2f
-//                    float xPos = x * (2.0f / numCubesX) - 1.0f;
-//                    float zPos = z * (2.0f / numCubesZ) - 1.0f;
-//                    Vector4 pos = new Vector4(xPos, 0, zPos, 1);
-////                    Matrix4x4 scale = Matrix4x4.scale(0.16f); // to 0.05 box, taking up 25% of space
-//                    Matrix4x4 scale = Matrix4x4.scale(0.1f); // to 0.05 box, taking up 25% of space
-//                    FancyCube cube = new FancyCube(pos, Optional.of(scale), Optional.empty(), materials.get(0), texture, specularMap);
-//                    cubeModels.add(cube);
-//                }
-//        }
+        {
+            int numBirdsX = 1;
+            int numBirdsY = 1;
+            int numBirdsZ = 1;
+            boolean leader = true;
+
+            for (int x = 0; x < numBirdsX; x ++) {
+                for (int y = 0; y < numBirdsY; y++)
+                    for (int z = 0; z < numBirdsZ; z++) {
+                        // Cube goes -0.5f to 0.5f
+                        // Want 10 cubes in a -1 to 1 space
+                        // So each cube can be max 0.2 across, spaced every 0.2f
+                        float xPos = x * (2.0f / numBirdsX) - 1.0f;
+                        float yPos = y * (2.0f / numBirdsY) - 1.0f;
+                        float zPos = z * (2.0f / numBirdsZ) - 1.0f;
+                        Vector4 pos = new Vector4(xPos, yPos, zPos, 1);
+                        Matrix4x4 scale = Matrix4x4.scale(0.1f); // to 0.05 box, taking up 25% of space
+                        Material material = birdMaterial;
+                        if (leader) {
+                            material = birdLeaderMaterial;
+                        }
+                        Vector3 dir = new Vector3(0,0, -1);
+                        BirdView birdView = new BirdView(pos, Optional.of(scale), Optional.empty(), material, leader);
+                        BirdController bird = new BirdController(birdView, pos.toVector3(), dir);
+
+                        leader = false;
+
+                        birds.add(bird);
+                    }
+            }
+        }
 
         {
             Matrix4x4 scale = Matrix4x4.scale(0.01f);
@@ -227,20 +215,11 @@ class BasicModelScene extends Scene {
         else if (key == GLFW_KEY_A) camera.moveLeft(posDelta);
         else if (key == GLFW_KEY_D) camera.moveRight(posDelta);
 
-//        if (action == GLFW_PRESS) {
-//            lighting.handleKeyDown(key);
-//
-////            if (key == GLFW_KEY_KP_9) drawAxisMarkers = !drawAxisMarkers;
-////            else if (key == GLFW_KEY_KP_8) renderToDepth = !renderToDepth;
-////            else if (key == GLFW_KEY_KP_7) renderDepthFramebuffer = !renderDepthFramebuffer;
-////            else if (key == GLFW_KEY_KP_6) drawFloor = !drawFloor;
-////            else if (key == GLFW_KEY_KP_5) shadowsEnabled = !shadowsEnabled;
-//        }
     }
 
     private Shader getMainShader() {
-        if (debugShader) return shaders.debugShader;
-        else return shaders.standardShader;
+//        if (debugShader) return shaders.debugShader;
+        return shaders.standardShader;
     }
 
     @Override public void draw(AppParams params) {
@@ -250,14 +229,6 @@ class BasicModelScene extends Scene {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        queued.forEach(blip -> {
-            blip.handle(this);
-//            if (blip instanceof BlipBasicModelSceneLoadModel) {
-//                BlipBasicModelSceneLoadModel v = (BlipBasicModelSceneLoadModel) blip;
-//                v.handle(this);
-//            }
-        });
-        queued.clear();
 
         try (ShaderUse wrap = new ShaderUse(getMainShader())) {
             wrap.shader.setBoolean("shadowsEnabled", shadowsEnabled);
@@ -348,9 +319,7 @@ class BasicModelScene extends Scene {
                 quadModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, wrap.shader));
             }
             if (drawModel) {
-                for (int i = 0; i < meshes.length; i++) {
-                    meshes[i].draw(projectionMatrix, cameraTranslate, wrap.shader);
-                }
+                birds.forEach(model -> model.draw(projectionMatrix, cameraTranslate, wrap.shader));
             }
         }
     }
@@ -380,5 +349,12 @@ class BasicModelScene extends Scene {
     public void changeData(Mesh[] meshes, List<BlipUI> modelUi) {
         this.meshes = meshes;
         this.modelUI = modelUi;
+    }
+
+    public void doOneTick() {
+        float constraint = 1.0f;
+        BoundingBox constraints = new BoundingBox(-constraint, constraint, -constraint, constraint, -constraint, constraint);
+        List<Bird> b = birds.stream().map(bird -> bird.getModel()).collect(Collectors.toList());
+        birds.forEach(bird -> bird.doOneTick(b, constraints));
     }
 }

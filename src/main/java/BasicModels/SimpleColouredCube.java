@@ -2,7 +2,6 @@ package BasicModels;
 
 import enterthematrix.Matrix4x4;
 import enterthematrix.Vector4;
-import matrixlwjgl.MatrixLwjgl;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
@@ -19,23 +18,18 @@ import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
-class FancyCube extends Model {
+class SimpleColouredCube extends Model {
     private final int vaoId;
-//    private final int textureId;
-    private final TextureFromFile texture, specularMap;
-//    private final Shader shader;
     private final int VBO_INDEX_VERTICES = 0;
     private final int VBO_INDEX_NORMALS = 1;
     private final int VBO_INDEX_DIFFUSE_MAP = 2;
     private final Material material;
 
 
-    public FancyCube(Vector4 pos, Optional<Matrix4x4> scale, Optional<Matrix4x4> rotate, Material material, TextureFromFile texture, TextureFromFile specularMap) {
+    public SimpleColouredCube(Vector4 pos, Optional<Matrix4x4> scale, Optional<Matrix4x4> rotate, Material material) {
         super(pos, scale, rotate);
 //        this.shader = shader;
         this.material = material;
-        this.texture = texture;
-        this.specularMap = specularMap;
 
         float vertices[] = {
                 // positions          // normals           // texture coords
@@ -114,11 +108,9 @@ class FancyCube extends Model {
 
     public void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate, Shader shader) {
         try (ShaderUse wrap = new ShaderUse(shader)) {
-//            shader.setVec3("material.ambient", material.getAmbient());
-            shader.setInt("material.texture", 0);
-            shader.setInt("material.diffuse", 0);
-//            shader.setVec3("material.specular", material.getSpecular());
-            shader.setInt("material.specular", 1);
+            shader.setVec3("material.ambient", material.getAmbient());
+            shader.setVec3("material.diffuse", material.getDiffuse());
+            shader.setVec3("material.specular", material.getSpecular());
             shader.setFloat("material.shininess", material.getShininess());
 
             // Upload matrices to the uniform variables
@@ -129,15 +121,6 @@ class FancyCube extends Model {
             glEnableVertexAttribArray(VBO_INDEX_VERTICES);
             glEnableVertexAttribArray(VBO_INDEX_NORMALS);
             glEnableVertexAttribArray(VBO_INDEX_DIFFUSE_MAP);
-
-            if (texture != null) {
-                glActiveTexture(GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, texture.getTextureId());
-            }
-            if (specularMap != null) {
-                glActiveTexture(GL_TEXTURE1);
-                glBindTexture(GL_TEXTURE_2D, specularMap.getTextureId());
-            }
 
             GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 36);
 

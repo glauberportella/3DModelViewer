@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 
-public class ShaderStore {
+public class ShaderStoreFlocking {
     public final Shader basicFlatShader = Shader.create("../shaders/basic_lighting2_vertex.glsl", "../shaders/lighting_materials_lamp_fragment.glsl", Optional.empty(),true, true);
     //    private final Shader standardShader = new Shader("../shaders/shadows_vertex.glsl", "../shaders/shadows_fragment.glsl");
 //    public final Shader standardShader = new Shader("../shaders/shadows_vertex.glsl", "../shaders/shadows_fragment.glsl", false);
-    public final Shader standardShader = Shader.create("../shaders/model_vertex.glsl", "../shaders/model_fragment.glsl", Optional.empty(), false, true);
+    public final Shader standardShader = Shader.create("../shaders/model_vertex.glsl", "../shaders/flocking_fragment.glsl", Optional.empty(), false, true);
 //    public final Shader debugShader = Shader.create("../shaders/debug_normals_vertex.glsl", "../shaders/debug_normals_fragment.glsl", Optional.of("../shaders/debug_normals_geometry.glsl"), false, true);
 //public final Shader debugShader = Shader.create("../shaders/model_vertex.glsl", "../shaders/model_fragment.glsl", Optional.empty(), false, true);
-    public final Shader debugShader = Shader.create("../shaders/debug_normals_vertex.glsl", "../shaders/debug_normals_fragment.glsl", Optional.of("../shaders/debug_normals_geometry.glsl"), false, true);
+//    public final Shader debugShader = Shader.create("../shaders/debug_normals_vertex.glsl", "../shaders/debug_normals_fragment.glsl", Optional.of("../shaders/debug_normals_geometry.glsl"), false, true);
     //    private final Shader standardShader = new Shader("../shaders/lighting_materials_vertex.glsl", "../shaders/lighting_materials2_fragment.glsl");
     public final Shader shadowGenShader = Shader.create("../shaders/shadow_mapping.vtx", "../shaders/empty.frag", true);
     public final Shader passthroughShader = Shader.create("../shaders/passthrough_vertex.glsl", "../shaders/passthrough_fragment.glsl", true);
@@ -19,13 +19,13 @@ public class ShaderStore {
 
     private final ArrayList<Shader> shaders = new ArrayList<>(Arrays.asList(basicFlatShader, standardShader, shadowGenShader, passthroughShader, renderDepthMapShader));
 
-    public ShaderStore() {
+    public ShaderStoreFlocking() {
         basicFlatShader.addVariable(ShaderVariable.changesEveryRun("projectionMatrix"));
         basicFlatShader.addVariable(ShaderVariable.changesEveryRun("viewMatrix"));
         basicFlatShader.addVariable(ShaderVariable.changesEveryRun("modelMatrix"));
         basicFlatShader.addVariable(ShaderVariable.changesEveryRun("lamp_Color"));
 
-        for (Shader shader: new Shader[] { standardShader, debugShader }){
+        for (Shader shader: new Shader[] { standardShader }){
             shader.addVariable(ShaderVariable.changesEveryRun("projectionMatrix"));
             shader.addVariable(ShaderVariable.changesEveryRun("viewMatrix"));
             shader.addVariable(ShaderVariable.changesEveryRun("modelMatrix"));
@@ -52,7 +52,7 @@ public class ShaderStore {
                 shader.addVariable(ShaderVariable.changesInfrequently("pointLights[" + i + "].shadowMap"));
             }
             shader.addVariable(ShaderVariable.changesEveryRun("viewPos"));
-            shader.addVariable(ShaderVariable.changesEveryRun("material.texture"));
+            shader.addVariable(ShaderVariable.changesEveryRun("material.ambient"));
             shader.addVariable(ShaderVariable.changesEveryRun("material.diffuse"));
             shader.addVariable(ShaderVariable.changesEveryRun("material.specular"));
             shader.addVariable(ShaderVariable.changesEveryRun("material.shininess"));

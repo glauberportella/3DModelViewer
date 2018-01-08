@@ -117,16 +117,16 @@ public class MeshLoader {
 
 
 
-//    private ArrayList<Texture> loadMaterialTextures(AIMaterial mat, AiTextureType type, String typeName)
+//    private ArrayList<Texture> loadMaterialTextures(AIMaterial mat, AiTextureType typ, String typeName)
 //    {
 //        ArrayList<Texture> textures = new ArrayList<>();
-//        for(int i = 0; i < mat. GetTextureCount(type); i++)
+//        for(int i = 0; i < mat. GetTextureCount(typ); i++)
 //        {
 //            aiString str;
-//            mat->GetTexture(type, i, &str);
+//            mat->GetTexture(typ, i, &str);
 //            Texture texture;
 //            texture.id = TextureFromFile(str.C_Str(), directory);
-//            texture.type = typeName;
+//            texture.typ = typeName;
 //            texture.path = str;
 //            textures.push_back(texture);
 //        }

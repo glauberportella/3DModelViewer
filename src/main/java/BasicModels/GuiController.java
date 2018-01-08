@@ -81,12 +81,29 @@ public class GuiController implements BlipHandler {
         else if (blip instanceof BlipUIFileDialogButton) {
             return createFileDialogButton((BlipUIFileDialogButton) blip);
         }
+        else if (blip instanceof BlipUIButton) {
+            return createButton((BlipUIButton) blip);
+        }
         else {
             assert (false);
             return null;
         }
     }
 
+    private Node createButton(BlipUIButton v) {
+        Button control = new Button();
+        control.setText(v.label);
+        control.setOnMouseClicked((event) -> {
+            v.onClicked.run();
+        });
+
+        if (v.shortcut.isPresent()) {
+            BlipInputAddKeyboardShortcut shortcut = BlipInputAddKeyboardShortcut.create(v.shortcut.get(), v.onClicked::run);
+            app.handle(shortcut);
+        }
+
+        return control;
+    }
     private Node createFileDialogButton(BlipUIFileDialogButton v) {
         Runnable onButtonClicked = () -> {
             FileChooser fileChooser = new FileChooser();

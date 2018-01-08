@@ -41,7 +41,7 @@ class BlipUIButton extends BlipUI {
 
     private BlipUIButton() {}
 
-    static BlipUIButton create(String label, boolean initialState, Runnable onClicked, Optional<Integer> shortcut) {
+    static BlipUIButton create(String label, Runnable onClicked, Optional<Integer> shortcut) {
         BlipUIButton out = new BlipUIButton();
         out.label = label;
         out.onClicked = onClicked;

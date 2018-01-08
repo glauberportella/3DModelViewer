@@ -165,7 +165,7 @@ public class Shader {
     }
 
     public  static Shader create(String vertexResourceFilename, String fragmentResourceFilename, Optional<String> geometryResourceFilename, boolean ignoreUnknownVariables, boolean logErrors) {
-        return new Shader(vertexResourceFilename, fragmentResourceFilename, Optional.empty(), ignoreUnknownVariables, logErrors);
+        return new Shader(vertexResourceFilename, fragmentResourceFilename, geometryResourceFilename, ignoreUnknownVariables, logErrors);
     }
 
     public Shader(String vertexResourceFilename, String fragmentResourceFilename, Optional<String> geometryResourceFilename, boolean ignoreUnknownVariables, boolean logErrors) {
@@ -182,9 +182,7 @@ public class Shader {
         // Final steps to use the shaders
         shaderProgram = glCreateProgram();
         glAttachShader(shaderProgram, vertexShader);
-        glAttachShader(shaderProgram, fragmentShader);
-
-
+            glAttachShader(shaderProgram, fragmentShader);
 
         // Position information will be attribute 0
         GL20.glBindAttribLocation(shaderProgram, 0, "aPos");
@@ -198,7 +196,6 @@ public class Shader {
             glAttachShader(shaderProgram, geometryShader);
         }
 
-
         glLinkProgram(shaderProgram);
         GL20.glValidateProgram(shaderProgram);
 
@@ -208,6 +205,8 @@ public class Shader {
         }
 
         // Cleanup
+//        glDeleteShader(vertexShader);
+//        glDeleteShader(fragmentShader);
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
     }

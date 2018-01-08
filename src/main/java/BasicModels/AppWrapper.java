@@ -187,9 +187,10 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
 
         app.handle(BlipUITitledSection.create("Scenes",
                 BlipUIComboBox.create(Optional.of("Scene"), new ArrayList<>(Arrays.asList(
-                        ComboBoxItem.create("Scene 1", () -> app.handle(new BlipInputChangeScene(0)), Optional.of(GLFW_KEY_KP_1)),
-                        ComboBoxItem.create("Scene 2", () -> app.handle(new BlipInputChangeScene(1)), Optional.of(GLFW_KEY_KP_2)),
-                        ComboBoxItem.create("Scene 3", () -> app.handle(new BlipInputChangeScene(2)), Optional.of(GLFW_KEY_KP_3))
+                        ComboBoxItem.create("Scene 1", () -> app.handle(new BlipInputChangeScene(0)), Optional.of(GLFW_KEY_KP_1))
+//                        ComboBoxItem.create("Scene 2", () -> app.handle(new BlipInputChangeScene(1)), Optional.of(GLFW_KEY_KP_2)),
+//                        ComboBoxItem.create("Scene 3", () -> app.handle(new BlipInputChangeScene(2)), Optional.of(GLFW_KEY_KP_3)),
+//                        ComboBoxItem.create("Scene 4", () -> app.handle(new BlipInputChangeScene(3)), Optional.of(GLFW_KEY_KP_4))
                 )))));
 
         app.handle(new BlipSceneStart());
@@ -208,14 +209,16 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_MULTISAMPLE);
 
-        Scene models = new BasicModelScene(app);
-        Scene shadows = new ShinyCubeShadowsScene(app);
-        Scene gloomy = new GloomyCubeScene();
+        Scene flocking = new FlockingScene(app);
+//        Scene models = new BasicModelScene(app);
+//        Scene shadows = new ShinyCubeShadowsScene(app);
+//        Scene gloomy = new GloomyCubeScene();
 
-        scenes.add(models);
-        scenes.add(shadows);
-        scenes.add(gloomy);
-
+        scenes.add(flocking);
+//        scenes.add(models);
+//        scenes.add(shadows);
+//        scenes.add(gloomy);
+//
         changeScene(0);
 
 

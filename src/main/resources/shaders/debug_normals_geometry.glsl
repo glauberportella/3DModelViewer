@@ -2,48 +2,106 @@
 layout(triangles) in;
 
 // Three lines will be generated: 6 vertices
-layout(line_strip, max_vertices=6) out;
+//layout(line_strip, max_vertices=6) out;
+layout(triangle_strip, max_vertices=3) out;
+
 
 //uniform float normal_length;
+#define NR_POINT_LIGHTS 4
 float normal_length=0.1f;
-uniform mat4 projectionMatrix;
+//uniform mat4 projectionMatrix;
 
-in Vertex
-{
-  vec4 normal;
-  vec4 color;
-} vertex[];
+//in Vertex
+//{
+//  vec4 normal;
+//  vec4 color;
+//} vertex[];
 
-out vec4 vertex_color;
+//out vec4 vertex_color;
+
+//in VertexData {
+    in vec2 gTexCoords;
+    in vec3 gNormal;
+    in vec3 gFragPos;
+    in vec4 gFragPosLightSpaceDir;
+    in vec4 gFragPosLightSpacePoint[NR_POINT_LIGHTS];
+//} vsIn;
+
+//out VertexData {
+    out vec3 FragPos;
+    out vec3 Normal;
+    out vec2 TexCoords;
+    out vec4 FragPosLightSpaceDir;
+    out vec4 FragPosLightSpacePoint[NR_POINT_LIGHTS];
+//} vsOut;
 
 void main()
 {
-    gl_Position = gl_in[0].gl_Position + vec4(-0.1, 0.0, 0.0, 0.0);
-    EmitVertex();
-
-    gl_Position = gl_in[0].gl_Position + vec4( 0.1, 0.0, 0.0, 0.0);
-    EmitVertex();
-
-    EndPrimitive();
-
-    vertex_color = vertex[0].color;
-
-  int i;
-//  for(i=0; i<gl_in.length(); i++)
-//  {
-//    vec3 P = gl_in[i].gl_Position.xyz;
-//    vec3 N = vertex[i].normal.xyz;
-//
-//    gl_Position = projectionMatrix * vec4(P, 1.0);
-//    vertex_color = vertex[i].color;
+//    gl_Position = gl_in[0].gl_Position + vec4(-0.1, 0.0, 0.0, 0.0);
 //    EmitVertex();
 //
-//    gl_Position = projectionMatrix * vec4(P + N * normal_length, 1.0);
-//    vertex_color = vertex[i].color;
+//    gl_Position = gl_in[0].gl_Position + vec4( 0.1, 0.0, 0.0, 0.0);
 //    EmitVertex();
 //
 //    EndPrimitive();
+//
+//    vertex_color = vertex[0].color;
+
+//    gl_Position = vec4(-1,1,0,1);
+//    EmitVertex();
+//    gl_Position = vec4(1,1,0,1);
+//    EmitVertex();
+//    gl_Position = vec4(1,-1,0,1);
+//    EmitVertex();
+//     EndPrimitive();
+///    vertex_color = vertex[i].color;
+//    EmitVertex();
+//
+////    gl_Position = projectionMatrix * vec4(P + N * normal_length, 1.0);
+////    vertex_color = vertex[i].color;
+////    EmitVertex();
+//
 //  }
+  int i;
+  for(i=0; i<gl_in.length(); i++)
+  {
+//    vec3 P = gl_in[i].gl_Position.xyz;
+//    vec3 N = vertex[i].normal.xyz;
+
+    FragPos = gFragPos;
+    Normal = gNormal;
+    TexCoords = gTexCoords;
+    FragPosLightSpaceDir = gFragPosLightSpaceDir;
+    for (int l = 0; l < NR_POINT_LIGHTS; l ++) {
+    FragPosLightSpacePoint[l] = gFragPosLightSpacePoint[l];
+    }
+
+    gl_Position = gl_in[i].gl_Position;//projectionMatrix * vec4(P, 1.0);
+//    vertex_color = vertex[i].color;
+    EmitVertex();
+
+//    gl_Position = projectionMatrix * vec4(P + N * normal_length, 1.0);
+//    vertex_color = vertex[i].color;
+//    EmitVertex();
+
+  }
+    EndPrimitive();
+//
+//  for(i=0; i<gl_in.length(); i++)
+//  {
+////    vec3 P = gl_in[i].gl_Position.xyz;
+////    vec3 N = vertex[i].normal.xyz;
+//
+//    gl_Position = gl_in[i].gl_Position + vec4(-0.5, 0.0, 0.0, 0.0);
+////    vertex_color = vertex[i].color;
+//    EmitVertex();
+//
+////    gl_Position = projectionMatrix * vec4(P + N * normal_length, 1.0);
+////    vertex_color = vertex[i].color;
+////    EmitVertex();
+//
+//  }
+//    EndPrimitive();
 }
 
 

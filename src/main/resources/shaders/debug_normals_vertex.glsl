@@ -1,22 +1,73 @@
-#version 330
-//in vec4 gxl3d_Position;
-//in vec4 gxl3d_Normal;
+#version 330 core
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec2 aTexCoords;
 
-out Vertex
-{
-  vec4 normal;
-  vec4 color;
-} vertex;
+#define NR_POINT_LIGHTS 4
+
+//out VS_OUT {
+//out vec3 FragPos;
+//out vec3 Normal;
+//out vec2 TexCoords;
+//out vec4 FragPosLightSpaceDir;
+//out vec4 FragPosLightSpacePoint[NR_POINT_LIGHTS];
+//} vs_out;
+
+//out VertexData {
+    out vec3 gFragPos;
+    out vec3 gNormal;
+    out vec2 gTexCoords;
+    out vec4 gFragPosLightSpaceDir;
+    out vec4 gFragPosLightSpacePoint[NR_POINT_LIGHTS];
+//} vsVertex;
+
+
+uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 modelMatrix;
+//uniform mat4 lightSpaceMatrix;
+
+uniform mat4 lightSpaceMatrixDir;
+uniform mat4 lightSpaceMatrixes[NR_POINT_LIGHTS];
 
 void main()
 {
-  gl_Position = vec4(aPos, 1);
-  vertex.normal = vec4(aNormal, 1);
-  vertex.color =  vec4(1.0, 1.0, 0.0, 1.0);
+    vec3 FragPos = vec3(modelMatrix * vec4(aPos, 1.0));
+    gFragPos = FragPos;
+    //Normal = mat3(transpose(inverse(modelMatrix))) * aNormal;
+//    Normal = transpose(inverse(mat3(modelMatrix))) * aNormal;
+    gNormal = transpose(inverse(mat3(modelMatrix))) * aNormal;
+    gTexCoords = aTexCoords;
+    gFragPosLightSpaceDir = lightSpaceMatrixDir * vec4(FragPos, 1.0);
+//    FragPosLightSpaceDir = vec4(FragPos, 1.0);
+    for (int i = 0; i < NR_POINT_LIGHTS; i ++) {
+        gFragPosLightSpacePoint[i] = lightSpaceMatrixes[i] * vec4(FragPos, 1.0);
+    }
+    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(aPos, 1.0);
 }
+
+
+
+//#version 330
+//in vec4 gxl3d_Position;
+//in vec4 gxl3d_Normal;
+
+//layout (location = 0) in vec3 aPos;
+//layout (location = 1) in vec3 aNormal;
+//
+//out Vertex
+//{
+//  vec4 normal;
+//  vec4 color;
+//} vertex;
+//
+//void main()
+//{
+//  gl_Position = vec4(aPos, 1);
+//  vertex.normal = vec4(aNormal, 1);
+//  vertex.color =  vec4(1.0, 1.0, 0.0, 1.0);
+//}
 
 
 //#version 330 core
