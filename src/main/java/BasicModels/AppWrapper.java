@@ -13,6 +13,7 @@ import java.net.URISyntaxException;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Optional;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
@@ -221,11 +222,20 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
 //
         changeScene(0);
 
+        long timeLastFrameMsecs = new Date().getTime();
+        int gameTicksPerSec = 60;
+        final long timePerTickMsecs = 1000 / gameTicksPerSec;
 
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
         while ( !glfwWindowShouldClose(window) ) {
             currentScene.draw(params);
+
+            long timeMsecs = new Date().getTime();
+            if (timeMsecs - timeLastFrameMsecs >= timePerTickMsecs) {
+                timeLastFrameMsecs = timeMsecs;
+                currentScene.doOneTick();
+            }
 
             glfwSwapBuffers(window); // swap the color buffers
 

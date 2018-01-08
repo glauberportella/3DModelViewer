@@ -17,7 +17,7 @@ import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 import static org.lwjgl.opengl.GL30.*;
 
-class ShinyCubeShadowsScene extends Scene {
+class ShinyCubeShadowsScene implements Scene {
     private final ArrayList<FancyCube> cubeModels = new ArrayList<>();
     private final ArrayList<FancyQuad> quadModels = new ArrayList<>();
     private final ArrayList<FancyCube> axisMarkers = new ArrayList<>();

@@ -19,7 +19,7 @@ import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
 
-class FlockingScene extends Scene {
+class FlockingScene implements Scene {
     private final BlipHandler app;
     private final ArrayList<BirdController> birds = new ArrayList<>();
     //    private final ArrayList<Model> models = new ArrayList<>();
@@ -41,6 +41,7 @@ class FlockingScene extends Scene {
     private boolean renderLightsEnabled = true;
     private boolean shadowsEnabled = true;
     private boolean debugShader = false;
+    private boolean tickAutomatically = true;
 
     private List<BlipUI> modelUI = new ArrayList<BlipUI>();
     private final List<BlipUI> basicUi = new ArrayList<BlipUI>();
@@ -75,6 +76,7 @@ class FlockingScene extends Scene {
         basicUi.add(BlipUICheckbox.create("Floor", drawFloor, (v) -> drawFloor = v, Optional.of(GLFW_KEY_KP_6)));
         basicUi.add(BlipUICheckbox.create("Shadows", shadowsEnabled, (v) -> shadowsEnabled = v, Optional.of(GLFW_KEY_KP_5)));
         basicUi.add(BlipUICheckbox.create("Lights", renderLightsEnabled, (v) -> renderLightsEnabled = v, Optional.empty()));
+        basicUi.add(BlipUICheckbox.create("Tick Auto", tickAutomatically,  (v) -> tickAutomatically = v, Optional.of(GLFW_KEY_T)));
         basicUi.add(BlipUIButton.create("Tick", () -> doOneTick(), Optional.of(GLFW_KEY_SPACE)));
 
         birdLeaderMaterial = new Material("Bird", new Vector3(1.0f, 0, 0), Vector3.fill(1f), Vector3.fill(1f), 32.0f);
@@ -143,7 +145,7 @@ class FlockingScene extends Scene {
                         if (leader) {
                             material = birdLeaderMaterial;
                         }
-                        Vector3 dir = new Vector3(0,0, -1);
+                        Vector3 dir = new Vector3(-1,0, 0);
                         BirdView birdView = new BirdView(pos, Optional.of(scale), Optional.empty(), material, leader);
                         BirdController bird = new BirdController(birdView, pos.toVector3(), dir);
 
@@ -351,10 +353,11 @@ class FlockingScene extends Scene {
         this.modelUI = modelUi;
     }
 
-    public void doOneTick() {
+    @Override public void doOneTick() {
         float constraint = 1.0f;
         BoundingBox constraints = new BoundingBox(-constraint, constraint, -constraint, constraint, -constraint, constraint);
         List<Bird> b = birds.stream().map(bird -> bird.getModel()).collect(Collectors.toList());
         birds.forEach(bird -> bird.doOneTick(b, constraints));
     }
+
 }

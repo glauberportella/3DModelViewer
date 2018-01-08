@@ -7,7 +7,7 @@ import enterthematrix.{Matrix4x4, Vector3}
 import scala.collection.immutable.Seq
 
 class BirdController(val view: BirdView, val initialPos: Vector3, val initialDir: Vector3) {
-  private var model = Bird(initialPos, initialDir)
+  private var model = Bird(initialPos.toVector3d, initialDir.toVector3d)
 
   def getModel: Bird = model
   def getView: BirdView = view
@@ -24,7 +24,7 @@ class BirdController(val view: BirdView, val initialPos: Vector3, val initialDir
     for (decision <- decisions) {
       model = decision.resolve(model)
     }
-    view.setPos(model.pos)
+    view.setPos(model.pos.toVector3)
   }
 
 }

@@ -18,14 +18,14 @@ class ObjFileParserTest extends FunSuite {
     assert (out.get(1).asInstanceOf[ObjFileTokenFloat].value === 0.123f)
   }
 
-  test("faces complex") {
+  ignore("faces complex") {
     val out = ObjFileParser.parseLine("f 1//1 2//1 3//1 4//1")
     assert (out.get(0).typ == ObjFileTokenType.FaceMarker)
     assert (out.get(1).asInstanceOf[ObjFileTokenFloat].typ === ObjFileTokenType.Vertex)
     assert (out.get(1).asInstanceOf[ObjFileTokenFloat].value === 0.123f)
   }
 
-  test("real world") {
+  ignore("real world") {
     val raw = """# Blender v2.79 (sub 0) OBJ File: 'cube.blend'
                 |# www.blender.org
                 |mtllib cube.mtl

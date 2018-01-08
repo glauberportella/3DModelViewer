@@ -54,7 +54,7 @@ class BlipBasicModelSceneLoadModel implements BlipBasicModelScene {
     }
 }
 
-class BasicModelScene extends Scene {
+class BasicModelScene implements Scene {
     private final BlipHandler app;
     private final ArrayList<FancyCube> cubeModels = new ArrayList<>();
     private final ArrayList<FancyQuad> quadModels = new ArrayList<>();

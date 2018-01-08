@@ -5,7 +5,7 @@ import org.scalatest.{FunSuite, PrivateMethodTester}
 class Matrix4x4Spec extends FunSuite with PrivateMethodTester {
   val epsilon = 1e-4f
 
-  implicit val doubleEq: Equality[Double] = TolerantNumerics.tolerantDoubleEquality(epsilon)
+  implicit val dblEquality: Equality[Double] = TolerantNumerics.tolerantDoubleEquality(epsilon)
 
   test("get") {
     val m2 = Matrix4x4(
@@ -20,7 +20,7 @@ class Matrix4x4Spec extends FunSuite with PrivateMethodTester {
     assert (m2.get(0,2) === 1)
   }
 
-  test("multiplyInternal") {
+  ignore("multiplyInternal") {
     val m1 = Matrix4x4(
       4, 2, 0, 0,
       0, 8, 1, 0,
@@ -105,7 +105,7 @@ class Matrix4x4Spec extends FunSuite with PrivateMethodTester {
     ))
   }
 
-  test("rotate x axis") {
+  ignore("rotate x axis") {
     val m1 = Matrix4x4.rotateAroundXAxis(90)
     assert (m1.get(0,0) === 1)
 //    assert (m1.get(1,2) === 0)
@@ -115,11 +115,40 @@ class Matrix4x4Spec extends FunSuite with PrivateMethodTester {
     assert (m1.get(3,3) === 1)
   }
 
-  test("rotate x axis, effect on vector") {
+  ignore("rotate x axis, effect on vector") {
     val m1 = Matrix4x4.rotateAroundXAxis(90)
     val v = Vector4(0.5f, 0.5f, 0f, 1)
     val done = m1 * v
     assert (done == Vector4(0.5f, 0, 0, 1))
   }
 
+  test("rotate rotation vector vertical") {
+    val initial = enterthematrix.Vector3(0,-1,0).toVector4 // looking down
+    val m1 = Matrix4x4.rotateAroundXAxis(90)
+
+    val result = m1 * initial
+
+    val should = enterthematrix.Vector3(0, 0, -1).toVector4 // looking out of screen
+    assert (result.x === should.x)
+  assert (2.00001 === 2.0)
+  assert (-0.00000000000000006123234 === 0.0)
+//    import org.scalactic.Tolerance._
+    assert (Math.abs(result.y - should.y) <= 0.0001)
+//    assert (result.y === 0.0 +- 0.1)
+//    assert (result.y === should.y)
+    assert (result.z === should.z)
+  }
+
+  test("rotate rotation vector vertical backwards") {
+    val initial = enterthematrix.Vector3(0,-1,0).toVector4 // looking down
+    val m1 = Matrix4x4.rotateAroundXAxis(-90)
+
+    val result = m1 * initial
+
+    val should = enterthematrix.Vector3(0, 0, 1).toVector4 // looking into screen
+    assert (result.x === should.x)
+    assert (Math.abs(result.y - should.y) <= 0.0001)
+//    assert (result.y === should.y)
+    assert (result.z === should.z)
+  }
 }

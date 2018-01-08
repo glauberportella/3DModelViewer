@@ -11,7 +11,7 @@ import java.util.Optional;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
-class GloomyCubeScene extends Scene {
+class GloomyCubeScene implements Scene {
     private final ArrayList<FancyCube> cubeModels = new ArrayList<>();
     private final ArrayList<FancyQuad> quadModels = new ArrayList<>();
     private final Shader lightingShader;
@@ -98,6 +98,11 @@ class GloomyCubeScene extends Scene {
         lighting.draw(projectionMatrix, cameraTranslate, lightingShader, camera);
         cubeModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, lightingShader));
         quadModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, lightingShader));
+    }
+
+    @Override
+    public void doOneTick() {
+
     }
 
     @Override

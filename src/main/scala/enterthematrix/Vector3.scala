@@ -21,6 +21,7 @@ case class Vector3(x: Float, y: Float, z: Float) {
   }
   def crossProduct(b: Vector3) = Vector3(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x)
   def toVector4 = Vector4(x, y, z, 1.0f)
+  def toVector3d = Vector3d(x, y, z)
 }
 
 object Vector3 {

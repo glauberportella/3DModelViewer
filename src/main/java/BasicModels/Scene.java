@@ -6,12 +6,12 @@ import enterthematrix.Matrix4x4;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-abstract public class Scene implements BlipHandler {
-    protected Matrix4x4 createPerspectiveProjectionMatrix(AppParams params) {
+interface Scene extends BlipHandler {
+    default Matrix4x4 createPerspectiveProjectionMatrix(AppParams params) {
         return SceneUtils.createPerspectiveProjectionMatrix(params);
     }
 
-    public void keyPressed(long window, int key, int scancode, int action, int mods) {
+    default public void keyPressed(long window, int key, int scancode, int action, int mods) {
         if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
             glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
         } else {
@@ -19,9 +19,10 @@ abstract public class Scene implements BlipHandler {
         }
     }
 
-    abstract protected void keyPressedImpl(long window, int key, int scancode, int action, int mods);
+    abstract void keyPressedImpl(long window, int key, int scancode, int action, int mods);
     abstract public void draw(AppParams params);
-
+    default public void doOneTick() {
+    }
 }
 
 class SceneUtils {
