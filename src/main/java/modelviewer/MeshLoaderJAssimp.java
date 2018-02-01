@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 // Assimp general:
+// https://learnopengl.com/#!Model-Loading/Assimp great guide to Assimp
 // Gives 24 vertices for a simple cube, rather than 8.
 // https://sourceforge.net/p/assimp/discussion/817654/thread/026e9640/
 // Basically, because of UV texture co-ords, it needs to duplicate vertices.
@@ -24,7 +25,6 @@ import java.util.Set;
 // Hmmm... Issues with Kotlin Assimp
 // 1. Can't import everything e.g. IronMan fails mysteriously
 // 2. Doesn't seem to import well e.g. cube produces 6 quads rather than the requested triangles.
-//        AiScene aiScene = new Importer().readFile(resourcePath, flags);
 
 // But LGJWL Assimp issues:
 // 1. Can't make heads nor tails out of how to parse the materials
@@ -32,24 +32,20 @@ import java.util.Set;
 //        AIScene aiScene2 = aiImportFile(resourcePath.getPath().substring(1), flags);
 //
 // JAssimp, after getting past the PITA that was building the native libs:
+// 1. Works soooo much better than the other two.  All the weird glitches disappear.
 interface MeshLoader {
-    MeshData[] load(URI resourcePath, String texturesDir, int flags) throws IOException;
+    ModelData load(URI resourcePath, String texturesDir, int flags) throws IOException;
 }
 
 // Loads a mesh (model) with JAssimp lib
 public class MeshLoaderJAssimp implements MeshLoader {
-    public MeshData[] load(URI resourcePath, String texturesDir, int flags) throws IOException {
-        // https://learnopengl.com/#!Model-Loading/Assimp great guide to Assimp
+    public ModelData load(URI resourcePath, String texturesDir, int flags) throws IOException {
 
-//        URI uri = URI.create(resourcePath);
-//        String fullPath = "file://" + resourcePath.getPath();
         String fullPath = resourcePath.getPath().substring(1);
-
 
         // Make sure the libs are preloaded in reverse order so there's no lookup fails
         System.loadLibrary("assimp-vc140-mt");
         System.loadLibrary("jassimp");
-
 
         Set<AiPostProcessSteps> steps = new HashSet<AiPostProcessSteps>();
         steps.add(AiPostProcessSteps.TRIANGULATE);
@@ -62,12 +58,11 @@ public class MeshLoaderJAssimp implements MeshLoader {
         MeshData[] meshes = new MeshData[numMeshes];
         for (int i = 0; i < numMeshes; i++) {
             AiMesh aiMesh = aiMeshes.get(i);
-            int x=1;
             MeshData mesh = processMesh(aiMesh, scene);
             meshes[i] = mesh;
         }
 
-        return meshes;
+        return new ModelData(meshes, scene);
 
     }
 

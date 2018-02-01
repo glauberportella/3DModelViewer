@@ -1,8 +1,28 @@
 package modelviewer;
 
 import enterthematrix.Matrix4x4;
+import jassimp.AiScene;
 
 import java.nio.FloatBuffer;
+
+class ModelData {
+    public MeshData[] getMeshes() {
+        return meshes;
+    }
+
+    public AiScene getScene() {
+        return scene;
+    }
+
+    private final MeshData[] meshes;
+    private final AiScene scene;
+
+    ModelData(MeshData[] meshes, AiScene scene) {
+        this.meshes = meshes;
+        this.scene = scene;
+    }
+
+}
 
 class MeshData {
     protected final float[] vertices, normals;

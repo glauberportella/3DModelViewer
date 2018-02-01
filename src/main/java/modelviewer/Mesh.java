@@ -4,7 +4,6 @@ import com.jogamp.opengl.math.Matrix4;
 import enterthematrix.Matrix4x4;
 import enterthematrix.Vector3;
 import enterthematrix.Vector4;
-import kotlin.internal.contracts.Returns;
 import matrixlwjgl.MatrixLwjgl;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;

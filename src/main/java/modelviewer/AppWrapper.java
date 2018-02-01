@@ -2,6 +2,7 @@
 package modelviewer;
 
 import Useful.AppParams;
+import javafx.geometry.Bounds;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
@@ -85,6 +86,7 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
         params.heightPixels = 600;
         params.widthPixels = 600;
         params.fovDegrees = 90;
+        params.windowTitle = "Model Viewer";
 
         init(params);
         return params;
@@ -143,7 +145,7 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
         glfwWindowHint(GLFW_SAMPLES, 4);
 
         // Create the window
-        window = glfwCreateWindow(params.widthPixels, params.heightPixels, "Hello GloomyCubeScene!", NULL, NULL);
+        window = glfwCreateWindow(params.widthPixels, params.heightPixels, params.windowTitle, NULL, NULL);
         if ( window == NULL )
             throw new RuntimeException("Failed to create the GLFW window");
 
@@ -191,13 +193,13 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
         Scene scene = scenes.get(index);
         currentScene = scene;
 
-        app.handle(BlipUITitledSection.create("Scenes",
-                BlipUIComboBox.create(Optional.of("Scene"), new ArrayList<>(Arrays.asList(
-                        ComboBoxItem.create("Scene 1", () -> app.handle(new BlipInputChangeScene(0)), Optional.of(GLFW_KEY_KP_1))
-//                        ComboBoxItem.create("Scene 2", () -> app.handle(new BlipInputChangeScene(1)), Optional.of(GLFW_KEY_KP_2)),
-//                        ComboBoxItem.create("Scene 3", () -> app.handle(new BlipInputChangeScene(2)), Optional.of(GLFW_KEY_KP_3)),
-//                        ComboBoxItem.create("Scene 4", () -> app.handle(new BlipInputChangeScene(3)), Optional.of(GLFW_KEY_KP_4))
-                )))));
+//        app.handle(BlipUITitledSection.create("Scenes",
+//                BlipUIComboBox.create(Optional.of("Scene"), new ArrayList<>(Arrays.asList(
+//                        ComboBoxItem.create("Scene 1", () -> app.handle(new BlipInputChangeScene(0)), Optional.of(GLFW_KEY_KP_1))
+////                        ComboBoxItem.create("Scene 2", () -> app.handle(new BlipInputChangeScene(1)), Optional.of(GLFW_KEY_KP_2)),
+////                        ComboBoxItem.create("Scene 3", () -> app.handle(new BlipInputChangeScene(2)), Optional.of(GLFW_KEY_KP_3)),
+////                        ComboBoxItem.create("Scene 4", () -> app.handle(new BlipInputChangeScene(3)), Optional.of(GLFW_KEY_KP_4))
+//                )))));
 
         app.handle(new BlipSceneStart());
 
@@ -244,5 +246,9 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
     }
 
     static final int gameTicksPerSec = 60;
+
+    public void boundsChanged(Bounds bounds) {
+//        glfwSetWindowSize(window, (int) bounds.getWidth(), (int) bounds.getHeight());
+    }
 }
 

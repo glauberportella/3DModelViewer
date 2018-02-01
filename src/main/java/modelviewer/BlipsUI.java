@@ -150,3 +150,15 @@ class BlipUIHStack extends BlipUIContainer {
     }
 }
 
+class BlipUIVStack extends BlipUIContainer {
+    public List<BlipUI> elements = new ArrayList<BlipUI>();
+
+    private BlipUIVStack() { }
+
+    static BlipUIVStack create(List<BlipUI> elements) {
+        BlipUIVStack out = new BlipUIVStack();
+        out.elements = elements;
+        return out;
+    }
+}
+

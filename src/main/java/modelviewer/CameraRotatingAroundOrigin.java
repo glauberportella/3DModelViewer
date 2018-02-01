@@ -6,15 +6,11 @@ import enterthematrix.Vector4;
 class CameraRotatingAroundOrigin implements ICamera {
     // Remember: normalized co-ords have to be between -1 to 1. If using a projection matrix (perspective or ortho),
     // this will normalize from whatever range we want into that.  Else, have to output in that range.
-    private float rotationAngleDegrees = 0.0f;
+    private float rotationAngleDegrees = 0.7f;
     private final float initialZoom = 1.5f;
     private float zoom = initialZoom;
-    private final Vector4 initialPosition = new Vector4(initialZoom, initialZoom, initialZoom, 0);
+    private final Vector4 initialPosition = new Vector4(0.90f, 0.65f, 0.93f, 0);
     private final Vector4 origin = new Vector4(0, 0, 0, 0);
-//    private final Vector4 initialPosition = new Vector4(0, 0, 0.1f, 0);
-    private final Vector4 initialTarget = new Vector4(0, 0, 0, 0);
-    // Note this is really the reverse direction from where we're facing - it's meant to be
-    private final Vector4 initialDirection = initialPosition.$minus(initialTarget).normalize();
 
     public Vector4 getPosition() {
         return position;
@@ -70,7 +66,7 @@ class CameraRotatingAroundOrigin implements ICamera {
         System.out.println(this);
     }
     @Override public String toString() {
-        return "x=" + position.x() + " y=" + position.y() + " z=" + position.z(); // + " rlr=" + rotationLeftRightAngleDegrees + " rtb=" + rotationTopBottomAngleDegrees;
+        return "x=" + position.x() + " y=" + position.y() + " z=" + position.z() + " rlr=" + rotationAngleDegrees;
     }
 
     public Matrix4x4 getMatrix() {
@@ -81,19 +77,6 @@ class CameraRotatingAroundOrigin implements ICamera {
         position = new Vector4(x, position.y(), z, 1);
 
         return Matrix4x4.lookAt(getPosition(), origin, new Vector4(0f,1f,0f,1f));
-
-//        // Force it always pointing straight up
-//        Vector4 up = new Vector4(0, 1, 0, 1);
-//        Vector4 xAxis = new Vector4(1, 0, 0, 1);
-//        Matrix4x4 rotationLeftRight = Matrix4x4.rotateAroundAnyAxis(up, rotationLeftRightAngleDegrees);
-//        Matrix4x4 rotationTopBottom = Matrix4x4.rotateAroundAnyAxis(xAxis, rotationTopBottomAngleDegrees);
-//        // This is the direction we're looking in
-//        Vector4 dir = rotationLeftRight.$times(rotationTopBottom).$times(initialDirection);
-//        // Cross product gives us vector perpendicular to both up and the direction we're looking - e.g. it's our right axis
-//        Vector4 right = up.crossProduct(dir).normalize();
-//        Matrix4x4 out = calcLookat(right, up, dir);
-//        return out;
-////        return Matrix4x4.translate(position).$times(rotationLeftRight).$times(rotationTopBottom);
     }
 
 }

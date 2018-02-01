@@ -6,6 +6,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -16,27 +17,26 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+// Controls the JavaFX mini GUI, and handles requests to dynamically build the UI
 public class GuiController implements BlipHandler {
-    //    @FXML public ChoiceBox scene;
     @FXML public VBox others;
 
     private final double padding = 5.0;
+    private final double inner = 3.0;
     private MainGui app;
     private Stage stage;
+    Consumer<Bounds> onBoundsChanged;
 
     public GuiController() {
-
     }
 
     @FXML public void initialize() {
     }
 
-
-    @FXML private void test(ActionEvent event) {
-        System.out.println("Fired!");
-    }
 
     public void setApp(MainGui app, Stage stage) {
         this.app = app;
@@ -44,7 +44,11 @@ public class GuiController implements BlipHandler {
     }
 
     private void addNode(Node control) {
-        Platform.runLater(() -> others.getChildren().add(control));
+        Platform.runLater(() -> {
+            others.getChildren().add(control);
+            Bounds bounds = stage.getScene().getRoot().layoutBoundsProperty().get();
+            onBoundsChanged.accept(bounds);
+        });
     }
 
     @Override
@@ -59,6 +63,7 @@ public class GuiController implements BlipHandler {
 
     private void handleBuildUI(BlipUI blip) {
         addNode(createNode(blip));
+
     }
 
     private Node createNode(BlipUI blip) {
@@ -77,6 +82,9 @@ public class GuiController implements BlipHandler {
         }
         else if (blip instanceof BlipUIHStack) {
             return createHBox((BlipUIHStack) blip);
+        }
+        else if (blip instanceof BlipUIVStack) {
+            return createVBox((BlipUIVStack) blip);
         }
         else if (blip instanceof BlipUIFileDialogButton) {
             return createFileDialogButton((BlipUIFileDialogButton) blip);
@@ -148,11 +156,6 @@ public class GuiController implements BlipHandler {
             v.onChanged.accept(!checked);
         });
 
-//        Platform.runLater(() -> {
-//            others.getChildren().add(control);
-//            others.getChildren().add(label);
-//        });
-
         if (v.shortcut.isPresent()) {
             BlipInputAddKeyboardShortcut shortcut = BlipInputAddKeyboardShortcut.create(v.shortcut.get(), () -> {
                 boolean checked = control.selectedProperty().get();
@@ -163,6 +166,7 @@ public class GuiController implements BlipHandler {
         }
 
         HBox box = new HBox();
+        box.setSpacing(inner);
         box.getChildren().add(label);
         box.getChildren().add(control);
         return box;
@@ -172,6 +176,7 @@ public class GuiController implements BlipHandler {
     private Node createTextField(BlipUITextField v) {
         TextField control = new TextField();
         control.setText(v.initialState);
+        control.setMaxWidth(50f);
         control.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
@@ -185,6 +190,7 @@ public class GuiController implements BlipHandler {
             label.setText(v.label.get());
 
             HBox box = new HBox();
+            box.setSpacing(inner);
             box.getChildren().add(label);
             box.getChildren().add(control);
             return box;
@@ -207,7 +213,6 @@ public class GuiController implements BlipHandler {
                 });
             }
         });
-//        control.valueProperty().setValue(itemssAsStrings.get(0));
 
         v.items.forEach(item -> {
             if (item.shortcut.isPresent()) {
@@ -225,33 +230,37 @@ public class GuiController implements BlipHandler {
             label.setLabelFor(control);
             label.setText(v.label.get());
 
-//            Platform.runLater(() -> {
-//                others.getChildren().add(label);
-//                others.getChildren().add(control);
-//            });
-
             HBox box = new HBox();
+            box.setSpacing(inner);
             box.getChildren().add(label);
             box.getChildren().add(control);
             return box;
         }
         else {
-//            Platform.runLater(() -> {
-//                others.getChildren().add(control);
-//            });
             return control;
         }
     }
 
     private Node createHBox(BlipUIHStack v) {
-
         HBox control = new HBox();
         control.setPadding(new Insets(padding, padding, padding, padding));
+        control.setSpacing(padding);
         v.elements.forEach(item -> {
             control.getChildren().add(createNode(item));
         });
         return control;
     }
+
+    private Node createVBox(BlipUIVStack v) {
+        VBox control = new VBox();
+        control.setPadding(new Insets(padding, padding, padding, padding));
+        control.setSpacing(padding);
+        v.elements.forEach(item -> {
+            control.getChildren().add(createNode(item));
+        });
+        return control;
+    }
+
 
     private Node createTitledSection(BlipUITitledSection v) {
         TitledPane control = new TitledPane();

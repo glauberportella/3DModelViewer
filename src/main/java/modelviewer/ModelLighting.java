@@ -109,37 +109,43 @@ public class ModelLighting implements BlipHandler{
     @Override
     public void handle(Blip blip) {
         if (blip instanceof BlipSceneStart) {
-            List<BlipUI> elements = new ArrayList<>();
+            List<BlipUI> elements1 = new ArrayList<>();
+            List<BlipUI> elements2 = new ArrayList<>();
+            List<BlipUI> sections = new ArrayList<>();
 
-            elements.add(BlipUICheckbox.create("Directional", directional.isEnabled(), directional::setEnabled, Optional.of(GLFW_KEY_0)));
+            elements1.add(BlipUICheckbox.create("Directional", directional.isEnabled(), directional::setEnabled, Optional.of(GLFW_KEY_0)));
 
             for (int i = 0; i < MAX_POINT_LIGHTS; i++) {
                 final int x = i;
-                elements.add(BlipUICheckbox.create("Point " + i, points[i].isEnabled(), (v) -> {
+                elements1.add(BlipUICheckbox.create("Point " + i, points[i].isEnabled(), (v) -> {
                     points[x].setEnabled(v);
                 }, Optional.of(GLFW_KEY_1 + i)));
             }
 
-            elements.add(BlipUITextField.create(Optional.of("Constant"), String.valueOf(defaultConstant), (v) -> {
+            elements2.add(BlipUITextField.create(Optional.of("Constant"), String.valueOf(defaultConstant), (v) -> {
                 float value = defaultConstant;
                 try { value = Float.valueOf(v); } catch(Exception e) {}
                 final float x = value;
                 Arrays.stream(points).forEach(p -> p.setConstant(x));
             }));
-            elements.add(BlipUITextField.create(Optional.of("Linear"), String.valueOf(defaultLinear), (v) -> {
+            elements2.add(BlipUITextField.create(Optional.of("Linear"), String.valueOf(defaultLinear), (v) -> {
                 float value = defaultLinear;
                 try { value = Float.valueOf(v); } catch(Exception e) {}
                 final float x = value;
                 Arrays.stream(points).forEach(p -> p.setLinear(x));
             }));
-            elements.add(BlipUITextField.create(Optional.of("Quadratic"), String.valueOf(defaultQuadratic), (v) -> {
+            elements2.add(BlipUITextField.create(Optional.of("Quadratic"), String.valueOf(defaultQuadratic), (v) -> {
                 float value = defaultQuadratic;
                 try { value = Float.valueOf(v); } catch(Exception e) {}
                 final float x = value;
                 Arrays.stream(points).forEach(p -> p.setQuadratic(x));
             }));
 
-            app.handle(BlipUITitledSection.create("Lighting", BlipUIHStack.create(elements)));
+            sections.add(BlipUIHStack.create(elements1));
+            sections.add(BlipUIHStack.create(elements2));
+            BlipUIVStack done = BlipUIVStack.create(sections);
+
+            app.handle(BlipUITitledSection.create("Lighting", done));
         }
     }
 }

@@ -4,17 +4,21 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Bounds;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.function.Consumer;
 
 
+// This it the JavaFX mini UI, in its separate window
 public class MainGui extends Application implements BlipHandler {
     private modelviewer.AppWrapper app;
     private Stage primaryStage;
@@ -39,7 +43,7 @@ public class MainGui extends Application implements BlipHandler {
         app = new AppWrapper(this);
         app.runNonBlocking();
 
-        primaryStage.setTitle("3D Model Viewer");
+        primaryStage.setTitle("Model Viewer");
 
         Parent root = null;
         try {
@@ -50,36 +54,21 @@ public class MainGui extends Application implements BlipHandler {
             assert (root != null);
             gui = loader.getController();
             assert (gui != null);
+            gui.onBoundsChanged = new Consumer<Bounds>() {
+                @Override
+                public void accept(Bounds bounds) {
+                    app.boundsChanged(bounds);
+                }
+            };
             gui.setApp(this, primaryStage);
         } catch (IOException e) {
             e.printStackTrace();
         }
         assert (root != null);
 
-//        Button changeScene1 = new Button();
-//        changeScene1.setText("Scene 1");
-//        changeScene1.setOnAction(new BlipHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent event) {
-//                app.changeScene(0);
-//            }
-//        });
-//
-//        Button changeScene2 = new Button();
-//        changeScene2.setText("Scene 2");
-//        changeScene2.setOnAction(new BlipHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent event) {
-//                app.changeScene(1);
-//            }
-//        });
-//
-//
-//        StackPane root = new StackPane();
-//        root.getChildren().add(changeScene1);
-//        root.getChildren().add(changeScene2);
-//        primaryStage.setScene(new Scene(root, 300, 250));
-        primaryStage.setScene(new Scene(root));
+        Scene scene = new Scene(root, Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+        primaryStage.setScene(scene);
+        primaryStage.sizeToScene();
         primaryStage.show();
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override

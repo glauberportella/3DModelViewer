@@ -4,6 +4,7 @@ import Useful.AppParams;
 import de.matthiasmann.twl.utils.PNGDecoder;
 import enterthematrix.Matrix4x4;
 import enterthematrix.Vector4;
+import jassimp.AiMaterial;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,35 +32,30 @@ class BlipBasicModelSceneLoadModel implements BlipBasicModelScene {
     }
 
     @Override public void handle(ModelViewerScene scene) {
-        MeshLoader meshLoader = new MeshLoaderJAssimp();
-        MeshData[] meshData = new MeshData[0];
-        try {
-            meshData = meshLoader.load(file.toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Mesh[] meshes = new Mesh[meshData.length];
-        Matrix4x4 meshScale = MeshDataUtils.getInitialScaleMatrix(meshData);
-        List<BlipUI> ui = new ArrayList<BlipUI>();
-
-        for(int i = 0; i < meshData.length; i ++) {
-//            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(Matrix4x4.scale(0.1f)), Optional.empty(), meshData[i]);
-            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(meshScale), Optional.empty(), meshData[i]);
-//            final int x = i;
-            final MeshData y = meshData[i];
-            ui.add(BlipUITextField.create(Optional.of("Mesh indices"), String.valueOf(meshData[i].indices.length), (v) -> {
-                int indices = y.indices.length;
-                try {
-                    indices = Integer.parseInt(v);
-                }
-                catch(Exception e) {
-                }
-                mesh.setIndicesToDraw(indices);
-            }));
-            meshes[i] = mesh;
-        }
-
-        scene.changeData(meshes, ui);
+//        MeshLoader meshLoader = new MeshLoaderJAssimp();
+//        Model modelData = meshLoader.load(file.toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
+//        Mesh[] meshes = new Mesh[meshData.length];
+//        Matrix4x4 meshScale = MeshDataUtils.getInitialScaleMatrix(meshData);
+//        List<BlipUI> ui = new ArrayList<BlipUI>();
+//
+//        for(int i = 0; i < meshData.length; i ++) {
+////            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(Matrix4x4.scale(0.1f)), Optional.empty(), meshData[i]);
+//            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(meshScale), Optional.empty(), meshData[i]);
+////            final int x = i;
+//            final MeshData y = meshData[i];
+//            ui.add(BlipUITextField.create(Optional.of("Mesh indices"), String.valueOf(meshData[i].indices.length), (v) -> {
+//                int indices = y.indices.length;
+//                try {
+//                    indices = Integer.parseInt(v);
+//                }
+//                catch(Exception e) {
+//                }
+//                mesh.setIndicesToDraw(indices);
+//            }));
+//            meshes[i] = mesh;
+//        }
+//
+//        scene.changeData(meshes, ui);
     }
 }
 
@@ -92,13 +88,13 @@ class ModelViewerScene implements Scene {
 
     @Override
     public void handle(Blip blip) {
-        lighting.handle(blip);
-
         if (blip instanceof BlipSceneStart) {
             List<BlipUI> uiComplete = new ArrayList<>(basicUi);
             uiComplete.addAll(modelUI);
             app.handle(BlipUITitledSection.create("Scene", BlipUIHStack.create(uiComplete)));
         }
+
+        lighting.handle(blip);
     }
 
     ModelViewerScene(BlipHandler app) throws URISyntaxException, IOException {
@@ -116,11 +112,11 @@ class ModelViewerScene implements Scene {
         basicUi.add(BlipUICheckbox.create("Floor", drawFloor, (v) -> drawFloor = v, Optional.of(GLFW_KEY_KP_6)));
         basicUi.add(BlipUICheckbox.create("Shadows", shadowsEnabled, (v) -> shadowsEnabled = v, Optional.of(GLFW_KEY_KP_5)));
         basicUi.add(BlipUICheckbox.create("Lights", renderLightsEnabled, (v) -> renderLightsEnabled = v, Optional.empty()));
-        basicUi.add(BlipUICheckbox.create("Debug Shader", debugShader, (v) -> {
-            debugShader = v;
-            shaders.debugShader.setCheckErrors(debugShader);
-            shaders.standardShader.setCheckErrors(!debugShader);
-        }, Optional.empty()));
+//        basicUi.add(BlipUICheckbox.create("Debug Shader", debugShader, (v) -> {
+//            debugShader = v;
+//            shaders.debugShader.setCheckErrors(debugShader);
+//            shaders.standardShader.setCheckErrors(!debugShader);
+//        }, Optional.empty()));
 
         MeshLoader meshLoader = new MeshLoaderJAssimp();
 
@@ -129,27 +125,31 @@ class ModelViewerScene implements Scene {
 //        MeshData[] meshData = meshLoader.load(AppWrapper.class.getResource("../models/cube.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate);
 //        MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("/models/IronMan.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
 //        MeshData[] meshData = meshLoader.load(AppWrapper.class.getResource("/models/IronMan.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
-        MeshData[] meshData = meshLoader.load(AppWrapper.class.getResource("../models/lego obj.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
+        ModelData modelData = meshLoader.load(AppWrapper.class.getResource("../models/lego obj.obj").toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
 //        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/LEGO_Man.obj", "C:/dev/portfolio/3ddemo/out/production/resources/images");
 //        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/lego obj.obj", "C:/dev/portfolio/3ddemo/out/production/resources/models");
 //        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/IronMan.obj", "C:/dev/portfolio/3ddemo/out/production/resources/models");
-        meshes = new Mesh[meshData.length];
-        Matrix4x4 meshScale = MeshDataUtils.getInitialScaleMatrix(meshData);
+        meshes = new Mesh[modelData.getMeshes().length];
+        MeshData[] meshData = modelData.getMeshes();
+        Matrix4x4 meshScale = MeshDataUtils.getInitialMatrix(modelData.getMeshes());
         for(int i = 0; i < meshData.length; i ++) {
-//            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(Matrix4x4.scale(0.1f)), Optional.empty(), meshData[i]);
             Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(meshScale), Optional.empty(), meshData[i]);
             final int x = i;
-            modelUI.add(BlipUITextField.create(Optional.of("Mesh indices"), String.valueOf(meshData[i].indices.length), (v) -> {
-                int indices = meshData[x].indices.length;
-                try {
-                    indices = Integer.parseInt(v);
-                }
-                catch(Exception e) {
-                }
-                mesh.setIndicesToDraw(indices);
-            }));
+//            modelUI.add(BlipUITextField.create(Optional.of("Mesh indices"), String.valueOf(meshData[i].indices.length), (v) -> {
+//                int indices = meshData[x].indices.length;
+//                try {
+//                    indices = Integer.parseInt(v);
+//                }
+//                catch(Exception e) {
+//                }
+//                mesh.setIndicesToDraw(indices);
+//            }));
             meshes[i] = mesh;
         }
+
+        modelData.getScene().getMaterials().forEach(mat -> {
+            List<AiMaterial.Property> properties = mat.getProperties();
+                });
 
         Materials materials = new Materials();
         TextureFromFile texture = new TextureFromFile("../images/container2.png", PNGDecoder.Format.RGBA);
@@ -259,7 +259,8 @@ class ModelViewerScene implements Scene {
         shaders.reset();
 
 //        glClearColor(1f, 1f, 1f, 1.0f);
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+//        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(1f, 1f, 1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         queued.forEach(blip -> {
