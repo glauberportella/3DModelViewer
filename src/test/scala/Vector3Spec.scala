@@ -9,6 +9,12 @@ class Vector3Spec extends FunSuite {
 
   test("dot product") {
     assert (Vector3(0.6f, -0.8f, 0).dotProduct(Vector3(0, 1, 0)) === -0.8)
+//    assert (Vector3(0, 0, -1).dotProduct(Vector3(0, 1, 0)) === -0.8)
+  }
+
+  test("right angle") {
+    assert (Vector3(0.6f, -0.8f, 0).dotProduct(Vector3(0, 1, 0)) === -0.8)
+//        assert (Vector3(0, 1, 0).dotProduct(Vector3(1, 0, 0)) === 90)
   }
 
   test("fill") {

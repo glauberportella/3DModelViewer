@@ -13,6 +13,12 @@ case class Vector3d(x: Double, y: Double, z: Double) {
     val len = length.toDouble
     Vector3d(x / len, y / len, z / len)
   }
+  def limit(high: Double): Vector3d = {
+    if (length > high) {
+      normalize * high
+    }
+    else this
+  }
   def dotProduct(v: Vector3d) = {
     val len1 = length
     val len2 = v.length

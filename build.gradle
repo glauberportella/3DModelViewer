@@ -20,13 +20,17 @@ apply plugin: 'kotlin'
 sourceCompatibility = 1.8
 
 repositories {
+    maven {
+        url "https://dl.bintray.com/ihmcrobotics/maven-release"
+    }
     mavenCentral()
+    jcenter()
 }
 
 // https://www.lwjgl.org/customize
 import org.gradle.internal.os.OperatingSystem
 
-switch ( OperatingSystem.current() ) {
+switch (OperatingSystem.current()) {
     case OperatingSystem.WINDOWS:
         project.ext.lwjglNatives = "natives-windows"
         break
@@ -37,7 +41,6 @@ switch ( OperatingSystem.current() ) {
         project.ext.lwjglNatives = "natives-macos"
         break
 }
-
 
 //project('vendor/assimp') {
 ////    task('hello').doLast(cl)
@@ -72,17 +75,7 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-//    compile 'com.github.kotlin-graphics:glm:0.1'
-// https://mvnrepository.com/artifact/io.github.java-graphics/glm
-//    compile group: 'io.github.java-graphics', name: 'glm', version: '1.0.1'
-
-
-    // https://mvnrepository.com/artifact/org.joml/joml
-//    compile group: 'org.joml', name: 'joml', version: '1.9.6'
-//    compile 'com.github.jpbetz:subspace:0.1.0'
-
-// https://mvnrepository.com/artifact/org.lwjgl/lwjgl-util
-//    compile group: 'org.lwjgl', name: 'lwjgl-util', version: '2.7.1'
+    compile 'us.ihmc.thirdparty:jassimp:4.0.0-ihmc2'
 
     compile 'org.immutables:value:2.5.5'
 
@@ -91,11 +84,6 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.scala-lang/scala-library
     compile group: 'org.scala-lang', name: 'scala-library', version: '2.12.4'
-
-//    compile 'com.github.kotlin-graphics:uno-sdk:f9a47461db6eb4e398563d6414d291fd88d38132'
-
-    // https://mvnrepository.com/artifact/io.github.java-graphics/assimp
-//    compile group: 'io.github.java-graphics', name: 'assimp', version: '1.0.1'
 
     // https://www.lwjgl.org/customize
     compile "org.lwjgl:lwjgl:$lwjglVersion"
