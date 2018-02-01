@@ -5,9 +5,9 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public class ShaderStore {
-    public final Shader basicFlatShader = Shader.create("/shaders/basic_lighting2_vertex.glsl", "/shaders/lighting_materials_lamp_fragment.glsl", Optional.empty(),true, true);
-    public final Shader standardShader = Shader.create("../shaders/model_vertex.glsl", "../shaders/model_fragment.glsl", Optional.empty(), false, true);
-    public final Shader debugShader = Shader.create("/shaders/debug_normals_vertex.glsl", "/shaders/debug_normals_fragment.glsl", Optional.of("../shaders/debug_normals_geometry.glsl"), false, true);
+    public final Shader basicFlatShader = Shader.create("/shaders/basic_lighting2_vertex.glsl", "/shaders/lighting_materials_lamp_fragment.glsl", Optional.empty(),true, false);
+    public final Shader standardShader = Shader.create("../shaders/model_vertex.glsl", "../shaders/model_fragment.glsl", Optional.empty(), false, false);
+//    public final Shader debugShader = Shader.create("/shaders/debug_normals_vertex.glsl", "/shaders/debug_normals_fragment.glsl", Optional.of("../shaders/debug_normals_geometry.glsl"), false, true);
     public final Shader shadowGenShader = Shader.create("/shaders/shadow_mapping.vtx", "/shaders/empty.frag", true);
     public final Shader passthroughShader = Shader.create("/shaders/passthrough_vertex.glsl", "/shaders/passthrough_fragment.glsl", true);
     public final Shader renderDepthMapShader = Shader.create("/shaders/passthrough_vertex.glsl", "/shaders/render_depth_map_fragment.glsl", true);
@@ -21,7 +21,8 @@ public class ShaderStore {
         basicFlatShader.addVariable(ShaderVariable.changesEveryRun("modelMatrix"));
         basicFlatShader.addVariable(ShaderVariable.changesEveryRun("lamp_Color"));
 
-        for (Shader shader: new Shader[] { standardShader, debugShader }){
+//        for (Shader shader: new Shader[] { standardShader, debugShader }){
+        for (Shader shader: new Shader[] { standardShader }){
             shader.addVariable(ShaderVariable.changesEveryRun("projectionMatrix"));
             shader.addVariable(ShaderVariable.changesEveryRun("viewMatrix"));
             shader.addVariable(ShaderVariable.changesEveryRun("modelMatrix"));
@@ -33,7 +34,7 @@ public class ShaderStore {
             shader.addVariable(ShaderVariable.changesInfrequently("dirLight.specular"));
             shader.addVariable(ShaderVariable.changesInfrequently("dirLight.shadowsEnabled"));
             shader.addVariable(ShaderVariable.changesInfrequently("dirLight.shadowMap"));
-            for (int i = 0; i < BrightLighting.MAX_POINT_LIGHTS; i++) {
+            for (int i = 0; i < ModelLighting.MAX_POINT_LIGHTS; i++) {
                 shader.addVariable(ShaderVariable.changesEveryRun("lightSpaceMatrixes[" + i + "]"));
 
                 shader.addVariable(ShaderVariable.changesInfrequently("pointLights[" + i + "].enabled"));

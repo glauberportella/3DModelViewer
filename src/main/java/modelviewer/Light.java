@@ -10,7 +10,7 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE6;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 
 abstract class Light {
-    protected final Vector3 ambient, diffuse, specular;
+    protected Vector3 ambient, diffuse, specular;
     final ShadowMap shadowMap;
     protected int shadowTexture;
     boolean shadowsEnabled = false;
@@ -115,7 +115,11 @@ class PointLight extends Light {
 //            shader.setFloat(lightText + ".constant", 1.0f);
 //            shader.setFloat(lightText + ".linear", 0.05f);
 //            shader.setFloat(lightText + ".quadratic", 0.2f);
-            shader.setFloat(lightText + ".constant", constant);
+        shader.setVec3(lightText + ".ambient", ambient);
+        shader.setVec3(lightText + ".diffuse", diffuse);
+        shader.setVec3(lightText + ".specular", specular);
+
+        shader.setFloat(lightText + ".constant", constant);
             shader.setFloat(lightText + ".linear", linear);
             shader.setFloat(lightText + ".quadratic", quadratic);
             shader.setBoolean(lightText +".shadowsEnabled", shadowsEnabled);

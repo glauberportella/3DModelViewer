@@ -30,6 +30,7 @@ public class Mesh extends Model {
     private final MeshData data;
     private final int vaoId, vboIndicesId;
     private int indicesToDraw;
+    private final Material material;
     //    private final int textureId;
 //    private final Texture texture, specularMap;
 
@@ -49,8 +50,9 @@ public class Mesh extends Model {
     private final int VBO_INDEX_INDICES = 3;
 
 
-    Mesh(Vector4 pos, Optional<Matrix4x4> scale, Optional<Matrix4x4> rotate, MeshData data) {
+    Mesh(Vector4 pos, Optional<Matrix4x4> scale, Optional<Matrix4x4> rotate, MeshData data, Material material) {
         super(pos, scale, rotate);
+        this.material = material;
         this.data = data;
         this.indicesToDraw = data.indicesCount;
 //        this.vertices = data.vertices;
@@ -137,12 +139,17 @@ public class Mesh extends Model {
 
         try (ShaderUse wrap = new ShaderUse(shader)) {
 //            shader.setVec3("material.ambient", material.getAmbient());
-            shader.setInt("material.texture", 0);
-            shader.setInt("material.diffuse", 0);
+
+            shader.setVec3("material.ambient", material.getAmbient());
+            shader.setVec3("material.diffuse", material.getDiffuse());
+            shader.setVec3("material.specular", material.getSpecular());
+            shader.setFloat("material.shininess", material.getShininess());
+
+//            shader.setInt("material.texture", 0);
+//            shader.setInt("material.diffuse", 0);
 //            shader.setVec3("material.specular", material.getSpecular());
-            shader.setInt("material.specular", 1);
+//            shader.setInt("material.specular", 1);
 //            shader.setFloat("material.shininess", material.getShininess());
-            shader.setFloat("material.shininess", 32f);
 
             // Upload matrices to the uniform variables
 //            int modelMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "modelMatrix");
@@ -153,7 +160,8 @@ public class Mesh extends Model {
             Matrix4x4 modelMatrix = getModelMatrix();
             shader.setMatrix("modelMatrix", modelMatrix);
 
-//            GL20.glUniformMatrix4fv(projectionMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(projectionMatrix));
+//            GL20.glUniformMatrix4fv(projectionMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer
+// (projectionMatrix));
 //            GL20.glUniformMatrix4fv(viewMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(cameraTranslate));
 //            GL20.glUniformMatrix4fv(modelMatrixLocation, false, MatrixLwjgl.convertMatrixToBuffer(modelMatrix));
 

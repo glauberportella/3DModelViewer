@@ -10,10 +10,12 @@ import static org.lwjgl.opengl.GL13.glActiveTexture;
 
 class DirectionalLight extends Light {
     final Vector3 direction;
+    float ambientMin;
 
-    public DirectionalLight(Vector3 direction, boolean enabled, Vector3 ambient, Vector3 diffuse, Vector3 specular) {
+    public DirectionalLight(Vector3 direction, boolean enabled, Vector3 ambient, Vector3 diffuse, Vector3 specular, float ambientMin) {
         super(enabled, ambient, diffuse, specular);
         this.direction = direction;
+        this.ambientMin = ambientMin;
     }
 
     @Override public void setupShader(Shader shader) {
@@ -22,6 +24,10 @@ class DirectionalLight extends Light {
         super.setupShaderImpl(shader, lightText);
 //        if (isEnabled()) {
             shader.setVec3(lightText + ".direction", direction);
+            shader.setVec3(lightText + ".ambient", ambient);
+            shader.setFloat(lightText + ".ambientMin", ambientMin);
+            shader.setVec3(lightText + ".diffuse", diffuse);
+            shader.setVec3(lightText + ".specular", specular);
 
             shader.setBoolean(lightText +".shadowsEnabled", shadowsEnabled);
 

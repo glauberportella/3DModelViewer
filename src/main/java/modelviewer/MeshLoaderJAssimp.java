@@ -17,7 +17,10 @@ import java.util.List;
 import java.util.Set;
 
 // Assimp general:
-// https://learnopengl.com/#!Model-Loading/Assimp great guide to Assimp
+// Great guide to Assimp:
+// https://learnopengl.com/#!Model-Loading/Assimp
+
+// Oddness:
 // Gives 24 vertices for a simple cube, rather than 8.
 // https://sourceforge.net/p/assimp/discussion/817654/thread/026e9640/
 // Basically, because of UV texture co-ords, it needs to duplicate vertices.
@@ -50,6 +53,7 @@ public class MeshLoaderJAssimp implements MeshLoader {
         Set<AiPostProcessSteps> steps = new HashSet<AiPostProcessSteps>();
         steps.add(AiPostProcessSteps.TRIANGULATE);
         steps.add(AiPostProcessSteps.JOIN_IDENTICAL_VERTICES);
+        steps.add(AiPostProcessSteps.GEN_SMOOTH_NORMALS);
 
         AiScene scene = Jassimp.importFile(fullPath, steps);
 
@@ -99,6 +103,6 @@ public class MeshLoaderJAssimp implements MeshLoader {
             indicesRaw[index] = indices.get(index);
         }
 
-        return new MeshData(vertices, normals, indicesRaw, null);
+        return new MeshData(vertices, normals, indicesRaw, null, aiMesh.getMaterialIndex());
     }
 }

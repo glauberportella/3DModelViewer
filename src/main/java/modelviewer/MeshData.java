@@ -4,6 +4,7 @@ import enterthematrix.Matrix4x4;
 import jassimp.AiScene;
 
 import java.nio.FloatBuffer;
+import java.util.Optional;
 
 class ModelData {
     public MeshData[] getMeshes() {
@@ -28,12 +29,14 @@ class MeshData {
     protected final float[] vertices, normals;
     protected final int[] indices;
     protected final int indicesCount;
+    protected final int materialIndex;
 
-    public MeshData(float[] vertices, float[] normals, int[] indices, FloatBuffer textureBufFloat) {
+    public MeshData(float[] vertices, float[] normals, int[] indices, FloatBuffer textureBufFloat, int materialIndex) {
         this.vertices = vertices;
         this.normals = normals;
         this.indices = indices;
         this.indicesCount = indices.length;
+        this.materialIndex = materialIndex;
     }
 
     /** @return The matrix required to scale this Mesh so it's longest dimension is 1.0

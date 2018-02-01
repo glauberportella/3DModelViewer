@@ -5,6 +5,7 @@ struct DirLight {
     bool enabled;
     vec3 direction;
 
+    vec3 ambientMin;
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
@@ -29,7 +30,7 @@ struct PointLight {
     sampler2D shadowMap;
 };
 
-struct Material {
+struct Texture {
     sampler2D texture;
     sampler2D diffuse;
     sampler2D specular;
@@ -39,12 +40,21 @@ struct Material {
     float shininess;
 };
 
+struct Material {
+     vec3 ambient;
+     vec3 diffuse;
+    vec3 specular;
+    float shininess;
+};
+
 #define NR_POINT_LIGHTS 4
 uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform DirLight dirLight;
+//uniform Texture texture;
 uniform Material material;
 uniform vec3 viewPos;
 uniform bool shadowsEnabled;
+uniform bool shadowsHighQuality;
 
 out vec4 FragColor;
 
@@ -80,20 +90,24 @@ float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadowMap, vec3 normal
 //    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.00005);
 
     // check whether current frag pos is in shadow
-    float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
-//    float shadow = (currentDepth > closestDepth  ? 1.0 : 0.0);
+    float shadow = 0;
 
-//    float shadow = 0.0;
-//    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-//    for(int x = -1; x <= 1; ++x)
-//    {
-//        for(int y = -1; y <= 1; ++y)
-//        {
-//            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
-//            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
-//        }
-//    }
-//    shadow /= 9.0;
+    if (shadowsHighQuality) {
+        vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+        for(int x = -1; x <= 1; ++x)
+        {
+            for(int y = -1; y <= 1; ++y)
+            {
+                float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+                shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+            }
+        }
+        shadow /= 9.0;
+
+    }
+    else {
+        float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+    }
 
     //return 1.0f;
     return shadow;
@@ -108,9 +122,12 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
       vec3 reflectDir = reflect(-lightDir, normal);
       float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
       // combine results
-      vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, TexCoords));
-      vec3 diffuse  = light.diffuse  * diff * vec3(texture(material.diffuse, TexCoords));
-      vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+//      vec3 ambient  = light.ambient  * vec3(texture(material.ambient, TexCoords));
+//      vec3 diffuse  = light.diffuse  * diff * vec3(texture(material.diffuse, TexCoords));
+//      vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+      vec3 ambient  = light.ambientMin + (light.ambient * material.ambient);
+      vec3 diffuse  = light.diffuse * material.diffuse;
+      vec3 specular = light.specular * spec * material.specular;
 
       float shadow = 0;
       if (shadowsEnabled) {
@@ -118,45 +135,6 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
       }
 
        return ((1.0 - shadow) * (ambient + diffuse + specular));
-//     if (shadow > 0.5) {
-//        return vec3(1,0,0);
-//    }
-//    else {
-//    return ambient + diffuse + specular;
-//    }
-    // return vec3(shadow, 1.0);
-
-//return vec3(FragPosLightSpace.w);
-
-        // perform perspective divide
-        vec3 projCoords = FragPosLightSpaceDir.xyz / FragPosLightSpaceDir.w;
-        // transform to [0,1] range
-        projCoords = projCoords * 0.5 + 0.5;
-        return projCoords;
-        // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-        float closestDepth = texture(light.shadowMap, projCoords.xy).r;
-        // get depth of current fragment from light's perspective
-        float currentDepth = projCoords.z;
-        // check whether current frag pos is in shadow
-        float shadowRet = currentDepth > closestDepth  ? 1.0 : 0.0;
-        //return 1.0f;
-        //return shadow;
-//        return vec3(texture(light.shadowMap, projCoords.xy));
-        return vec3(texture(light.shadowMap, projCoords.xy));
-        shadow = 1 / (currentDepth - closestDepth);
-
-       return ((1.0 - shadow) * (ambient + diffuse + specular));
-
-//if (shadow > 0.5) {
-//        return vec3(1,0,0);
-//    }
-//    else {
-//    return ambient + diffuse + specular;
-//    }
-
-    //return vec3(closestDepth, currentDepth, 0);
-    //return vec3(currentDepth);
-
 }
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec4 fragPosLightSpace)
@@ -178,9 +156,12 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, v
         shadow = ShadowCalculation(fragPosLightSpace, light.shadowMap, normal, lightDir);
     }
 
-    vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, TexCoords));
-    vec3 diffuse  = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
-    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+//    vec3 ambient  = light.ambient  * vec3(texture(material.ambient, TexCoords));
+//    vec3 diffuse  = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
+//    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+    vec3 ambient  = light.ambient  * material.ambient;
+    vec3 diffuse  = light.diffuse * diff * material.diffuse;
+    vec3 specular = light.specular * spec * material.specular;
 
     ambient  *= attenuation;
     diffuse  *= attenuation;

@@ -65,10 +65,10 @@ public class MeshDataUtils {
                 if (z > maxZ) maxZ = z;
             }
         }
-        float xDist = maxX - minX;
-        float yDist = maxY - minY;
-        float zDist = maxZ - minZ;
-        return Matrix4x4.translate(xDist /- 2, yDist / -2, zDist / -2);
+        float xDist = -minX - maxX;
+        float yDist = -minY - maxY;
+        float zDist = -minZ - maxZ;
+        return Matrix4x4.translate(xDist / 2, yDist / 2, zDist / 2);
     }
 
 }

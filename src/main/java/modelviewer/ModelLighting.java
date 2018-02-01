@@ -40,23 +40,28 @@ public class ModelLighting implements BlipHandler{
         float fullStrength = 1.0f;
         float halfStrength = 0.5f;
         float ambientStrength = 0.4f;
-        float diffuseStrength = 0.9f;
+        float diffuseStrength = 0.1f;
 //        float diffuseStrength = 3f;
         float directionalModifier = 2f;
-        float specularDirectionalForce = 0.0f;
+//        float specularDirectionalForce = 0.0f;
+        float ambientMin = 0.1f;
+
+        float directionalAmbient = 0.4f;
+        float directionalDiffuse = 0.7f;
+        float directionalSpecular = 0.5f;
 
         Vector3 ambient = new Vector3(ambientStrength, ambientStrength, ambientStrength);
         Vector3 diffuse = new Vector3(diffuseStrength, diffuseStrength, diffuseStrength);
         Vector3 specular = new Vector3(fullStrength, fullStrength, fullStrength);
 
-        Vector3 ambientDirectional = new Vector3(ambientStrength * directionalModifier, ambientStrength * directionalModifier, ambientStrength * directionalModifier);
-        Vector3 diffuseDirectional = new Vector3(diffuseStrength * directionalModifier, diffuseStrength * directionalModifier, diffuseStrength * directionalModifier);
-        Vector3 specularDirectional = new Vector3(specularDirectionalForce, specularDirectionalForce, specularDirectionalForce);
+        Vector3 ambientDirectional = new Vector3(directionalAmbient, directionalAmbient, directionalAmbient);
+        Vector3 diffuseDirectional = new Vector3(directionalDiffuse, directionalDiffuse, directionalDiffuse);
+        Vector3 specularDirectional = new Vector3(directionalSpecular, directionalSpecular, directionalSpecular);
 
         Vector3 directionalDir = new Vector3(-0.5f, -0.5f, -0.5f);
 
-        directional = new DirectionalLight(directionalDir, true, ambientDirectional, diffuseDirectional, specularDirectional);
-        directional.setEnabled(false);
+        directional = new DirectionalLight(directionalDir, true, ambientDirectional, diffuseDirectional, specularDirectional, ambientMin);
+//        directional.setEnabled(false);
 
 
         // Putting into a -1 to 1 space
@@ -74,7 +79,7 @@ public class ModelLighting implements BlipHandler{
             light.setEnabled(false);
         }
 
-        points[0].setEnabled(true);
+//        points[0].setEnabled(true);
     }
 
     void handleKeyDown(int key) {
@@ -110,6 +115,7 @@ public class ModelLighting implements BlipHandler{
     public void handle(Blip blip) {
         if (blip instanceof BlipSceneStart) {
             List<BlipUI> elements1 = new ArrayList<>();
+            List<BlipUI> elementsDir = new ArrayList<>();
             List<BlipUI> elements2 = new ArrayList<>();
             List<BlipUI> sections = new ArrayList<>();
 
@@ -122,19 +128,43 @@ public class ModelLighting implements BlipHandler{
                 }, Optional.of(GLFW_KEY_1 + i)));
             }
 
-            elements2.add(BlipUITextField.create(Optional.of("Constant"), String.valueOf(defaultConstant), (v) -> {
+            elementsDir.add(BlipUITextField.create(Optional.of("Ambient Min"), String.valueOf(directional.ambientMin), (v) -> {
+                float value = directional.ambientMin;
+                try { value = Float.valueOf(v); } catch(Exception e) {}
+                directional.ambientMin = value;
+            }));
+
+            elementsDir.add(BlipUITextField.create(Optional.of("Dir Ambient"), String.valueOf(directional.ambient.x()), (v) -> {
+                float value = directional.ambient.x();
+                try { value = Float.valueOf(v); } catch(Exception e) {}
+                directional.ambient = Vector3.fill(value);
+            }));
+
+            elementsDir.add(BlipUITextField.create(Optional.of("Dir Diffuse"), String.valueOf(directional.diffuse.x()), (v) -> {
+                float value = directional.diffuse.x();
+                try { value = Float.valueOf(v); } catch(Exception e) {}
+                directional.diffuse = Vector3.fill(value);
+            }));
+
+            elementsDir.add(BlipUITextField.create(Optional.of("Dir Specular"), String.valueOf(directional.specular.x()), (v) -> {
+                float value = directional.specular.x();
+                try { value = Float.valueOf(v); } catch(Exception e) {}
+                directional.specular = Vector3.fill(value);
+            }));
+
+            elements2.add(BlipUITextField.create(Optional.of("Point Constant"), String.valueOf(defaultConstant), (v) -> {
                 float value = defaultConstant;
                 try { value = Float.valueOf(v); } catch(Exception e) {}
                 final float x = value;
                 Arrays.stream(points).forEach(p -> p.setConstant(x));
             }));
-            elements2.add(BlipUITextField.create(Optional.of("Linear"), String.valueOf(defaultLinear), (v) -> {
+            elements2.add(BlipUITextField.create(Optional.of("Point Linear"), String.valueOf(defaultLinear), (v) -> {
                 float value = defaultLinear;
                 try { value = Float.valueOf(v); } catch(Exception e) {}
                 final float x = value;
                 Arrays.stream(points).forEach(p -> p.setLinear(x));
             }));
-            elements2.add(BlipUITextField.create(Optional.of("Quadratic"), String.valueOf(defaultQuadratic), (v) -> {
+            elements2.add(BlipUITextField.create(Optional.of("Point Quadratic"), String.valueOf(defaultQuadratic), (v) -> {
                 float value = defaultQuadratic;
                 try { value = Float.valueOf(v); } catch(Exception e) {}
                 final float x = value;
@@ -142,6 +172,7 @@ public class ModelLighting implements BlipHandler{
             }));
 
             sections.add(BlipUIHStack.create(elements1));
+            sections.add(BlipUIHStack.create(elementsDir));
             sections.add(BlipUIHStack.create(elements2));
             BlipUIVStack done = BlipUIVStack.create(sections);
 

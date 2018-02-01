@@ -47,6 +47,16 @@ class Material {
         this.specular = specular;
         this.shininess = shininess;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("a=" + ambient.toString() + " ");
+        sb.append("d=" + diffuse.toString() + " ");
+        sb.append("s=" + specular.toString() + " ");
+        sb.append("sh=" + shininess);
+        return sb.toString();
+    }
 }
 
 class Materials {
