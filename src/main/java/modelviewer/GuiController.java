@@ -35,8 +35,6 @@ public class GuiController implements BlipHandler {
     private MainGui app;
     private Stage stage;
     Consumer<Bounds> onBoundsChanged;
-    DB db;
-    Map persisted;
 
     public GuiController() {
     }
@@ -144,30 +142,14 @@ public class GuiController implements BlipHandler {
         return control;
     }
 
-    private void getAndOpenDb() {
-        db = DBMaker.fileDB("settings.db").closeOnJvmShutdown().make();
-        persisted = db.hashMap("map").createOrOpen();
-    }
 
     private Node createCheckbox(BlipUICheckbox v) {
-        getAndOpenDb();
-        Boolean value = (Boolean) persisted.get(v.name);
-        db.close();
-
         CheckBox control = new CheckBox();
-        if (value != null) {
-            control.setSelected(value);
-        }
-        else {
-            control.setSelected(v.initialState);
-        }
+        control.setSelected(v.initialState);
         control.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observableValue, Boolean aBoolean, Boolean t1) {
                 v.onChanged.accept(t1);
-                getAndOpenDb();
-                persisted.put(v.name, t1);
-                db.close();
             }
         });
 
@@ -198,31 +180,13 @@ public class GuiController implements BlipHandler {
     }
 
     private Node createTextField(BlipUITextField v) {
-        String value = v.initialState;
-        if (v.label.isPresent()) {
-            getAndOpenDb();
-            value = (String) persisted.get(v.label.get());
-            db.close();
-        }
-
         TextField control = new TextField();
-        if (value != null) {
-            control.setText(value);
-        }
-        else {
             control.setText(v.initialState);
-        }
         control.setMaxWidth(50f);
         control.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
                 v.onChanged.accept(t1);
-                if (v.label.isPresent()) {
-                    getAndOpenDb();
-                    persisted.put(v.label.get(), t1);
-                    db.close();
-                }
-
             }
         });
 

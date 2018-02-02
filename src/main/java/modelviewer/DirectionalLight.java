@@ -32,7 +32,7 @@ class DirectionalLight extends Light {
             shader.setBoolean(lightText +".shadowsEnabled", shadowsEnabled);
 
 //            if (shadowsEnabled) {
-                shader.setInt(lightText +".shadowMap", 3);
+                shader.setInt(lightText +".shadowMap", 20);
                 glActiveTexture(GL_TEXTURE3);
                 glBindTexture(GL_TEXTURE_2D, shadowTexture);
 //            }

@@ -125,7 +125,7 @@ class PointLight extends Light {
             shader.setBoolean(lightText +".shadowsEnabled", shadowsEnabled);
 
 //            if (shadowsEnabled) {
-                shader.setInt(lightText +".shadowMap", index + 6);
+                shader.setInt(lightText +".shadowMap", index + 21);
                 glActiveTexture(GL_TEXTURE6 + index);
                 glBindTexture(GL_TEXTURE_2D, shadowTexture);
 //            }
