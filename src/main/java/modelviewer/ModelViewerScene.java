@@ -1,17 +1,16 @@
 package modelviewer;
 
 import Useful.AppParams;
-import de.matthiasmann.twl.utils.PNGDecoder;
 import enterthematrix.Matrix4x4;
 import enterthematrix.Vector3;
 import enterthematrix.Vector4;
-import jassimp.AiMaterial;
-import jassimp.AiWrapperProvider;
-import jassimp.Jassimp;
+import jassimp.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.*;
 
 import static org.lwjgl.assimp.Assimp.aiProcess_FixInfacingNormals;
@@ -37,6 +36,13 @@ class BlipBasicModelSceneLoadModel implements BlipBasicModelScene {
 
     @Override
     public void handle(ModelViewerScene scene) {
+        try {
+            scene.loadModel(file);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 //        MeshLoader meshLoader = new MeshLoaderJAssimp();
 //        Model modelData = meshLoader.load(file.toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images",
 // aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
@@ -106,35 +112,18 @@ class ModelViewerScene implements Scene {
         lighting.handle(blip);
     }
 
-    ModelViewerScene(BlipHandler app) throws URISyntaxException, IOException {
-        this.app = app;
-        lighting = new ModelLighting(app, shaders);
+    public void loadModel(URL url) throws URISyntaxException, IOException {
+        File file = new File(url.getFile());
+        assert (file.exists());
+        loadModel(file);
+    }
 
-        File initialDir = new File(System.getProperty("user.dir"));
-        basicUi.add(BlipUIFileDialogButton.create("Load", "Choose Model File", (file) -> {
-            // Cause this will fire in its own thread, and we don't want to trash the meshdata mid-scene
-            queued.add(new BlipBasicModelSceneLoadModel(file));
-        }, Optional.of(GLFW_KEY_O), Optional.of(initialDir)));
-
-        basicUi.add(BlipUICheckbox.create("Model", drawModel, (v) -> drawModel = v, Optional.empty()));
-        basicUi.add(BlipUICheckbox.create("Axis markers", drawAxisMarkers, (v) -> drawAxisMarkers = v, Optional.empty
-                ()));
-        basicUi.add(BlipUICheckbox.create("Floor", drawFloor, (v) -> drawFloor = v, Optional.of(GLFW_KEY_KP_6)));
-        basicUi.add(BlipUICheckbox.create("Shadows", shadowsEnabled, (v) -> shadowsEnabled = v, Optional.of(GLFW_KEY_KP_5)));
-        basicUi.add(BlipUICheckbox.create("Shadows Quality", shadowsHighQuality, (v) -> shadowsHighQuality = v, Optional.empty()));
-        basicUi.add(BlipUICheckbox.create("Lights", renderLightsEnabled, (v) -> renderLightsEnabled = v, Optional
-                .empty()));
-//        basicUi.add(BlipUICheckbox.create("Debug Shader", debugShader, (v) -> {
-//            debugShader = v;
-//            shaders.debugShader.setCheckErrors(debugShader);
-//            shaders.standardShader.setCheckErrors(!debugShader);
-//        }, Optional.empty()));
-
+    public void loadModel(File file) throws URISyntaxException, IOException {
         JassimpWrapperProvider wrapper = new JassimpWrapperProvider();
         Jassimp.setWrapperProvider(wrapper);
         MeshLoader meshLoader = new MeshLoaderJAssimp();
 
-//        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/cube.obj",
+        //        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/cube.obj",
 // "C:/dev/portfolio/3ddemo/out/production/resources/images");
 //        MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("../models/cube.obj").toURI(),
 // "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate
@@ -144,10 +133,10 @@ class ModelViewerScene implements Scene {
 //        MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("/models/IronMan.obj").toURI(),
 // "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate
 // | aiProcess_FixInfacingNormals);
-                ModelData modelData = meshLoader.load(AppWrapper.class.getResource("/models/IronMan.obj").toURI(),
- "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate
- | aiProcess_FixInfacingNormals);
-//        ModelData modelData = meshLoader.load(AppWrapper.class.getResource("/models/audi/r8_gt_3ds.3ds").toURI(),
+        ModelData modelData = meshLoader.load(file.toURI(),
+                "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate
+                        | aiProcess_FixInfacingNormals);
+//        ModelData modelData = meshLoader.load(,
 //                "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate
 //                        | aiProcess_FixInfacingNormals);
 //        ModelData modelData = meshLoader.load(AppWrapper.class.getResource("/models/woman/highpoly.OBJ").toURI(),
@@ -169,18 +158,33 @@ class ModelViewerScene implements Scene {
 
         ArrayList<Material> materials = new ArrayList<Material>();
         List<AiMaterial> materialsRaw = modelData.getScene().getMaterials();
+
+
         for (int materialIdx = 0; materialIdx < materialsRaw.size(); materialIdx++) {
             AiMaterial mat = materialsRaw.get(materialIdx);
-            Colour ambient = (Colour) mat.getAmbientColor(wrapper);
-            Colour diffuse = (Colour) mat.getDiffuseColor(wrapper);
-            Colour specular = (Colour) mat.getSpecularColor(wrapper);
-            float shininess = mat.getShininess();
+                Colour ambient = (Colour) mat.getAmbientColor(wrapper);
+                Colour diffuse = (Colour) mat.getDiffuseColor(wrapper);
+                Colour specular = (Colour) mat.getSpecularColor(wrapper);
+                float shininess = mat.getShininess();
+
+            List<TextureFromFile> textures = new ArrayList<>();
+
+            for(int idx = 0; idx < mat.getNumTextures(AiTextureType.DIFFUSE); idx += 1) {
+                AiTextureInfo textureInfo = mat.getTextureInfo(AiTextureType.DIFFUSE, idx);
+                String path = file.getParent() + "/" + textureInfo.getFile();
+                TextureFromFile texture = new TextureFromFile(path);
+//                    File textureFile = new File(path);
+                textures.add(texture);
+            }
+
             Material material = new Material(mat.getName(),
-                    new Vector3(ambient.r, ambient.g, ambient.b),
-                    new Vector3(diffuse.r, diffuse.g, diffuse.b),
-                    new Vector3(specular.r, specular.g, specular.b),
-                    shininess);
-            materials.add(material);
+                        new Vector3(ambient.r, ambient.g, ambient.b),
+                        new Vector3(diffuse.r, diffuse.g, diffuse.b),
+                        new Vector3(specular.r, specular.g, specular.b),
+                        shininess,
+                    textures);
+                materials.add(material);
+
         }
 
         meshes = new Mesh[modelData.getMeshes().length];
@@ -203,6 +207,39 @@ class ModelViewerScene implements Scene {
 //            }));
             meshes[i] = mesh;
         }
+
+        assert(1 == 1);
+    }
+    
+    ModelViewerScene(BlipHandler app) throws URISyntaxException, IOException {
+        this.app = app;
+        lighting = new ModelLighting(app, shaders);
+
+        File initialDir = new File(System.getProperty("user.dir") + "/src/main/resources/models");
+
+        basicUi.add(BlipUIFileDialogButton.create("Load", "Choose Model File", (file) -> {
+            // Cause this will fire in its own thread, and we don't want to trash the meshdata mid-scene
+            queued.add(new BlipBasicModelSceneLoadModel(file));
+        }, Optional.of(GLFW_KEY_O), Optional.of(initialDir)));
+
+        basicUi.add(BlipUICheckbox.create("Model", drawModel, (v) -> drawModel = v, Optional.empty()));
+        basicUi.add(BlipUICheckbox.create("Axis markers", drawAxisMarkers, (v) -> drawAxisMarkers = v, Optional.empty
+                ()));
+        basicUi.add(BlipUICheckbox.create("Floor", drawFloor, (v) -> drawFloor = v, Optional.of(GLFW_KEY_KP_6)));
+        basicUi.add(BlipUICheckbox.create("Shadows", shadowsEnabled, (v) -> shadowsEnabled = v, Optional.of(GLFW_KEY_KP_5)));
+        basicUi.add(BlipUICheckbox.create("Shadows Quality", shadowsHighQuality, (v) -> shadowsHighQuality = v, Optional.empty()));
+        basicUi.add(BlipUICheckbox.create("Lights", renderLightsEnabled, (v) -> renderLightsEnabled = v, Optional
+                .empty()));
+//        basicUi.add(BlipUICheckbox.create("Debug Shader", debugShader, (v) -> {
+//            debugShader = v;
+//            shaders.debugShader.setCheckErrors(debugShader);
+//            shaders.standardShader.setCheckErrors(!debugShader);
+//        }, Optional.empty()));
+
+
+        loadModel(AppWrapper.class.getResource("/models/TrexModelByJoel3d_FBX/TrexByJoel3d.fbx"));
+//        loadModel(AppWrapper.class.getResource("/models/audi/r8_gt_3ds.3ds").toURI());
+//        loadModel(AppWrapper.class.getResource("/models/Baymax_White_BigHero6/Bigmax_White_OBJ.obj").toURI());
 
 
 //        Materials materials = new Materials();
@@ -234,44 +271,31 @@ class ModelViewerScene implements Scene {
 //        }
 
         {
+            Material axisMaterial = new Material("axis", Vector3.fill(1), Vector3.fill(1), Vector3.fill(1), 10);
             Matrix4x4 scale = Matrix4x4.scale(0.01f);
             // axis
-            axisMarkers.add(new FancyCube(new Vector4(0, 0, 0, 1), Optional.of(scale), Optional.empty(), materials
-                    .get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(0, 0, 0, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
 
-            axisMarkers.add(new FancyCube(new Vector4(-1, 0, -1, 1), Optional.of(scale), Optional.empty(), materials
-                    .get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1, 0, -1, 1), Optional.of(scale), Optional.empty(), materials
-                    .get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1, 0, 1, 1), Optional.of(scale), Optional.empty(), materials
-                    .get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(-1, 0, 1, 1), Optional.of(scale), Optional.empty(), materials
-                    .get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1, 0, -1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1, 0, -1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1, 0, 1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1, 0, 1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
 
-            axisMarkers.add(new FancyCube(new Vector4(-1, 1, -1, 1), Optional.of(scale), Optional.empty(), materials
-                    .get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1, 1, -1, 1), Optional.of(scale), Optional.empty(), materials
-                    .get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1, 1, 1, 1), Optional.of(scale), Optional.empty(), materials
-                    .get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(-1, 1, 1, 1), Optional.of(scale), Optional.empty(), materials
-                    .get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1, 1, -1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1, 1, -1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1, 1, 1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1, 1, 1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
 
-            axisMarkers.add(new FancyCube(new Vector4(-1, -1, -1, 1), Optional.of(scale), Optional.empty(), materials
-                    .get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1, -1, -1, 1), Optional.of(scale), Optional.empty(), materials
-                    .get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1, -1, 1, 1), Optional.of(scale), Optional.empty(), materials
-                    .get(0), texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(-1, -1, 1, 1), Optional.of(scale), Optional.empty(), materials
-                    .get(0), texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1, -1, -1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1, -1, -1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1, -1, 1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1, -1, 1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
 
         }
 
 
         {
-            TextureFromFile floorTexture = new TextureFromFile("../images/WM_IndoorWood-44_1024.png", PNGDecoder
-                    .Format.RGBA);
+            TextureFromFile floorTexture = new TextureFromFile(getClass().getResource("../images/WM_IndoorWood-44_1024.png"));
 //            Optional<Matrix4x4> rotate = Optional.empty();
             Optional<Matrix4x4> rotate = Optional.of(Matrix4x4.rotateAroundXAxis(90));
 //            Optional<Matrix4x4> scale = Optional.empty();
@@ -336,10 +360,6 @@ class ModelViewerScene implements Scene {
 
         queued.forEach(blip -> {
             blip.handle(this);
-//            if (blip instanceof BlipBasicModelSceneLoadModel) {
-//                BlipBasicModelSceneLoadModel v = (BlipBasicModelSceneLoadModel) blip;
-//                v.handle(this);
-//            }
         });
         queued.clear();
 

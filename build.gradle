@@ -67,13 +67,14 @@ repositories {
 
 dependencies {
     // https://mvnrepository.com/artifact/org.l33tlabs.twl/pngdecoder
-    compile group: 'org.l33tlabs.twl', name: 'pngdecoder', version: '1.0'
+//    compile group: 'org.l33tlabs.twl', name: 'pngdecoder', version: '1.0'
 
     compile 'com.github.kotlin-graphics:uno-sdk:f9a47461db6eb4e398563d6414d291fd88d38132'
     compile 'io.github.microutils:kotlin-logging:1.4.6'
     compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.mapdb:mapdb:3.0.5"
 
     compile 'us.ihmc.thirdparty:jassimp:4.0.0-ihmc2'
 

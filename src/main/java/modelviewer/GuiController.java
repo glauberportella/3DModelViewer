@@ -14,12 +14,17 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
 
 // Controls the JavaFX mini GUI, and handles requests to dynamically build the UI
 public class GuiController implements BlipHandler {
@@ -30,6 +35,8 @@ public class GuiController implements BlipHandler {
     private MainGui app;
     private Stage stage;
     Consumer<Bounds> onBoundsChanged;
+    DB db;
+    Map persisted;
 
     public GuiController() {
     }
@@ -137,13 +144,30 @@ public class GuiController implements BlipHandler {
         return control;
     }
 
+    private void getAndOpenDb() {
+        db = DBMaker.fileDB("settings.db").closeOnJvmShutdown().make();
+        persisted = db.hashMap("map").createOrOpen();
+    }
+
     private Node createCheckbox(BlipUICheckbox v) {
+        getAndOpenDb();
+        Boolean value = (Boolean) persisted.get(v.name);
+        db.close();
+
         CheckBox control = new CheckBox();
-        control.setSelected(v.initialState);
+        if (value != null) {
+            control.setSelected(value);
+        }
+        else {
+            control.setSelected(v.initialState);
+        }
         control.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observableValue, Boolean aBoolean, Boolean t1) {
                 v.onChanged.accept(t1);
+                getAndOpenDb();
+                persisted.put(v.name, t1);
+                db.close();
             }
         });
 
@@ -174,13 +198,31 @@ public class GuiController implements BlipHandler {
     }
 
     private Node createTextField(BlipUITextField v) {
+        String value = v.initialState;
+        if (v.label.isPresent()) {
+            getAndOpenDb();
+            value = (String) persisted.get(v.label.get());
+            db.close();
+        }
+
         TextField control = new TextField();
-        control.setText(v.initialState);
+        if (value != null) {
+            control.setText(value);
+        }
+        else {
+            control.setText(v.initialState);
+        }
         control.setMaxWidth(50f);
         control.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
                 v.onChanged.accept(t1);
+                if (v.label.isPresent()) {
+                    getAndOpenDb();
+                    persisted.put(v.label.get(), t1);
+                    db.close();
+                }
+
             }
         });
 

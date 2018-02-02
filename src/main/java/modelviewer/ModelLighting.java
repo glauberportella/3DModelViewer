@@ -21,9 +21,9 @@ public class ModelLighting implements BlipHandler{
 //    private final float defaultConstant = 1.0f;
 //    private final float defaultLinear = 0.7f;
 //    private final float defaultQuadratic = 1.8f;
-    private final float defaultConstant = 0.01f;
-    private final float defaultLinear = 0.01f;
-    private final float defaultQuadratic = 0.2f;
+    private final float defaultConstant = 0.8f;
+    private final float defaultLinear = 0.4f;
+    private final float defaultQuadratic = 0.5f;
 
     ModelLighting(BlipHandler app, ShaderStore shaders) {
         this.app = app;
@@ -39,15 +39,15 @@ public class ModelLighting implements BlipHandler{
 
         float fullStrength = 1.0f;
         float halfStrength = 0.5f;
-        float ambientStrength = 0.4f;
-        float diffuseStrength = 0.1f;
+        float ambientStrength = 0.05f;
+        float diffuseStrength = 0.4f;
 //        float diffuseStrength = 3f;
         float directionalModifier = 2f;
 //        float specularDirectionalForce = 0.0f;
-        float ambientMin = 0.1f;
+        float ambientMin = 0.01f;
 
-        float directionalAmbient = 0.4f;
-        float directionalDiffuse = 0.7f;
+        float directionalAmbient = 0.1f;
+        float directionalDiffuse = 0.3f;
         float directionalSpecular = 0.5f;
 
         Vector3 ambient = new Vector3(ambientStrength, ambientStrength, ambientStrength);
@@ -76,7 +76,7 @@ public class ModelLighting implements BlipHandler{
 
             final int x = i;
 
-            light.setEnabled(false);
+//            light.setEnabled(false);
         }
 
 //        points[0].setEnabled(true);
@@ -117,6 +117,7 @@ public class ModelLighting implements BlipHandler{
             List<BlipUI> elements1 = new ArrayList<>();
             List<BlipUI> elementsDir = new ArrayList<>();
             List<BlipUI> elements2 = new ArrayList<>();
+            List<BlipUI> elementsPoint = new ArrayList<>();
             List<BlipUI> sections = new ArrayList<>();
 
             elements1.add(BlipUICheckbox.create("Directional", directional.isEnabled(), directional::setEnabled, Optional.of(GLFW_KEY_0)));
@@ -152,6 +153,27 @@ public class ModelLighting implements BlipHandler{
                 directional.specular = Vector3.fill(value);
             }));
 
+            elementsPoint.add(BlipUITextField.create(Optional.of("Point Ambient"), String.valueOf(points[0].ambient.x()), (v) -> {
+                float value = points[0].ambient.x();
+                try { value = Float.valueOf(v); } catch(Exception e) {}
+                final float x = value;
+                Arrays.stream(points).forEach(p -> p.ambient = Vector3.fill(x));
+            }));
+            
+            elementsPoint.add(BlipUITextField.create(Optional.of("Point Diffuse"), String.valueOf(points[0].diffuse.x()), (v) -> {
+                float value = points[0].diffuse.x();
+                try { value = Float.valueOf(v); } catch(Exception e) {}
+                final float x = value;
+                Arrays.stream(points).forEach(p -> p.diffuse = Vector3.fill(x));
+            }));
+            
+            elementsPoint.add(BlipUITextField.create(Optional.of("Point Specular"), String.valueOf(points[0].specular.x()), (v) -> {
+                float value = points[0].specular.x();
+                try { value = Float.valueOf(v); } catch(Exception e) {}
+                final float x = value;
+                Arrays.stream(points).forEach(p -> p.specular = Vector3.fill(x));
+            }));
+
             elements2.add(BlipUITextField.create(Optional.of("Point Constant"), String.valueOf(defaultConstant), (v) -> {
                 float value = defaultConstant;
                 try { value = Float.valueOf(v); } catch(Exception e) {}
@@ -173,6 +195,7 @@ public class ModelLighting implements BlipHandler{
 
             sections.add(BlipUIHStack.create(elements1));
             sections.add(BlipUIHStack.create(elementsDir));
+            sections.add(BlipUIHStack.create(elementsPoint));
             sections.add(BlipUIHStack.create(elements2));
             BlipUIVStack done = BlipUIVStack.create(sections);
 

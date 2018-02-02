@@ -54,6 +54,9 @@ public class MeshLoaderJAssimp implements MeshLoader {
         steps.add(AiPostProcessSteps.TRIANGULATE);
         steps.add(AiPostProcessSteps.JOIN_IDENTICAL_VERTICES);
         steps.add(AiPostProcessSteps.GEN_SMOOTH_NORMALS);
+        steps.add(AiPostProcessSteps.FIND_INVALID_DATA);
+        steps.add(AiPostProcessSteps.GEN_UV_COORDS);
+//        steps.add(AiPostProcessSteps.TRANSFORM_UV_COORDS);
 
         AiScene scene = Jassimp.importFile(fullPath, steps);
 

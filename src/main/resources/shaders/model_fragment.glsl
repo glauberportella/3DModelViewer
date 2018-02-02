@@ -41,10 +41,12 @@ struct Texture {
 };
 
 struct Material {
-     vec3 ambient;
-     vec3 diffuse;
+    vec3 ambient;
+    vec3 diffuse;
     vec3 specular;
     float shininess;
+
+    sampler2D diffuseTexture;
 };
 
 #define NR_POINT_LIGHTS 4
@@ -160,7 +162,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, v
 //    vec3 diffuse  = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
 //    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
     vec3 ambient  = light.ambient  * material.ambient;
-    vec3 diffuse  = light.diffuse * diff * material.diffuse;
+    vec3 diffuse  = light.diffuse + (diff * material.diffuse) + (diff * vec3(texture(material.diffuseTexture, TexCoords)));
     vec3 specular = light.specular * spec * material.specular;
 
     ambient  *= attenuation;

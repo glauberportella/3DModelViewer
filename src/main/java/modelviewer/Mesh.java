@@ -1,25 +1,15 @@
 package modelviewer;
 
-import com.jogamp.opengl.math.Matrix4;
 import enterthematrix.Matrix4x4;
-import enterthematrix.Vector3;
 import enterthematrix.Vector4;
-import matrixlwjgl.MatrixLwjgl;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
 
-import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.List;
 import java.util.Optional;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE1;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
@@ -89,12 +79,12 @@ public class Mesh extends Model {
             glVertexAttribPointer(VBO_INDEX_NORMALS, 3, GL_FLOAT, false, 0, 0);
         }
 
-//        {
+//        if (material.getDiffuseTextures().size() > 0) {
 //            // VBO 2 = textures
 //            int vboTextures = GL15.glGenBuffers();
 //            glEnableVertexAttribArray(VBO_INDEX_TEXTURE);
 //            glBindBuffer(GL_ARRAY_BUFFER, vboTextures);
-//            GL15.glBufferData(GL_ARRAY_BUFFER, textureBufFloat, GL15.GL_STATIC_DRAW);
+//            GL15.glBufferData(GL_ARRAY_BUFFER, material.getDiffuseTextures().get(0)., GL15.GL_STATIC_DRAW);
 //            glVertexAttribPointer(VBO_INDEX_TEXTURE, 2, GL_FLOAT, false, 0, 0);
 //        }
 
@@ -120,33 +110,17 @@ public class Mesh extends Model {
 
     @Override
     public void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate, Shader shader) {
-//        shader.setVec3("material.ambient",  new Vector3(1.0f, 0.5f, 0.31f).$times(5f));
-//        shader.setVec3("material.diffuse",  new Vector3(1.0f, 0.5f, 0.31f).$times(2f));
-//        shader.setVec3("material.specular", new Vector3(0.1f, 0.1f, 0.1f));
-//        shader.setFloat("material.shininess", 32.0f);
-
-//        shader.setFloat("material.shininess", material.getShininess());
-
-//        shader.setVec3("material.ambient", material.getAmbient());
-//        shader.setVec3("material.diffuse", material.getDiffuse());
-//        shader.setVec3("material.specular", material.getSpecular());
-
-//        shader.setVec3("material.ambient", 0.0f, 0.1f, 0.06f);
-//        shader.setVec3("material.diffuse", 0.0f, 0.50980392f, 0.50980392f);
-//        shader.setVec3("material.specular", 0.50196078f, 0.50196078f, 0.50196078f);
-//        shader.setFloat("material.shininess", 32.0f);
-
-
         try (ShaderUse wrap = new ShaderUse(shader)) {
-//            shader.setVec3("material.ambient", material.getAmbient());
-
             shader.setVec3("material.ambient", material.getAmbient());
             shader.setVec3("material.diffuse", material.getDiffuse());
             shader.setVec3("material.specular", material.getSpecular());
             shader.setFloat("material.shininess", material.getShininess());
 
-//            shader.setInt("material.texture", 0);
-//            shader.setInt("material.diffuse", 0);
+            if (material.getDiffuseTextures().size() > 0) {
+                shader.setInt("material.diffuseTexture", material.getDiffuseTextures().get(0).getTextureId());
+            }
+
+            //            shader.setInt("material.diffuse", 0);
 //            shader.setVec3("material.specular", material.getSpecular());
 //            shader.setInt("material.specular", 1);
 //            shader.setFloat("material.shininess", material.getShininess());
