@@ -134,11 +134,13 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
       vec3 ambient  = vec3(light.ambientMin) + (light.ambient * material.ambient);
 //      vec3 diffuse  = (light.diffuse * material.diffuse) + (light.ambient * material.diffuse *  vec3(texture(material.diffuseTexture, TexCoords)));
 //      vec3 diffuse  = (light.diffuse * material.diffuse *  vec3(texture(material.diffuseTexture, TexCoords)));
-        float tex = 1.0f;
+        vec3 tex = vec3(1.0f);
         if (drawTextures) {
-            tex = texture(material.diffuseTexture, TexCoords);
+//            tex = texture2D(material.diffuseTexture, TexCoords).xyz;
+            tex = vec3(texture(material.diffuseTexture, TexCoords));
         }
-      vec3 diffuse  = (light.diffuse * material.diffuse * vec3(tex));
+//      vec3 diffuse  = (light.diffuse * material.diffuse * tex);
+      vec3 diffuse  = tex;
 //      vec3 diffuse  = (light.ambient * vec3(texture(material.diffuseTexture, TexCoords)));
 //      vec3 diffuse  = vec3(texture(material.diffuseTexture, TexCoords));
       vec3 specular = light.specular * spec * material.specular;

@@ -11,33 +11,35 @@ class DirectionalLight extends Light {
     final Vector3 direction;
     float ambientMin;
 
-    public DirectionalLight(Vector3 direction, boolean enabled, Vector3 ambient, Vector3 diffuse, Vector3 specular, float ambientMin) {
+    public DirectionalLight(Vector3 direction, boolean enabled, Vector3 ambient, Vector3 diffuse, Vector3 specular,
+                            float ambientMin) {
         super(enabled, ambient, diffuse, specular);
         this.direction = direction;
         this.ambientMin = ambientMin;
     }
 
-    @Override public void setupShader(Shader shader) {
+    @Override
+    public void setupShader(Shader shader) {
         assert (shader.isInUse());
         String lightText = "dirLight";
         super.setupShaderImpl(shader, lightText);
 //        if (isEnabled()) {
-            shader.setVec3(lightText + ".direction", direction);
-            shader.setVec3(lightText + ".ambient", ambient);
-            shader.setFloat(lightText + ".ambientMin", ambientMin);
-            shader.setVec3(lightText + ".diffuse", diffuse);
-            shader.setVec3(lightText + ".specular", specular);
+        shader.setVec3(lightText + ".direction", direction);
+        shader.setVec3(lightText + ".ambient", ambient);
+        shader.setFloat(lightText + ".ambientMin", ambientMin);
+        shader.setVec3(lightText + ".diffuse", diffuse);
+        shader.setVec3(lightText + ".specular", specular);
 
-            shader.setBoolean(lightText +".shadowsEnabled", shadowsEnabled);
+        shader.setBoolean(lightText + ".shadowsEnabled", shadowsEnabled);
 
 //            if (shadowsEnabled) {
 //        shader.setInt(lightText +".shadowMap", 20);
 //        glActiveTexture(GL_TEXTURE3);
 
         // Hardcoded constant is clumsy attempt to avoid stepping on the regular textures
-                shader.setInt(lightText +".shadowMap", GL_TEXTURE20);
-                glActiveTexture(GL_TEXTURE20);
-                glBindTexture(GL_TEXTURE_2D, shadowTexture);
+        shader.setInt(lightText + ".shadowMap", GL_TEXTURE20);
+        glActiveTexture(GL_TEXTURE20);
+        glBindTexture(GL_TEXTURE_2D, shadowTexture);
 //            }
 //        }
     }

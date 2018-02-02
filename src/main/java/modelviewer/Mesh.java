@@ -83,6 +83,19 @@ public class Mesh extends Model {
             glVertexAttribPointer(VBO_INDEX_NORMALS, 3, GL_FLOAT, false, 0, 0);
         }
 
+//        if (data.normals != null) {
+//            FloatBuffer normalsBuffer = BufferUtils.createFloatBuffer(data.normals.length);
+//            normalsBuffer.put(data.normals);
+//            normalsBuffer.flip();
+//
+//            // VBO 1 = normals
+//            int vboNormals = GL15.glGenBuffers();
+//            glEnableVertexAttribArray(VBO_INDEX_NORMALS);
+//            glBindBuffer(GL_ARRAY_BUFFER, vboNormals);
+//            GL15.glBufferData(GL_ARRAY_BUFFER, normalsBuffer, GL15.GL_STATIC_DRAW);
+//            glVertexAttribPointer(VBO_INDEX_NORMALS, 3, GL_FLOAT, false, 0, 0);
+//        }
+
 //        if (material.getDiffuseTextures().size() > 0) {
 //            // VBO 2 = textures
 //            int vboTextures = GL15.glGenBuffers();
@@ -148,7 +161,7 @@ public class Mesh extends Model {
 
             if (material.getDiffuseTextures().size() > 0) {
                 TextureFromFile texture = material.getDiffuseTextures().get(0);
-                shader.setInt("material.diffuseTexture", texture.getTextureId());
+                shader.setInt("material.diffuseTexture", GL_TEXTURE0);
                 glActiveTexture(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_2D, texture.getTextureId());
             }
