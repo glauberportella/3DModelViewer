@@ -8,6 +8,8 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_CLAMP_TO_BORDER;
 import static org.lwjgl.opengl.GL30.*;
 
+// Shadow mapping: render the scene from the light's viewpoint, but instead of rendering it normally, render the depth
+// values onto a texture.  When the scene is rendered normally, can test this texture to see if that pixel is in shadow.
 public class ShadowMap {
     int depthMapFBO = glGenFramebuffers();
     final int SHADOW_WIDTH = 2048, SHADOW_HEIGHT = SHADOW_WIDTH;
@@ -60,7 +62,7 @@ public class ShadowMap {
         // Back to default framebugger (screen)
 //        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        // 1. first setup to depth map
+        // first setup to depth map
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
         glEnable(GL_DEPTH_TEST);

@@ -57,6 +57,9 @@ uniform Material material;
 uniform vec3 viewPos;
 uniform bool shadowsEnabled;
 uniform bool shadowsHighQuality;
+uniform float shadowBiasMulti;
+uniform float shadowBiasMax;
+uniform bool drawTextures;
 
 out vec4 FragColor;
 
@@ -69,13 +72,11 @@ in vec4 FragPosLightSpacePoint[NR_POINT_LIGHTS];
 
 float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadowMap, vec3 normal, vec3 lightDir)
 {
-
-
     // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 
-            if(projCoords.z > 1.0)
-                return 0.0;
+    if(projCoords.z > 1.0)
+        return 0.0;
 
 
     // transform to [0,1] range
@@ -88,13 +89,16 @@ float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadowMap, vec3 normal
     float currentDepth = projCoords.z;
 
     // Bias gets rid of weird moire pattern
-    float bias = 0.005;
+//    float bias = 0.005;
 //    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.00005);
+    float bias = max(shadowBiasMulti * (1.0 - dot(normal, lightDir)), shadowBiasMax);
 
     // check whether current frag pos is in shadow
     float shadow = 0;
 
+
     if (shadowsHighQuality) {
+//    if (true) {
         vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
         for(int x = -1; x <= 1; ++x)
         {
@@ -108,7 +112,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadowMap, vec3 normal
 
     }
     else {
-        float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+        shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
     }
 
     //return 1.0f;
@@ -127,9 +131,18 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 //      vec3 ambient  = light.ambient  * vec3(texture(material.ambient, TexCoords));
 //      vec3 diffuse  = light.diffuse  * diff * vec3(texture(material.diffuse, TexCoords));
 //      vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
-      vec3 ambient  = light.ambientMin + (light.ambient * material.ambient);
-      vec3 diffuse  = light.diffuse * material.diffuse;
+      vec3 ambient  = vec3(light.ambientMin) + (light.ambient * material.ambient);
+//      vec3 diffuse  = (light.diffuse * material.diffuse) + (light.ambient * material.diffuse *  vec3(texture(material.diffuseTexture, TexCoords)));
+//      vec3 diffuse  = (light.diffuse * material.diffuse *  vec3(texture(material.diffuseTexture, TexCoords)));
+        float tex = 1.0f;
+        if (drawTextures) {
+            tex = texture(material.diffuseTexture, TexCoords);
+        }
+      vec3 diffuse  = (light.diffuse * material.diffuse * vec3(tex));
+//      vec3 diffuse  = (light.ambient * vec3(texture(material.diffuseTexture, TexCoords)));
+//      vec3 diffuse  = vec3(texture(material.diffuseTexture, TexCoords));
       vec3 specular = light.specular * spec * material.specular;
+//       return (ambient + diffuse + specular);
 
       float shadow = 0;
       if (shadowsEnabled) {
@@ -221,5 +234,8 @@ void main(void) {
     //result += CalcSpotLight(spotLight, norm, FragPos, viewDir);
 
     FragColor = vec4(result, 1.0);
+
+//    FragColor = texture(material.diffuseTexture, TexCoords);
+
     //FragColor = texture(material.texture, TexCoords);
 }

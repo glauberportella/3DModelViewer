@@ -7,14 +7,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-/** Don't want to create Blips for every single little thing, e.g. turning lights on and off.  Actually has opposite of
- *  desired effect, and spreads parts of the system that could be localised, all over the code.
- *  Instead, allow components to add things to the UI.  Has advantage that UI is now completely decoupled, making unit
- *  testing easier and making it possible to e.g. drop in a completely different UI later.
+/**
+ * Don't want to create Blips for every single little thing, e.g. turning lights on and off.  Actually has opposite of
+ * desired effect, and spreads parts of the system that could be localised, all over the code.
+ * Instead, allow components to add things to the UI.  Has advantage that UI is now completely decoupled, making unit
+ * testing easier and making it possible to e.g. drop in a completely different UI later.
  */
 
-class BlipUI implements Blip {}
-class BlipUIContainer extends BlipUI {}
+class BlipUI implements Blip {
+}
+
+class BlipUIContainer extends BlipUI {
+}
 
 class BlipUICheckbox extends BlipUI {
     public String name;
@@ -22,9 +26,11 @@ class BlipUICheckbox extends BlipUI {
     public Consumer<Boolean> onChanged;
     Optional<Integer> shortcut;
 
-    private BlipUICheckbox() {}
+    private BlipUICheckbox() {
+    }
 
-    static BlipUICheckbox create(String name, boolean initialState, Consumer<Boolean> onChanged, Optional<Integer> shortcut) {
+    static BlipUICheckbox create(String name, boolean initialState, Consumer<Boolean> onChanged, Optional<Integer>
+            shortcut) {
         BlipUICheckbox out = new BlipUICheckbox();
         out.name = name;
         out.initialState = initialState;
@@ -39,7 +45,8 @@ class BlipUIButton extends BlipUI {
     public Runnable onClicked;
     Optional<Integer> shortcut;
 
-    private BlipUIButton() {}
+    private BlipUIButton() {
+    }
 
     static BlipUIButton create(String label, Runnable onClicked, Optional<Integer> shortcut) {
         BlipUIButton out = new BlipUIButton();
@@ -57,9 +64,11 @@ class BlipUIFileDialogButton extends BlipUI {
     Optional<Integer> shortcut;
     Optional<File> initialDir;
 
-    private BlipUIFileDialogButton() {}
+    private BlipUIFileDialogButton() {
+    }
 
-    static BlipUIFileDialogButton create(String label, String dialogTitle, Consumer<File> onFileSelected, Optional<Integer> shortcut, Optional<File> initialDir) {
+    static BlipUIFileDialogButton create(String label, String dialogTitle, Consumer<File> onFileSelected,
+                                         Optional<Integer> shortcut, Optional<File> initialDir) {
         BlipUIFileDialogButton out = new BlipUIFileDialogButton();
         out.label = label;
         out.dialogTitle = dialogTitle;
@@ -75,7 +84,8 @@ class BlipUITextField extends BlipUI {
     public String initialState;
     public Consumer<String> onChanged;
 
-    private BlipUITextField() {}
+    private BlipUITextField() {
+    }
 
     static BlipUITextField create(Optional<String> label, String initialState, Consumer<String> onChanged) {
         BlipUITextField out = new BlipUITextField();
@@ -91,7 +101,8 @@ class ComboBoxItem {
     public Runnable onSelected;
     public Optional<Integer> shortcut;
 
-    private ComboBoxItem() {}
+    private ComboBoxItem() {
+    }
 
     static ComboBoxItem create(String value, Runnable onSelected, Optional<Integer> shortcut) {
         ComboBoxItem out = new ComboBoxItem();
@@ -106,7 +117,8 @@ class BlipUIComboBox extends BlipUI {
     public Optional<String> label;
     public List<ComboBoxItem> items;
 
-    private BlipUIComboBox() {}
+    private BlipUIComboBox() {
+    }
 
     static BlipUIComboBox create(Optional<String> label, List<ComboBoxItem> items) {
         BlipUIComboBox out = new BlipUIComboBox();
@@ -120,7 +132,8 @@ class BlipUITitledSection extends BlipUI {
     public BlipUIContainer content;
     public String name;
 
-    private BlipUITitledSection() { }
+    private BlipUITitledSection() {
+    }
 
     static BlipUITitledSection create(String name, BlipUIContainer content) {
         BlipUITitledSection out = new BlipUITitledSection();
@@ -141,7 +154,8 @@ class BlipUITitledSection extends BlipUI {
 class BlipUIHStack extends BlipUIContainer {
     public List<BlipUI> elements = new ArrayList<BlipUI>();
 
-    private BlipUIHStack() { }
+    private BlipUIHStack() {
+    }
 
     static BlipUIHStack create(List<BlipUI> elements) {
         BlipUIHStack out = new BlipUIHStack();
@@ -153,7 +167,16 @@ class BlipUIHStack extends BlipUIContainer {
 class BlipUIVStack extends BlipUIContainer {
     public List<BlipUI> elements = new ArrayList<BlipUI>();
 
-    private BlipUIVStack() { }
+    private BlipUIVStack() {
+    }
+
+    static BlipUIVStack create(BlipUI... element) {
+        ArrayList<BlipUI> elements = new ArrayList<>();
+        for (int i = 0; i < element.length; i++) {
+            elements.add(element[i]);
+        }
+        return create(elements);
+    }
 
     static BlipUIVStack create(List<BlipUI> elements) {
         BlipUIVStack out = new BlipUIVStack();

@@ -6,8 +6,7 @@ import enterthematrix.Vector4;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE6;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
+import static org.lwjgl.opengl.GL13.*;
 
 abstract class Light {
     protected Vector3 ambient, diffuse, specular;
@@ -125,8 +124,13 @@ class PointLight extends Light {
             shader.setBoolean(lightText +".shadowsEnabled", shadowsEnabled);
 
 //            if (shadowsEnabled) {
-                shader.setInt(lightText +".shadowMap", index + 21);
-                glActiveTexture(GL_TEXTURE6 + index);
+        // Hardcoded constant is clumsy attempt to avoid stepping on the regular textures
+                shader.setInt(lightText +".shadowMap", GL_TEXTURE21 + index);
+                glActiveTexture(GL_TEXTURE21 + index);
+
+//        shader.setInt(lightText +".shadowMap", index + 21);
+//        glActiveTexture(GL_TEXTURE6 + index);
+
                 glBindTexture(GL_TEXTURE_2D, shadowTexture);
 //            }
 //        }

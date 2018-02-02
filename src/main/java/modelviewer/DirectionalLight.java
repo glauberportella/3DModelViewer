@@ -5,8 +5,7 @@ import enterthematrix.Vector3;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE3;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
+import static org.lwjgl.opengl.GL13.*;
 
 class DirectionalLight extends Light {
     final Vector3 direction;
@@ -32,8 +31,12 @@ class DirectionalLight extends Light {
             shader.setBoolean(lightText +".shadowsEnabled", shadowsEnabled);
 
 //            if (shadowsEnabled) {
-                shader.setInt(lightText +".shadowMap", 20);
-                glActiveTexture(GL_TEXTURE3);
+//        shader.setInt(lightText +".shadowMap", 20);
+//        glActiveTexture(GL_TEXTURE3);
+
+        // Hardcoded constant is clumsy attempt to avoid stepping on the regular textures
+                shader.setInt(lightText +".shadowMap", GL_TEXTURE20);
+                glActiveTexture(GL_TEXTURE20);
                 glBindTexture(GL_TEXTURE_2D, shadowTexture);
 //            }
 //        }

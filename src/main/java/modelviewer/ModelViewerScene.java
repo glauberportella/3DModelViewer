@@ -6,6 +6,7 @@ import enterthematrix.Vector3;
 import enterthematrix.Vector4;
 import jassimp.*;
 
+import javax.swing.text.html.Option;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -43,33 +44,6 @@ class BlipBasicModelSceneLoadModel implements BlipBasicModelScene {
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        MeshLoader meshLoader = new MeshLoaderJAssimp();
-//        Model modelData = meshLoader.load(file.toURI(), "C:/dev/portfolio/3ddemo/out/production/resources/images",
-// aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
-//        Mesh[] meshes = new Mesh[meshData.length];
-//        Matrix4x4 meshScale = MeshDataUtils.getInitialScaleMatrix(meshData);
-//        List<BlipUI> ui = new ArrayList<BlipUI>();
-//
-//        for(int i = 0; i < meshData.length; i ++) {
-////            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(Matrix4x4.scale(0.1f)), Optional.empty(),
-// meshData[i]);
-//            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(meshScale), Optional.empty(), meshData[i]);
-////            final int x = i;
-//            final MeshData y = meshData[i];
-//            ui.add(BlipUITextField.create(Optional.of("Mesh indices"), String.valueOf(meshData[i].indices.length),
-// (v) -> {
-//                int indices = y.indices.length;
-//                try {
-//                    indices = Integer.parseInt(v);
-//                }
-//                catch(Exception e) {
-//                }
-//                mesh.setIndicesToDraw(indices);
-//            }));
-//            meshes[i] = mesh;
-//        }
-//
-//        scene.changeData(meshes, ui);
     }
 }
 
@@ -86,18 +60,25 @@ class ModelViewerScene implements Scene {
     private Mesh[] meshes;
 
 
-    private boolean drawAxisMarkers = false;
+    private boolean drawAxisMarkers = Persister.getOrElse("drawAxisMarkers", false);
     private boolean renderToDepth = true;
-    private boolean renderDepthFramebuffer = false;
-    private boolean drawFloor = false;
-    private boolean drawModel = true;
-    private boolean renderLightsEnabled = true;
-    private boolean shadowsEnabled = true;
-    private boolean shadowsHighQuality = true;
+    private boolean renderDepthFramebuffer = Persister.getOrElse("renderDepthFramebuffer", false);
+    private boolean drawFloor = Persister.getOrElse("drawFloor", false);
+    private boolean drawModel = Persister.getOrElse("drawModel", true);
+    private boolean drawCubes = Persister.getOrElse("drawCubes", true);
+    private boolean renderLightsEnabled = Persister.getOrElse("renderLightsEnabled", false);
+    private boolean shadowsEnabled = Persister.getOrElse("shadowsEnabled", true);
+    private boolean shadowsHighQuality = Persister.getOrElse("shadowsHighQuality", true);
+    private float shadowsBiasMulti = Persister.getOrElse("shadowsBiasMulti", 0.05f);
+    private boolean drawTextures = Persister.getOrElse("drawTextures", true);
+    private float shadowsBiasMax = Persister.getOrElse("shadowsBiasMax", 0.00005f);
+    private float floorYOffset = Persister.getOrElse("floorYOffset", -0.2f);
     private boolean debugShader = true;
 
     private List<BlipUI> modelUI = new ArrayList<BlipUI>();
     private final List<BlipUI> basicUi = new ArrayList<BlipUI>();
+    private final List<BlipUI> basicUi2 = new ArrayList<BlipUI>();
+    private final List<BlipUI> basicUi3 = new ArrayList<BlipUI>();
     private final Queue<BlipBasicModelScene> queued = new ArrayDeque<>();
 
 
@@ -106,7 +87,12 @@ class ModelViewerScene implements Scene {
         if (blip instanceof BlipSceneStart) {
             List<BlipUI> uiComplete = new ArrayList<>(basicUi);
             uiComplete.addAll(modelUI);
-            app.handle(BlipUITitledSection.create("Scene", BlipUIHStack.create(uiComplete)));
+
+            app.handle(BlipUITitledSection.create("Scene",
+                    BlipUIVStack.create(
+                            BlipUIHStack.create(uiComplete),
+                            BlipUIHStack.create(basicUi2),
+                            BlipUIHStack.create(basicUi3))));
         }
 
         lighting.handle(blip);
@@ -123,7 +109,8 @@ class ModelViewerScene implements Scene {
         Jassimp.setWrapperProvider(wrapper);
         MeshLoader meshLoader = new MeshLoaderJAssimp();
 
-        //        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/cube.obj",
+        //        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/cube
+        // .obj",
 // "C:/dev/portfolio/3ddemo/out/production/resources/images");
 //        MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("../models/cube.obj").toURI(),
 // "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate
@@ -134,17 +121,22 @@ class ModelViewerScene implements Scene {
 // "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate
 // | aiProcess_FixInfacingNormals);
         ModelData modelData = meshLoader.load(file.toURI(),
-                "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate
+                "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices |
+                        aiProcess_Triangulate
                         | aiProcess_FixInfacingNormals);
 //        ModelData modelData = meshLoader.load(,
-//                "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate
+//                "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices |
+// aiProcess_Triangulate
 //                        | aiProcess_FixInfacingNormals);
 //        ModelData modelData = meshLoader.load(AppWrapper.class.getResource("/models/woman/highpoly.OBJ").toURI(),
-//                "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate
+//                "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices |
+// aiProcess_Triangulate
 //                        | aiProcess_FixInfacingNormals);
 
-//        ModelData modelData = meshLoader.load(AppWrapper.class.getResource("/models/TrexModelByJoel3d_FBX/TrexByJoel3d.fbx").toURI(),
-//                "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate
+//        ModelData modelData = meshLoader.load(AppWrapper.class.getResource
+// ("/models/TrexModelByJoel3d_FBX/TrexByJoel3d.fbx").toURI(),
+//                "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices |
+// aiProcess_Triangulate
 //                        | aiProcess_FixInfacingNormals);
 //        ModelData modelData = meshLoader.load(AppWrapper.class.getResource("../models/Lego_Man.obj").toURI(),
 //                "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices |
@@ -162,14 +154,14 @@ class ModelViewerScene implements Scene {
 
         for (int materialIdx = 0; materialIdx < materialsRaw.size(); materialIdx++) {
             AiMaterial mat = materialsRaw.get(materialIdx);
-                Colour ambient = (Colour) mat.getAmbientColor(wrapper);
-                Colour diffuse = (Colour) mat.getDiffuseColor(wrapper);
-                Colour specular = (Colour) mat.getSpecularColor(wrapper);
-                float shininess = mat.getShininess();
+            Colour ambient = (Colour) mat.getAmbientColor(wrapper);
+            Colour diffuse = (Colour) mat.getDiffuseColor(wrapper);
+            Colour specular = (Colour) mat.getSpecularColor(wrapper);
+            float shininess = mat.getShininess();
 
             List<TextureFromFile> textures = new ArrayList<>();
 
-            for(int idx = 0; idx < mat.getNumTextures(AiTextureType.DIFFUSE); idx += 1) {
+            for (int idx = 0; idx < mat.getNumTextures(AiTextureType.DIFFUSE); idx += 1) {
                 AiTextureInfo textureInfo = mat.getTextureInfo(AiTextureType.DIFFUSE, idx);
                 String path = file.getParent() + "/" + textureInfo.getFile();
                 TextureFromFile texture = new TextureFromFile(path);
@@ -178,12 +170,12 @@ class ModelViewerScene implements Scene {
             }
 
             Material material = new Material(mat.getName(),
-                        new Vector3(ambient.r, ambient.g, ambient.b),
-                        new Vector3(diffuse.r, diffuse.g, diffuse.b),
-                        new Vector3(specular.r, specular.g, specular.b),
-                        shininess,
+                    new Vector3(ambient.r, ambient.g, ambient.b),
+                    new Vector3(diffuse.r, diffuse.g, diffuse.b),
+                    new Vector3(specular.r, specular.g, specular.b),
+                    shininess,
                     textures);
-                materials.add(material);
+            materials.add(material);
 
         }
 
@@ -193,7 +185,8 @@ class ModelViewerScene implements Scene {
         for (int i = 0; i < meshData.length; i++) {
             int matIndex = meshData[i].materialIndex;
             Material material = materials.get(matIndex);
-            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(meshScale), Optional.empty(), meshData[i], material);
+            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(meshScale), Optional.empty(), meshData[i],
+                    material);
             final int x = i;
 //            modelUI.add(BlipUITextField.create(Optional.of("Mesh indices"), String.valueOf(meshData[i].indices
 // .length), (v) -> {
@@ -208,9 +201,9 @@ class ModelViewerScene implements Scene {
             meshes[i] = mesh;
         }
 
-        assert(1 == 1);
+        assert (1 == 1);
     }
-    
+
     ModelViewerScene(BlipHandler app) throws URISyntaxException, IOException {
         this.app = app;
         lighting = new ModelLighting(app, shaders);
@@ -218,99 +211,162 @@ class ModelViewerScene implements Scene {
         File initialDir = new File(System.getProperty("user.dir") + "/src/main/resources/models");
 
         basicUi.add(BlipUIFileDialogButton.create("Load", "Choose Model File", (file) -> {
+            Persister.put("last_model", file.getAbsolutePath());
             // Cause this will fire in its own thread, and we don't want to trash the meshdata mid-scene
             queued.add(new BlipBasicModelSceneLoadModel(file));
         }, Optional.of(GLFW_KEY_O), Optional.of(initialDir)));
 
-        basicUi.add(BlipUICheckbox.create("Model", drawModel, (v) -> drawModel = v, Optional.empty()));
-        basicUi.add(BlipUICheckbox.create("Axis markers", drawAxisMarkers, (v) -> drawAxisMarkers = v, Optional.empty
-                ()));
-        basicUi.add(BlipUICheckbox.create("Floor", drawFloor, (v) -> drawFloor = v, Optional.of(GLFW_KEY_KP_6)));
-        basicUi.add(BlipUICheckbox.create("Shadows", shadowsEnabled, (v) -> shadowsEnabled = v, Optional.of(GLFW_KEY_KP_5)));
-        basicUi.add(BlipUICheckbox.create("Shadows Quality", shadowsHighQuality, (v) -> shadowsHighQuality = v, Optional.empty()));
-        basicUi.add(BlipUICheckbox.create("Lights", renderLightsEnabled, (v) -> renderLightsEnabled = v, Optional
-                .empty()));
+        basicUi.add(BlipUICheckbox.create("Model", drawModel, (v) -> {
+            drawModel = v;
+            Persister.put("drawModel", v);
+        }, Optional.empty()));
+        basicUi.add(BlipUICheckbox.create("Textures", drawTextures, (v) -> {
+            drawTextures = v;
+            Persister.put("drawTextures", v);
+        }, Optional.empty()));
+        basicUi.add(BlipUICheckbox.create("Cubes", drawCubes, (v) -> {
+            drawCubes = v;
+            Persister.put("drawCubes", v);
+        }, Optional.empty()));
+        basicUi.add(BlipUICheckbox.create("Axis markers", drawAxisMarkers, (v) -> {
+            drawAxisMarkers = v;
+            Persister.put("drawAxisMarkers", v);
+        }, Optional.empty()));
+        basicUi2.add(BlipUICheckbox.create("Frame buffer", renderDepthFramebuffer, (v) -> {
+            renderDepthFramebuffer = v;
+            Persister.put("renderDepthFramebuffer", v);
+        }, Optional.empty()));
+        basicUi3.add(BlipUICheckbox.create("Floor", drawFloor, (v) -> {
+            drawFloor = v;
+            Persister.put("drawFloor", v);
+        }, Optional.of(GLFW_KEY_KP_6)));
+        basicUi2.add(BlipUICheckbox.create("Shadows", shadowsEnabled, (v) -> {
+            shadowsEnabled = v;
+            Persister.put("shadowsEnabled", v);
+        }, Optional.of(GLFW_KEY_KP_5)));
+        basicUi2.add(BlipUICheckbox.create("Shadows Quality", shadowsHighQuality, (v) -> {
+            shadowsHighQuality = v;
+            Persister.put("shadowsHighQuality", v);
+        }, Optional.empty()));
+        basicUi2.add(BlipUITextField.create(Optional.of("Bias Max"), Float.toString(shadowsBiasMax), (v) -> {
+            float value = shadowsBiasMax;
+            try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
+            shadowsBiasMax = value;
+            Persister.put("shadowsBiasMax", value);
+        }));
+        basicUi2.add(BlipUITextField.create(Optional.of("Bias Multi"), Float.toString(shadowsBiasMulti), (v) -> {
+            float value = shadowsBiasMulti;
+            try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
+            shadowsBiasMulti = value;
+            Persister.put("shadowsBiasMulti", value);
+        }));
+        basicUi.add(BlipUICheckbox.create("Lights", renderLightsEnabled, (v) -> {
+            renderLightsEnabled = v;
+            Persister.put("renderLightsEnabled", v);
+        }, Optional.empty()));
 //        basicUi.add(BlipUICheckbox.create("Debug Shader", debugShader, (v) -> {
 //            debugShader = v;
 //            shaders.debugShader.setCheckErrors(debugShader);
 //            shaders.standardShader.setCheckErrors(!debugShader);
 //        }, Optional.empty()));
 
+        basicUi3.add(BlipUITextField.create(Optional.of("Floor YOffset"), Float.toString(floorYOffset), (v) -> {
+            float value = floorYOffset;
+            try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
+            floorYOffset = value;
+            Persister.put("floorYOffset", value);
+        }));
 
-        loadModel(AppWrapper.class.getResource("/models/TrexModelByJoel3d_FBX/TrexByJoel3d.fbx"));
+        if (drawModel) {
+            String lastModel = Persister.get("last_model");
+            if (lastModel != null) {
+                loadModel(new File(lastModel));
+            } else {
+                loadModel(AppWrapper.class.getResource("/models/audi/r8_gt_3ds.3ds"));
+            }
+        }
+
 //        loadModel(AppWrapper.class.getResource("/models/audi/r8_gt_3ds.3ds").toURI());
 //        loadModel(AppWrapper.class.getResource("/models/Baymax_White_BigHero6/Bigmax_White_OBJ.obj").toURI());
 
 
 //        Materials materials = new Materials();
-        TextureFromFile texture = null;// = new TextureFromFile("../images/container2.png", PNGDecoder.Format.RGBA);
-        TextureFromFile specularMap = null;// = new TextureFromFile("../images/container2_specular.png", PNGDecoder.Format.RGBA);
+        TextureFromFile texture = new TextureFromFile(getClass().getResource("../images/container2.png"));
+        TextureFromFile specularMap = new TextureFromFile(getClass().getResource("../images/container2_specular.png"));
 
         // Scale, translate, then rotate.
         // Putting into a -1 to 1 space
-//        {
-//            int numCubesX = 10;
-//            int numCubesZ = 10;
-//
-//            // Cubes!
-//            for (int x = 0; x < numCubesX; x ++)
-//                for (int z = 0; z < numCubesZ; z ++) {
-//                    if (x == 0 && z == 0) continue;
-//                    // Cube goes -0.5f to 0.5f
-//                    // Want 10 cubes in a -1 to 1 space
-//                    // So each cube can be max 0.2 across, spaced every 0.2f
-//                    float xPos = x * (2.0f / numCubesX) - 1.0f;
-//                    float zPos = z * (2.0f / numCubesZ) - 1.0f;
-//                    Vector4 pos = new Vector4(xPos, 0, zPos, 1);
-////                    Matrix4x4 scale = Matrix4x4.scale(0.16f); // to 0.05 box, taking up 25% of space
-//                    Matrix4x4 scale = Matrix4x4.scale(0.1f); // to 0.05 box, taking up 25% of space
-//                    FancyCube cube = new FancyCube(pos, Optional.of(scale), Optional.empty(), materials.get(0),
-// texture, specularMap);
-//                    cubeModels.add(cube);
-//                }
-//        }
+        {
+            int numCubesX = 10;
+            int numCubesZ = 10;
+            Material cubeMaterial = new Material("axis", Vector3.fill(1), Vector3.fill(1), Vector3.fill(1), 10);
+
+            // Cubes!
+            for (int x = 0; x < numCubesX; x++)
+                for (int z = 0; z < numCubesZ; z++) {
+                    if (x == 0 && z == 0) continue;
+                    // Cube goes -0.5f to 0.5f
+                    // Want 10 cubes in a -1 to 1 space
+                    // So each cube can be max 0.2 across, spaced every 0.2f
+                    float xPos = x * (2.0f / numCubesX) - 1.0f;
+                    float zPos = z * (2.0f / numCubesZ) - 1.0f;
+                    Vector4 pos = new Vector4(xPos, 0, zPos, 1);
+//                    Matrix4x4 scale = Matrix4x4.scale(0.16f); // to 0.05 box, taking up 25% of space
+                    Matrix4x4 scale = Matrix4x4.scale(0.1f); // to 0.05 box, taking up 25% of space
+                    FancyCube cube = new FancyCube(pos, Optional.of(scale), Optional.empty(), cubeMaterial, texture,
+                            specularMap);
+                    cubeModels.add(cube);
+                }
+        }
 
         {
             Material axisMaterial = new Material("axis", Vector3.fill(1), Vector3.fill(1), Vector3.fill(1), 10);
             Matrix4x4 scale = Matrix4x4.scale(0.01f);
             // axis
-            axisMarkers.add(new FancyCube(new Vector4(0, 0, 0, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(0, 0, 0, 1), Optional.of(scale), Optional.empty(),
+                    axisMaterial, texture, specularMap));
 
-            axisMarkers.add(new FancyCube(new Vector4(-1, 0, -1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1, 0, -1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1, 0, 1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(-1, 0, 1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1, 0, -1, 1), Optional.of(scale), Optional.empty(),
+                    axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1, 0, -1, 1), Optional.of(scale), Optional.empty(),
+                    axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1, 0, 1, 1), Optional.of(scale), Optional.empty(),
+                    axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1, 0, 1, 1), Optional.of(scale), Optional.empty(),
+                    axisMaterial, texture, specularMap));
 
-            axisMarkers.add(new FancyCube(new Vector4(-1, 1, -1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1, 1, -1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1, 1, 1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(-1, 1, 1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1, 1, -1, 1), Optional.of(scale), Optional.empty(),
+                    axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1, 1, -1, 1), Optional.of(scale), Optional.empty(),
+                    axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1, 1, 1, 1), Optional.of(scale), Optional.empty(),
+                    axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1, 1, 1, 1), Optional.of(scale), Optional.empty(),
+                    axisMaterial, texture, specularMap));
 
-            axisMarkers.add(new FancyCube(new Vector4(-1, -1, -1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1, -1, -1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(1, -1, 1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
-            axisMarkers.add(new FancyCube(new Vector4(-1, -1, 1, 1), Optional.of(scale), Optional.empty(), axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1, -1, -1, 1), Optional.of(scale), Optional.empty(),
+                    axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1, -1, -1, 1), Optional.of(scale), Optional.empty(),
+                    axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(1, -1, 1, 1), Optional.of(scale), Optional.empty(),
+                    axisMaterial, texture, specularMap));
+            axisMarkers.add(new FancyCube(new Vector4(-1, -1, 1, 1), Optional.of(scale), Optional.empty(),
+                    axisMaterial, texture, specularMap));
 
         }
 
 
         {
-            TextureFromFile floorTexture = new TextureFromFile(getClass().getResource("../images/WM_IndoorWood-44_1024.png"));
-//            Optional<Matrix4x4> rotate = Optional.empty();
+            TextureFromFile floorTexture = new TextureFromFile(getClass().getResource
+                    ("../images/WM_IndoorWood-44_1024.png"));
             Optional<Matrix4x4> rotate = Optional.of(Matrix4x4.rotateAroundXAxis(90));
-//            Optional<Matrix4x4> scale = Optional.empty();
-            Optional<Matrix4x4> scale = Optional.of(Matrix4x4.scale(4));
-//            Vector4 pos = new Vector4(-2f, -0.5f, -2f, 1);
-//            Vector4 pos = new Vector4(0,-0.05f,0, 1);
-            Vector4 pos = new Vector4(0, -0.2f, 0, 1);
-//            Vector4 pos = new Vector4(0,-0.5f,0, 1);
-            // Goes -0.5f to 0.5fc
             // Want it -2 to 2
-            Material material = new Material("dull", null, null, null, 32);
+            Optional<Matrix4x4> scale = Optional.of(Matrix4x4.scale(4));
+            Vector4 pos = new Vector4(0, floorYOffset, 0, 1);
+            Material material = new Material("dull", Vector3.fill(1), Vector3.fill(1), Vector3.fill(1), 16);
             FancyQuad floor = new FancyQuad(pos, scale, rotate, material, floorTexture, floorTexture, 10);
             quadModels.add(floor);
         }
-
 
         camera = new CameraRotatingAroundOrigin();
 
@@ -332,16 +388,6 @@ class ModelViewerScene implements Scene {
         else if (key == GLFW_KEY_F) camera.moveDown(posDelta);
         else if (key == GLFW_KEY_A) camera.moveLeft(posDelta);
         else if (key == GLFW_KEY_D) camera.moveRight(posDelta);
-
-//        if (action == GLFW_PRESS) {
-//            lighting.handleKeyDown(key);
-//
-////            if (key == GLFW_KEY_KP_9) drawAxisMarkers = !drawAxisMarkers;
-////            else if (key == GLFW_KEY_KP_8) renderToDepth = !renderToDepth;
-////            else if (key == GLFW_KEY_KP_7) renderDepthFramebuffer = !renderDepthFramebuffer;
-////            else if (key == GLFW_KEY_KP_6) drawFloor = !drawFloor;
-////            else if (key == GLFW_KEY_KP_5) shadowsEnabled = !shadowsEnabled;
-//        }
     }
 
     private Shader getMainShader() {
@@ -352,6 +398,9 @@ class ModelViewerScene implements Scene {
     @Override
     public void draw(AppParams params) {
         shaders.reset();
+
+        Vector4 floorPos = new Vector4(0, floorYOffset, 0, 1);
+        quadModels.get(0).setPos(floorPos);
 
 //        glClearColor(1f, 1f, 1f, 1.0f);
 //        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -365,6 +414,10 @@ class ModelViewerScene implements Scene {
 
         try (ShaderUse wrap = new ShaderUse(getMainShader())) {
             wrap.shader.setBoolean("shadowsEnabled", shadowsEnabled);
+            wrap.shader.setBoolean("shadowsHighQuality", shadowsHighQuality);
+            wrap.shader.setFloat("shadowBiasMax", shadowsBiasMax);
+            wrap.shader.setFloat("shadowBiasMulti", shadowsBiasMulti);
+            wrap.shader.setBoolean("drawTextures", drawTextures);
         }
 
         Matrix4x4 projectionMatrix = createPerspectiveProjectionMatrix(params);
@@ -440,7 +493,7 @@ class ModelViewerScene implements Scene {
         Matrix4x4 projectionMatrix = null;
         Matrix4x4 cameraTranslate = null;
         try (ShaderUse wrap = new ShaderUse(shader)) {
-            shader.setVec3("viewPos", camera.getPosition().toVector3());
+            wrap.shader.setVec3("viewPos", camera.getPosition().toVector3());
             lighting.setupShader(wrap.shader);
 
             if (renderLightsEnabled) {
@@ -453,9 +506,14 @@ class ModelViewerScene implements Scene {
             if (drawFloor) {
                 quadModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, wrap.shader));
             }
+            if (drawCubes) {
+                cubeModels.forEach(model -> model.draw(projectionMatrix, cameraTranslate, wrap.shader));
+            }
             if (drawModel) {
-                for (int i = 0; i < meshes.length; i++) {
-                    meshes[i].draw(projectionMatrix, cameraTranslate, wrap.shader);
+                if (meshes != null) {
+                    for (int i = 0; i < meshes.length; i++) {
+                        meshes[i].draw(projectionMatrix, cameraTranslate, wrap.shader);
+                    }
                 }
             }
         }
@@ -471,9 +529,8 @@ class ModelViewerScene implements Scene {
         try (ShaderUse su = new ShaderUse(shaders.shadowGenShader)) {
             shadowMap.setup(su.shader, lightSpaceMatrix);
 
-            renderScene(shaders.shadowGenShader);
+            renderScene(su.shader);
         }
-
 
         try (ShaderUse wrap = new ShaderUse(getMainShader())) {
             wrap.shader.setMatrix(shaderPosName, lightSpaceMatrix);

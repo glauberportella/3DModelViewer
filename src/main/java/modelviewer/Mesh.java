@@ -10,6 +10,10 @@ import java.nio.IntBuffer;
 import java.util.Optional;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
@@ -116,9 +120,6 @@ public class Mesh extends Model {
             shader.setVec3("material.specular", material.getSpecular());
             shader.setFloat("material.shininess", material.getShininess());
 
-            if (material.getDiffuseTextures().size() > 0) {
-                shader.setInt("material.diffuseTexture", material.getDiffuseTextures().get(0).getTextureId());
-            }
 
             //            shader.setInt("material.diffuse", 0);
 //            shader.setVec3("material.specular", material.getSpecular());
@@ -145,8 +146,13 @@ public class Mesh extends Model {
 //            glEnableVertexAttribArray(VBO_INDEX_TEXTURE);
 //            glEnableVertexAttribArray(VBO_INDEX_INDICES);
 
-//            glActiveTexture(GL_TEXTURE0);
-//            glBindTexture(GL_TEXTURE_2D, texture.getTextureId());
+            if (material.getDiffuseTextures().size() > 0) {
+                TextureFromFile texture = material.getDiffuseTextures().get(0);
+                shader.setInt("material.diffuseTexture", texture.getTextureId());
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, texture.getTextureId());
+            }
+
 //            glActiveTexture(GL_TEXTURE1);
 //            glBindTexture(GL_TEXTURE_2D, specularMap.getTextureId());
 

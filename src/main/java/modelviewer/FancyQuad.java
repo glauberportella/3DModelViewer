@@ -44,41 +44,6 @@ class FancyQuad extends Model {
                 0.5f,  0.5f, 0,  0.0f,  0.0f, 1.0f,  tc, tc,
                 -0.5f,  0.5f, 0,  0.0f,  0.0f, 1.0f,  0.0f, tc,
                 -0.5f, -0.5f, 0,  0.0f,  0.0f, 1.0f,  0.0f, 0.0f,
-
-//                -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-//                0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-//                0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-//                0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-//                -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-//                -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-//
-//                -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-//                -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-//                -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-//                -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-//                -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-//                -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-//
-//                0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-//                0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-//                0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-//                0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-//                0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-//                0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-//
-//                -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-//                0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-//                0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-//                0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-//                -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-//                -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-//
-//                -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-//                0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-//                0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-//                0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-//                -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-//                -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
     };
 
         FloatBuffer verticesBuffer = BufferUtils.createFloatBuffer(vertices.length);
@@ -114,15 +79,28 @@ class FancyQuad extends Model {
 
     public void draw(Matrix4x4 projectionMatrix, Matrix4x4 cameraTranslate, Shader shader) {
         try (ShaderUse wrap = new ShaderUse(shader)) {
-            shader.setInt("material.texture", 0);
-            shader.setInt("material.diffuse", 0);
-            shader.setInt("material.specular", 1);
             if (material != null) {
+                if (material.getAmbient() != null) shader.setVec3("material.ambient", material.getAmbient());
+                if (material.getDiffuse() != null) shader.setVec3("material.diffuse", material.getDiffuse());
+                if (material.getSpecular() != null) shader.setVec3("material.specular", material.getSpecular());
                 shader.setFloat("material.shininess", material.getShininess());
             }
-            else {
-                shader.setFloat("material.shininess", 32.0f);
-            }
+//            shader.setInt("material.diffuseTexture", texture.getTextureId());
+
+            //
+//            if (material.getDiffuseTextures().size() > 0) {
+//                shader.setInt("material.diffuseTexture", material.getDiffuseTextures().get(0).getTextureId());
+//            }
+//
+//            shader.setInt("material.texture", 0);
+//            shader.setInt("material.diffuse", 0);
+//            shader.setInt("material.specular", 1);
+//            if (material != null) {
+//                shader.setFloat("material.shininess", material.getShininess());
+//            }
+//            else {
+//                shader.setFloat("material.shininess", 32.0f);
+//            }
 
             // Upload matrices to the uniform variables
 //            int modelMatrixLocation = GL20.glGetUniformLocation(shader.getShaderId(), "modelMatrix");
@@ -136,6 +114,8 @@ class FancyQuad extends Model {
             glEnableVertexAttribArray(VBO_INDEX_VERTICES);
             glEnableVertexAttribArray(VBO_INDEX_NORMALS);
             glEnableVertexAttribArray(VBO_INDEX_DIFFUSE_MAP);
+
+            shader.setInt("material.diffuseTexture", GL_TEXTURE0);
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture.getTextureId());

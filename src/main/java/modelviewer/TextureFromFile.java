@@ -67,6 +67,7 @@ class TextureFromFile implements Texture {
                 System.out.println("OK with reason: " + stbi_failure_reason());
             }
 
+            System.out.println("Image: " + filenameFull);
             System.out.println("Image width: " + w.get(0));
             System.out.println("Image height: " + h.get(0));
             System.out.println("Image components: " + comp.get(0));
@@ -87,7 +88,7 @@ class TextureFromFile implements Texture {
 
             // Upload the texture data and generate mip maps (for scaling)
             if (comp.get(0) == 4) {
-                GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, w.get(0), h.get(0), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, image);
+                GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, w.get(0), h.get(0), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, image);
             }
             else if (comp.get(0) == 3) {
                 GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, w.get(0), h.get(0), 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, image);
@@ -106,6 +107,7 @@ class TextureFromFile implements Texture {
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
 //        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
 
+            stbi_image_free(image);
         }
 
     }
