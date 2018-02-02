@@ -91,6 +91,15 @@ public class MeshLoaderJAssimp implements MeshLoader {
             normals[idx + 2] = aiMesh.getPositionZ(normal);
         }
 
+        float[] texCoords = new float[numVertices * 2];
+        for(int vertex = 0; vertex < numVertices; vertex ++) {
+            int idx = vertex * 2;
+            // Assimp allows each vertex to have 8 sets of tex coords, but we only care about the first
+            texCoords[idx] = aiMesh.getTexCoordU(vertex, 0);
+            texCoords[idx + 1] = aiMesh.getTexCoordV(vertex, 0);
+//            texCoords[idx + 2] = aiMesh.getPositionZ(vertex, 0);
+        }
+
         ArrayList<Integer> indices = new ArrayList<Integer>();
 //        float[] normals = new float[numVertices * 3];
         int numFaces = aiMesh.getNumFaces();
@@ -106,6 +115,6 @@ public class MeshLoaderJAssimp implements MeshLoader {
             indicesRaw[index] = indices.get(index);
         }
 
-        return new MeshData(vertices, normals, indicesRaw, null, aiMesh.getMaterialIndex());
+        return new MeshData(vertices, normals, indicesRaw, texCoords, aiMesh.getMaterialIndex());
     }
 }

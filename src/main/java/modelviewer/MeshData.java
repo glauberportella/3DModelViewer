@@ -26,17 +26,18 @@ class ModelData {
 }
 
 class MeshData {
-    protected final float[] vertices, normals;
+    protected final float[] vertices, normals, texCoords;
     protected final int[] indices;
     protected final int indicesCount;
     protected final int materialIndex;
 
-    public MeshData(float[] vertices, float[] normals, int[] indices, FloatBuffer textureBufFloat, int materialIndex) {
+    public MeshData(float[] vertices, float[] normals, int[] indices, float[] texCoords, int materialIndex) {
         this.vertices = vertices;
         this.normals = normals;
         this.indices = indices;
         this.indicesCount = indices.length;
         this.materialIndex = materialIndex;
+        this.texCoords = texCoords;
     }
 
     /** @return The matrix required to scale this Mesh so it's longest dimension is 1.0

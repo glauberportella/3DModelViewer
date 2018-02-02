@@ -83,18 +83,18 @@ public class Mesh extends Model {
             glVertexAttribPointer(VBO_INDEX_NORMALS, 3, GL_FLOAT, false, 0, 0);
         }
 
-//        if (data.normals != null) {
-//            FloatBuffer normalsBuffer = BufferUtils.createFloatBuffer(data.normals.length);
-//            normalsBuffer.put(data.normals);
-//            normalsBuffer.flip();
-//
-//            // VBO 1 = normals
-//            int vboNormals = GL15.glGenBuffers();
-//            glEnableVertexAttribArray(VBO_INDEX_NORMALS);
-//            glBindBuffer(GL_ARRAY_BUFFER, vboNormals);
-//            GL15.glBufferData(GL_ARRAY_BUFFER, normalsBuffer, GL15.GL_STATIC_DRAW);
-//            glVertexAttribPointer(VBO_INDEX_NORMALS, 3, GL_FLOAT, false, 0, 0);
-//        }
+        if (data.texCoords != null) {
+            FloatBuffer texCoordsBuffer = BufferUtils.createFloatBuffer(data.texCoords.length);
+            texCoordsBuffer.put(data.texCoords);
+            texCoordsBuffer.flip();
+
+            // VBO 1 = normals
+            int vboTexCoords = GL15.glGenBuffers();
+            glEnableVertexAttribArray(VBO_INDEX_TEXTURE);
+            glBindBuffer(GL_ARRAY_BUFFER, vboTexCoords);
+            GL15.glBufferData(GL_ARRAY_BUFFER, texCoordsBuffer, GL15.GL_STATIC_DRAW);
+            glVertexAttribPointer(VBO_INDEX_TEXTURE, 2, GL_FLOAT, false, 0, 0);
+        }
 
 //        if (material.getDiffuseTextures().size() > 0) {
 //            // VBO 2 = textures
@@ -156,8 +156,7 @@ public class Mesh extends Model {
             GL30.glBindVertexArray(vaoId);
             glEnableVertexAttribArray(VBO_INDEX_VERTICES);
             glEnableVertexAttribArray(VBO_INDEX_NORMALS);
-//            glEnableVertexAttribArray(VBO_INDEX_TEXTURE);
-//            glEnableVertexAttribArray(VBO_INDEX_INDICES);
+            glEnableVertexAttribArray(VBO_INDEX_TEXTURE);
 
             if (material.getDiffuseTextures().size() > 0) {
                 TextureFromFile texture = material.getDiffuseTextures().get(0);
@@ -180,8 +179,7 @@ public class Mesh extends Model {
             glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
             GL20.glDisableVertexAttribArray(VBO_INDEX_VERTICES);
             GL20.glDisableVertexAttribArray(VBO_INDEX_NORMALS);
-//            GL20.glDisableVertexAttribArray(VBO_INDEX_TEXTURE);
-//            GL20.glDisableVertexAttribArray(VBO_INDEX_INDICES);
+            GL20.glDisableVertexAttribArray(VBO_INDEX_TEXTURE);
             GL30.glBindVertexArray(0);
         }
     }
