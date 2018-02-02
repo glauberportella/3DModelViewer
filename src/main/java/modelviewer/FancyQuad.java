@@ -116,6 +116,7 @@ class FancyQuad extends Model {
             glEnableVertexAttribArray(VBO_INDEX_DIFFUSE_MAP);
 
             shader.setInt("material.diffuseTexture", GL_TEXTURE0);
+            shader.setInt("material.specularTexture", GL_TEXTURE1);
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture.getTextureId());

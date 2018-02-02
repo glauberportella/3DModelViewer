@@ -5,6 +5,8 @@ import enterthematrix.Matrix4x4;
 import enterthematrix.Vector3;
 import enterthematrix.Vector4;
 import jassimp.*;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
 
 import javax.swing.text.html.Option;
 import java.io.File;
@@ -39,10 +41,16 @@ class BlipBasicModelSceneLoadModel implements BlipBasicModelScene {
     public void handle(ModelViewerScene scene) {
         try {
             scene.loadModel(file);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+        catch (Exception e) {
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("File cannot be loaded");
+                alert.setContentText("The importer could not load this file, with error message: " + e.getLocalizedMessage());
+
+
+                alert.showAndWait();
+            });
         }
     }
 }
@@ -71,6 +79,7 @@ class ModelViewerScene implements Scene {
     private boolean shadowsHighQuality = Persister.getOrElse("shadowsHighQuality", true);
     private float shadowsBiasMulti = Persister.getOrElse("shadowsBiasMulti", 0.05f);
     private boolean drawTextures = Persister.getOrElse("drawTextures", true);
+    private boolean doLighting = Persister.getOrElse("doLighting", true);
     private float shadowsBiasMax = Persister.getOrElse("shadowsBiasMax", 0.00005f);
     private float floorYOffset = Persister.getOrElse("floorYOffset", -0.2f);
     private boolean debugShader = true;
@@ -159,14 +168,54 @@ class ModelViewerScene implements Scene {
             Colour specular = (Colour) mat.getSpecularColor(wrapper);
             float shininess = mat.getShininess();
 
-            List<TextureFromFile> textures = new ArrayList<>();
+            float reflectivity = mat.getReflectivity();
+            float bumpScaling = mat.getBumpScaling();
+
+            List<TextureFromFile> diffuseTextures = new ArrayList<>();
+
+            if (mat.getNumTextures(AiTextureType.AMBIENT) > 0) {
+                System.out.println("Don't handle more than 0 ambient textures yet");
+            }
+
+            if (mat.getNumTextures(AiTextureType.EMISSIVE) > 0) {
+                System.out.println("Don't handle more than 0 emissive textures yet");
+            }
+
+            if (mat.getNumTextures(AiTextureType.DISPLACEMENT) > 0) {
+                System.out.println("Don't handle more than 0 displacement textures yet");
+            }
+
+            if (mat.getNumTextures(AiTextureType.HEIGHT) > 0) {
+                System.out.println("Don't handle more than 0 height textures yet");
+            }
+
+            if (mat.getNumTextures(AiTextureType.DIFFUSE) > 1) {
+                System.out.println("Don't handle more than 1 diffuse textures yet");
+            }
+
+            if (mat.getNumTextures(AiTextureType.SPECULAR) > 1) {
+                System.out.println("Don't handle more than 1 specular textures yet");
+            }
 
             for (int idx = 0; idx < mat.getNumTextures(AiTextureType.DIFFUSE); idx += 1) {
                 AiTextureInfo textureInfo = mat.getTextureInfo(AiTextureType.DIFFUSE, idx);
                 String path = file.getParent() + "/" + textureInfo.getFile();
-                TextureFromFile texture = new TextureFromFile(path);
-//                    File textureFile = new File(path);
-                textures.add(texture);
+                AiTextureMapMode mapModeU = mat.getTextureMapModeU(AiTextureType.DIFFUSE, idx);
+                AiTextureMapMode mapModeV = mat.getTextureMapModeV(AiTextureType.DIFFUSE, idx);
+                AiTextureOp op = mat.getTextureOp(AiTextureType.DIFFUSE, idx);
+                TextureFromFile texture = new TextureFromFile(path, mapModeU, mapModeV);
+                diffuseTextures.add(texture);
+            }
+
+            List<TextureFromFile> specularTextures = new ArrayList<>();
+
+            for (int idx = 0; idx < mat.getNumTextures(AiTextureType.SPECULAR); idx += 1) {
+                AiTextureInfo textureInfo = mat.getTextureInfo(AiTextureType.SPECULAR, idx);
+                String path = file.getParent() + "/" + textureInfo.getFile();
+                AiTextureMapMode mapModeU = mat.getTextureMapModeU(AiTextureType.SPECULAR, idx);
+                AiTextureMapMode mapModeV = mat.getTextureMapModeV(AiTextureType.SPECULAR, idx);
+                TextureFromFile texture = new TextureFromFile(path, mapModeU, mapModeV);
+                specularTextures.add(texture);
             }
 
             Material material = new Material(mat.getName(),
@@ -174,13 +223,15 @@ class ModelViewerScene implements Scene {
                     new Vector3(diffuse.r, diffuse.g, diffuse.b),
                     new Vector3(specular.r, specular.g, specular.b),
                     shininess,
-                    textures);
+                    diffuseTextures,
+                    specularTextures);
             materials.add(material);
 
         }
 
         meshes = new Mesh[modelData.getMeshes().length];
         MeshData[] meshData = modelData.getMeshes();
+//        Matrix4x4 meshScale = Matrix4x4.identity();// MeshDataUtils.getInitialMatrix(modelData.getMeshes());
         Matrix4x4 meshScale = MeshDataUtils.getInitialMatrix(modelData.getMeshes());
         for (int i = 0; i < meshData.length; i++) {
             int matIndex = meshData[i].materialIndex;
@@ -223,6 +274,10 @@ class ModelViewerScene implements Scene {
         basicUi.add(BlipUICheckbox.create("Textures", drawTextures, (v) -> {
             drawTextures = v;
             Persister.put("drawTextures", v);
+        }, Optional.empty()));
+        basicUi.add(BlipUICheckbox.create("Lighting", doLighting, (v) -> {
+            doLighting = v;
+            Persister.put("doLighting", v);
         }, Optional.empty()));
         basicUi.add(BlipUICheckbox.create("Cubes", drawCubes, (v) -> {
             drawCubes = v;
@@ -280,7 +335,19 @@ class ModelViewerScene implements Scene {
         if (drawModel) {
             String lastModel = Persister.get("last_model");
             if (lastModel != null) {
-                loadModel(new File(lastModel));
+                try {
+                    loadModel(new File(lastModel));
+                }
+                catch (IOException e) {
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("File cannot be loaded");
+                        alert.setContentText("The importer could not load this file, with error message: " + e.getLocalizedMessage());
+
+
+                        alert.showAndWait();
+                    });
+                }
             } else {
                 loadModel(AppWrapper.class.getResource("/models/audi/r8_gt_3ds.3ds"));
             }
@@ -418,6 +485,7 @@ class ModelViewerScene implements Scene {
             wrap.shader.setFloat("shadowBiasMax", shadowsBiasMax);
             wrap.shader.setFloat("shadowBiasMulti", shadowsBiasMulti);
             wrap.shader.setBoolean("drawTextures", drawTextures);
+            wrap.shader.setBoolean("doLighting", doLighting);
         }
 
         Matrix4x4 projectionMatrix = createPerspectiveProjectionMatrix(params);

@@ -1,5 +1,6 @@
 package modelviewer;
 
+import jassimp.AiTextureMapMode;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
@@ -41,37 +42,44 @@ class TextureFromFile implements Texture {
 
     final private int textureId;
 
-    public TextureFromFile(URL resource) {
-        this(resource.getFile());
+    public TextureFromFile(URL resource) throws IOException {
+        this(resource, AiTextureMapMode.WRAP, AiTextureMapMode.WRAP);
     }
 
-    public TextureFromFile(String filenameFull) {
+    public TextureFromFile(URL resource, AiTextureMapMode mapModeS, AiTextureMapMode mapModeT) throws IOException {
+        this(resource.getFile(), mapModeS, mapModeT);
+    }
+
+    public TextureFromFile(String filenameFull) throws IOException {
+        this(filenameFull, AiTextureMapMode.WRAP, AiTextureMapMode.WRAP);
+    }
+
+    public TextureFromFile(String filenameFull, AiTextureMapMode mapModeS, AiTextureMapMode mapModeT) throws
+            IOException {
         // Create a new texture object in memory and bind it
         ByteBuffer imageBuffer;
-        try {
-            imageBuffer = ioResourceToByteBuffer(new File(filenameFull), 8 * 1024);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        imageBuffer = ioResourceToByteBuffer(new File(filenameFull), 8 * 1024);
 
         try (MemoryStack stack = stackPush()) {
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
             IntBuffer comp = stack.mallocInt(1);
 
+            stbi_set_flip_vertically_on_load(true);
+
             // Use info to read image metadata without decoding the entire image.
             // We don't need this for this demo, just testing the API.
             if (!stbi_info_from_memory(imageBuffer, w, h, comp)) {
-                throw new RuntimeException("Failed to read image information: " + stbi_failure_reason());
+                throw new IOException("Failed to read image information: " + stbi_failure_reason());
             } else {
-                System.out.println("OK with reason: " + stbi_failure_reason());
+//                System.out.println("OK with reason: " + stbi_failure_reason());
             }
 
-            System.out.println("Image: " + filenameFull);
-            System.out.println("Image width: " + w.get(0));
-            System.out.println("Image height: " + h.get(0));
-            System.out.println("Image components: " + comp.get(0));
-            System.out.println("Image HDR: " + stbi_is_hdr_from_memory(imageBuffer));
+//            System.out.println("Image: " + filenameFull);
+//            System.out.println("Image width: " + w.get(0));
+//            System.out.println("Image height: " + h.get(0));
+//            System.out.println("Image components: " + comp.get(0));
+//            System.out.println("Image HDR: " + stbi_is_hdr_from_memory(imageBuffer));
 
             // Decode the image
             ByteBuffer image = stbi_load_from_memory(imageBuffer, w, h, comp, 0);
@@ -88,23 +96,43 @@ class TextureFromFile implements Texture {
 
             // Upload the texture data and generate mip maps (for scaling)
             if (comp.get(0) == 4) {
-                GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, w.get(0), h.get(0), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, image);
+                GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, w.get(0), h.get(0), 0, GL11.GL_RGBA,
+                        GL11.GL_UNSIGNED_BYTE, image);
+            } else if (comp.get(0) == 3) {
+                GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, w.get(0), h.get(0), 0, GL11.GL_RGB,
+                        GL11.GL_UNSIGNED_BYTE, image);
+            } else {
+                assert (false);
             }
-            else if (comp.get(0) == 3) {
-                GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, w.get(0), h.get(0), 0, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, image);
-            }
-            else {
-                assert(false);
-            }
-            GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
+//            GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
 
             // Setup the ST coordinate system
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
+            switch (mapModeS) {
+                case WRAP:
+                    GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
+                    break;
+                case CLAMP:
+                    GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_CLAMP);
+                    break;
+                default:
+                    System.out.println("Warning: cannot handle texture mode");
+            }
+
+            switch (mapModeT) {
+                case WRAP:
+                    GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
+                    break;
+                case CLAMP:
+                    GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP);
+                    break;
+                default:
+                    System.out.println("Warning: cannot handle texture mode");
+            }
 
             // Setup what to do when the texture has to be scaled
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+//            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 //        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
 
             stbi_image_free(image);

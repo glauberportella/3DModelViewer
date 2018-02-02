@@ -9,6 +9,11 @@ import java.nio.FloatBuffer;
 
 class Colour {
     float r, g, b, a;
+
+    @Override
+    public String toString() {
+        return "col=" + r + " " + g + " " + b + " " + a;
+    }
 }
 
 public class JassimpWrapperProvider implements AiWrapperProvider {

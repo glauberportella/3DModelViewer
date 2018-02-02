@@ -45,19 +45,24 @@ class Material {
         return diffuseTextures;
     }
 
-    private final List<TextureFromFile> diffuseTextures;
-
-    Material(String name, Vector3 ambient, Vector3 diffuse, Vector3 specular, float shininess) {
-        this(name, ambient, diffuse, specular, shininess, new ArrayList<TextureFromFile>());
+    public List<TextureFromFile> getSpecularTextures() {
+        return specularTextures;
     }
 
-    Material(String name, Vector3 ambient, Vector3 diffuse, Vector3 specular, float shininess, List<TextureFromFile> diffuseTextures) {
+    private final List<TextureFromFile> diffuseTextures, specularTextures;
+
+    Material(String name, Vector3 ambient, Vector3 diffuse, Vector3 specular, float shininess) {
+        this(name, ambient, diffuse, specular, shininess, new ArrayList<TextureFromFile>(), new ArrayList<TextureFromFile>());
+    }
+
+    Material(String name, Vector3 ambient, Vector3 diffuse, Vector3 specular, float shininess, List<TextureFromFile> diffuseTextures, List<TextureFromFile> specularTextures) {
         this.name = name;
         this.ambient = ambient;
         this.diffuse = diffuse;
         this.specular = specular;
         this.shininess = shininess;
         this.diffuseTextures = diffuseTextures;
+        this.specularTextures = specularTextures;
     }
 
     @Override

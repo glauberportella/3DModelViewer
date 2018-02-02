@@ -20,6 +20,13 @@ import java.util.Set;
 // Great guide to Assimp:
 // https://learnopengl.com/#!Model-Loading/Assimp
 
+// Models online:
+// It's very hard to find good free models that actually work.  E.g. quite often the OBJ file contains hardcoded
+// paths on the creator's machine.
+// FBX seems a bit more solid.
+// Often models are in .max or .c4d format - Assimp doesn't support these
+// In general, check with the Assimp model viewer if it can display it properly, first.
+
 // Oddness:
 // Gives 24 vertices for a simple cube, rather than 8.
 // https://sourceforge.net/p/assimp/discussion/817654/thread/026e9640/
@@ -55,6 +62,7 @@ public class MeshLoaderJAssimp implements MeshLoader {
         steps.add(AiPostProcessSteps.JOIN_IDENTICAL_VERTICES);
         steps.add(AiPostProcessSteps.GEN_SMOOTH_NORMALS);
         steps.add(AiPostProcessSteps.FIND_INVALID_DATA);
+        // Convert weird mappings like cube or sphere to regular
         steps.add(AiPostProcessSteps.GEN_UV_COORDS);
 //        steps.add(AiPostProcessSteps.TRANSFORM_UV_COORDS);
 
@@ -76,7 +84,7 @@ public class MeshLoaderJAssimp implements MeshLoader {
     private MeshData processMesh(AiMesh aiMesh, AiScene scene) {
         int numVertices = aiMesh.getNumVertices();
         float[] vertices = new float[numVertices * 3];
-        for(int vertex = 0; vertex < numVertices; vertex ++) {
+        for (int vertex = 0; vertex < numVertices; vertex++) {
             int idx = vertex * 3;
             vertices[idx] = aiMesh.getPositionX(vertex);
             vertices[idx + 1] = aiMesh.getPositionY(vertex);
@@ -84,7 +92,7 @@ public class MeshLoaderJAssimp implements MeshLoader {
         }
 
         float[] normals = new float[numVertices * 3];
-        for(int normal = 0; normal < numVertices; normal ++) {
+        for (int normal = 0; normal < numVertices; normal++) {
             int idx = normal * 3;
             normals[idx] = aiMesh.getPositionX(normal);
             normals[idx + 1] = aiMesh.getPositionY(normal);
@@ -92,26 +100,35 @@ public class MeshLoaderJAssimp implements MeshLoader {
         }
 
         float[] texCoords = new float[numVertices * 2];
-        for(int vertex = 0; vertex < numVertices; vertex ++) {
-            int idx = vertex * 2;
-            // Assimp allows each vertex to have 8 sets of tex coords, but we only care about the first
-            texCoords[idx] = aiMesh.getTexCoordU(vertex, 0);
-            texCoords[idx + 1] = aiMesh.getTexCoordV(vertex, 0);
+        // Assimp allows each vertex to have 8 sets of tex coords, but we only care about the first
+        if (aiMesh.hasTexCoords() && aiMesh.hasTexCoords(0)) {
+            for (int vertex = 0; vertex < numVertices; vertex++) {
+                int idx = vertex * 2;
+                float u = aiMesh.getTexCoordU(vertex, 0);
+                float v = aiMesh.getTexCoordV(vertex, 0);
+//                assert(u >= 0);
+//                assert(u <= 1.0f);
+//                assert(v >= 0);
+//                assert(v <= 1.0f);
+                texCoords[idx] = u;
+                texCoords[idx + 1] =  v;
+
 //            texCoords[idx + 2] = aiMesh.getPositionZ(vertex, 0);
+            }
         }
 
         ArrayList<Integer> indices = new ArrayList<Integer>();
 //        float[] normals = new float[numVertices * 3];
         int numFaces = aiMesh.getNumFaces();
-        for(int face = 0; face < numFaces; face ++) {
+        for (int face = 0; face < numFaces; face++) {
             int numIndicesForFace = aiMesh.getFaceNumIndices(face);
-            for(int index = 0; index < numIndicesForFace; index ++) {
+            for (int index = 0; index < numIndicesForFace; index++) {
                 int vertex = aiMesh.getFaceVertex(face, index);
                 indices.add(vertex);
             }
         }
         int[] indicesRaw = new int[indices.size()];
-        for(int index = 0; index < indices.size(); index ++) {
+        for (int index = 0; index < indices.size(); index++) {
             indicesRaw[index] = indices.get(index);
         }
 

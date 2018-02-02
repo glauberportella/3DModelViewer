@@ -9,10 +9,9 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Optional;
 
-import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE1;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
@@ -62,7 +61,6 @@ public class Mesh extends Model {
             verticesBuffer.put(data.vertices);
             verticesBuffer.flip();
 
-            // VBO 0 = vertices
             int vboVertices = GL15.glGenBuffers();
             glEnableVertexAttribArray(VBO_INDEX_VERTICES);
             glBindBuffer(GL_ARRAY_BUFFER, vboVertices);
@@ -75,7 +73,6 @@ public class Mesh extends Model {
             normalsBuffer.put(data.normals);
             normalsBuffer.flip();
 
-            // VBO 1 = normals
             int vboNormals = GL15.glGenBuffers();
             glEnableVertexAttribArray(VBO_INDEX_NORMALS);
             glBindBuffer(GL_ARRAY_BUFFER, vboNormals);
@@ -88,13 +85,19 @@ public class Mesh extends Model {
             texCoordsBuffer.put(data.texCoords);
             texCoordsBuffer.flip();
 
-            // VBO 1 = normals
             int vboTexCoords = GL15.glGenBuffers();
             glEnableVertexAttribArray(VBO_INDEX_TEXTURE);
+//            glEnable(VBO_INDEX_TEXTURE);
             glBindBuffer(GL_ARRAY_BUFFER, vboTexCoords);
             GL15.glBufferData(GL_ARRAY_BUFFER, texCoordsBuffer, GL15.GL_STATIC_DRAW);
             glVertexAttribPointer(VBO_INDEX_TEXTURE, 2, GL_FLOAT, false, 0, 0);
-        }
+//            glTexCoordPointer(2, GL_FLOAT, 0, texCoordsBuffer);
+
+//                glBindBuffer(GL_ARRAY_BUFFER, vboTexHandle);
+//        glBufferData(GL_ARRAY_BUFFER, textCoords, GL_STATIC_DRAW);
+//    glTexCoordPointer(3, GL_FLOAT, 0, 0L);
+
+//        }
 
 //        if (material.getDiffuseTextures().size() > 0) {
 //            // VBO 2 = textures
@@ -103,7 +106,7 @@ public class Mesh extends Model {
 //            glBindBuffer(GL_ARRAY_BUFFER, vboTextures);
 //            GL15.glBufferData(GL_ARRAY_BUFFER, material.getDiffuseTextures().get(0)., GL15.GL_STATIC_DRAW);
 //            glVertexAttribPointer(VBO_INDEX_TEXTURE, 2, GL_FLOAT, false, 0, 0);
-//        }
+        }
 
 
         // Deselect VAO
@@ -162,6 +165,12 @@ public class Mesh extends Model {
                 TextureFromFile texture = material.getDiffuseTextures().get(0);
                 shader.setInt("material.diffuseTexture", GL_TEXTURE0);
                 glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, texture.getTextureId());
+            }
+            if (material.getSpecularTextures().size() > 0) {
+                TextureFromFile texture = material.getSpecularTextures().get(0);
+                shader.setInt("material.specularTexture", GL_TEXTURE1);
+                glActiveTexture(GL_TEXTURE1);
                 glBindTexture(GL_TEXTURE_2D, texture.getTextureId());
             }
 
