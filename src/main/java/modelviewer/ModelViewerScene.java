@@ -8,10 +8,8 @@ import jassimp.*;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 
-import javax.swing.text.html.Option;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
@@ -82,12 +80,26 @@ class ModelViewerScene implements Scene {
     private boolean doLighting = Persister.getOrElse("doLighting", true);
     private float shadowsBiasMax = Persister.getOrElse("shadowsBiasMax", 0.00005f);
     private float floorYOffset = Persister.getOrElse("floorYOffset", -0.2f);
-    private boolean debugShader = true;
+    private float clearColourRed = Persister.getOrElse("clearColourRed", 0f);
+    private float clearColourGreen = Persister.getOrElse("clearColourGreen", 0f);
+    private float clearColourBlue = Persister.getOrElse("clearColourBlue", 0f);
+    private float projectionFar = Persister.getOrElse("projectionFar", 1000f);
+    private float projectionNear = Persister.getOrElse("projectionNear", 0.001f);
+    private float projectionFov = Persister.getOrElse("projectionFov", 90f);
+    private float orthoTop = Persister.getOrElse("orthoTop", 1f);
+    private float orthoBottom = Persister.getOrElse("orthoBottom", -1f);
+    private float orthoLeft = Persister.getOrElse("orthoLeft", -1f);
+    private float orthoRight = Persister.getOrElse("orthoRight", 1f);
+    private float orthoNear = Persister.getOrElse("orthoNear", 0.001f);
+    private float orthoFar = Persister.getOrElse("orthoNear", 1.5f);
 
     private List<BlipUI> modelUI = new ArrayList<BlipUI>();
     private final List<BlipUI> basicUi = new ArrayList<BlipUI>();
-    private final List<BlipUI> basicUi2 = new ArrayList<BlipUI>();
-    private final List<BlipUI> basicUi3 = new ArrayList<BlipUI>();
+    private final List<BlipUI> shadowsUI = new ArrayList<BlipUI>();
+    private final List<BlipUI> floorUI = new ArrayList<BlipUI>();
+    private final List<BlipUI> clearUI = new ArrayList<BlipUI>();
+    private final List<BlipUI> projectionUI = new ArrayList<BlipUI>();
+    private final List<BlipUI> orthoUI = new ArrayList<BlipUI>();
     private final Queue<BlipBasicModelScene> queued = new ArrayDeque<>();
 
 
@@ -100,8 +112,12 @@ class ModelViewerScene implements Scene {
             app.handle(BlipUITitledSection.create("Scene",
                     BlipUIVStack.create(
                             BlipUIHStack.create(uiComplete),
-                            BlipUIHStack.create(basicUi2),
-                            BlipUIHStack.create(basicUi3))));
+                            BlipUIHStack.create(floorUI))));
+
+            app.handle(BlipUITitledSection.create("Shadows", BlipUIHStack.create(shadowsUI)));
+            app.handle(BlipUITitledSection.create("Background", BlipUIHStack.create(clearUI)));
+            app.handle(BlipUITitledSection.create("Camera Projection", BlipUIHStack.create(projectionUI)));
+            app.handle(BlipUITitledSection.create("Camera Ortho", BlipUIHStack.create(orthoUI)));
         }
 
         lighting.handle(blip);
@@ -112,148 +128,11 @@ class ModelViewerScene implements Scene {
         assert (file.exists());
         loadModel(file);
     }
-
+    
     public void loadModel(File file) throws URISyntaxException, IOException {
-        JassimpWrapperProvider wrapper = new JassimpWrapperProvider();
-        Jassimp.setWrapperProvider(wrapper);
-        MeshLoader meshLoader = new MeshLoaderJAssimp();
-
-        //        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/cube
-        // .obj",
-// "C:/dev/portfolio/3ddemo/out/production/resources/images");
-//        MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("../models/cube.obj").toURI(),
-// "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate
-// | aiProcess_FixInfacingNormals);
-//        MeshData[] meshData = meshLoader.load(AppWrapper.class.getResource("../models/cube.obj").toURI(),
-// "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate);
-//        MeshData[] meshData = MeshLoader.load(AppWrapper.class.getResource("/models/IronMan.obj").toURI(),
-// "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices | aiProcess_Triangulate
-// | aiProcess_FixInfacingNormals);
-        ModelData modelData = meshLoader.load(file.toURI(),
-                "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices |
-                        aiProcess_Triangulate
-                        | aiProcess_FixInfacingNormals);
-//        ModelData modelData = meshLoader.load(,
-//                "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices |
-// aiProcess_Triangulate
-//                        | aiProcess_FixInfacingNormals);
-//        ModelData modelData = meshLoader.load(AppWrapper.class.getResource("/models/woman/highpoly.OBJ").toURI(),
-//                "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices |
-// aiProcess_Triangulate
-//                        | aiProcess_FixInfacingNormals);
-
-//        ModelData modelData = meshLoader.load(AppWrapper.class.getResource
-// ("/models/TrexModelByJoel3d_FBX/TrexByJoel3d.fbx").toURI(),
-//                "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices |
-// aiProcess_Triangulate
-//                        | aiProcess_FixInfacingNormals);
-//        ModelData modelData = meshLoader.load(AppWrapper.class.getResource("../models/Lego_Man.obj").toURI(),
-//                "C:/dev/portfolio/3ddemo/out/production/resources/images", aiProcess_JoinIdenticalVertices |
-//                        aiProcess_Triangulate | aiProcess_FixInfacingNormals);
-//        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/LEGO_Man
-// .obj", "C:/dev/portfolio/3ddemo/out/production/resources/images");
-//        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/lego obj
-// .obj", "C:/dev/portfolio/3ddemo/out/production/resources/models");
-//        MeshData[] meshData = MeshLoader.load("C:/dev/portfolio/3ddemo/out/production/resources/models/IronMan
-// .obj", "C:/dev/portfolio/3ddemo/out/production/resources/models");
-
-        ArrayList<Material> materials = new ArrayList<Material>();
-        List<AiMaterial> materialsRaw = modelData.getScene().getMaterials();
-
-
-        for (int materialIdx = 0; materialIdx < materialsRaw.size(); materialIdx++) {
-            AiMaterial mat = materialsRaw.get(materialIdx);
-            Colour ambient = (Colour) mat.getAmbientColor(wrapper);
-            Colour diffuse = (Colour) mat.getDiffuseColor(wrapper);
-            Colour specular = (Colour) mat.getSpecularColor(wrapper);
-            float shininess = mat.getShininess();
-
-            float reflectivity = mat.getReflectivity();
-            float bumpScaling = mat.getBumpScaling();
-
-            List<TextureFromFile> diffuseTextures = new ArrayList<>();
-
-            if (mat.getNumTextures(AiTextureType.AMBIENT) > 0) {
-                System.out.println("Don't handle more than 0 ambient textures yet");
-            }
-
-            if (mat.getNumTextures(AiTextureType.EMISSIVE) > 0) {
-                System.out.println("Don't handle more than 0 emissive textures yet");
-            }
-
-            if (mat.getNumTextures(AiTextureType.DISPLACEMENT) > 0) {
-                System.out.println("Don't handle more than 0 displacement textures yet");
-            }
-
-            if (mat.getNumTextures(AiTextureType.HEIGHT) > 0) {
-                System.out.println("Don't handle more than 0 height textures yet");
-            }
-
-            if (mat.getNumTextures(AiTextureType.DIFFUSE) > 1) {
-                System.out.println("Don't handle more than 1 diffuse textures yet");
-            }
-
-            if (mat.getNumTextures(AiTextureType.SPECULAR) > 1) {
-                System.out.println("Don't handle more than 1 specular textures yet");
-            }
-
-            for (int idx = 0; idx < mat.getNumTextures(AiTextureType.DIFFUSE); idx += 1) {
-                AiTextureInfo textureInfo = mat.getTextureInfo(AiTextureType.DIFFUSE, idx);
-                String path = file.getParent() + "/" + textureInfo.getFile();
-                AiTextureMapMode mapModeU = mat.getTextureMapModeU(AiTextureType.DIFFUSE, idx);
-                AiTextureMapMode mapModeV = mat.getTextureMapModeV(AiTextureType.DIFFUSE, idx);
-                AiTextureOp op = mat.getTextureOp(AiTextureType.DIFFUSE, idx);
-                TextureFromFile texture = new TextureFromFile(path, mapModeU, mapModeV);
-                diffuseTextures.add(texture);
-            }
-
-            List<TextureFromFile> specularTextures = new ArrayList<>();
-
-            for (int idx = 0; idx < mat.getNumTextures(AiTextureType.SPECULAR); idx += 1) {
-                AiTextureInfo textureInfo = mat.getTextureInfo(AiTextureType.SPECULAR, idx);
-                String path = file.getParent() + "/" + textureInfo.getFile();
-                AiTextureMapMode mapModeU = mat.getTextureMapModeU(AiTextureType.SPECULAR, idx);
-                AiTextureMapMode mapModeV = mat.getTextureMapModeV(AiTextureType.SPECULAR, idx);
-                TextureFromFile texture = new TextureFromFile(path, mapModeU, mapModeV);
-                specularTextures.add(texture);
-            }
-
-            Material material = new Material(mat.getName(),
-                    new Vector3(ambient.r, ambient.g, ambient.b),
-                    new Vector3(diffuse.r, diffuse.g, diffuse.b),
-                    new Vector3(specular.r, specular.g, specular.b),
-                    shininess,
-                    diffuseTextures,
-                    specularTextures);
-            materials.add(material);
-
-        }
-
-        meshes = new Mesh[modelData.getMeshes().length];
-        MeshData[] meshData = modelData.getMeshes();
-//        Matrix4x4 meshScale = Matrix4x4.identity();// MeshDataUtils.getInitialMatrix(modelData.getMeshes());
-        Matrix4x4 meshScale = MeshDataUtils.getInitialMatrix(modelData.getMeshes());
-        for (int i = 0; i < meshData.length; i++) {
-            int matIndex = meshData[i].materialIndex;
-            Material material = materials.get(matIndex);
-            Mesh mesh = new Mesh(new Vector4(0, 0, 0, 1), Optional.of(meshScale), Optional.empty(), meshData[i],
-                    material);
-            final int x = i;
-//            modelUI.add(BlipUITextField.create(Optional.of("Mesh indices"), String.valueOf(meshData[i].indices
-// .length), (v) -> {
-//                int indices = meshData[x].indices.length;
-//                try {
-//                    indices = Integer.parseInt(v);
-//                }
-//                catch(Exception e) {
-//                }
-//                mesh.setIndicesToDraw(indices);
-//            }));
-            meshes[i] = mesh;
-        }
-
-        assert (1 == 1);
+        meshes = LoaderUtils.loadModel(file);    
     }
+
 
     ModelViewerScene(BlipHandler app) throws URISyntaxException, IOException {
         this.app = app;
@@ -287,29 +166,29 @@ class ModelViewerScene implements Scene {
             drawAxisMarkers = v;
             Persister.put("drawAxisMarkers", v);
         }, Optional.empty()));
-        basicUi2.add(BlipUICheckbox.create("Frame buffer", renderDepthFramebuffer, (v) -> {
+        shadowsUI.add(BlipUICheckbox.create("Frame buffer", renderDepthFramebuffer, (v) -> {
             renderDepthFramebuffer = v;
             Persister.put("renderDepthFramebuffer", v);
         }, Optional.empty()));
-        basicUi3.add(BlipUICheckbox.create("Floor", drawFloor, (v) -> {
+        floorUI.add(BlipUICheckbox.create("Floor", drawFloor, (v) -> {
             drawFloor = v;
             Persister.put("drawFloor", v);
         }, Optional.of(GLFW_KEY_KP_6)));
-        basicUi2.add(BlipUICheckbox.create("Shadows", shadowsEnabled, (v) -> {
+        shadowsUI.add(BlipUICheckbox.create("Shadows", shadowsEnabled, (v) -> {
             shadowsEnabled = v;
             Persister.put("shadowsEnabled", v);
         }, Optional.of(GLFW_KEY_KP_5)));
-        basicUi2.add(BlipUICheckbox.create("Shadows Quality", shadowsHighQuality, (v) -> {
+        shadowsUI.add(BlipUICheckbox.create("Shadows Quality", shadowsHighQuality, (v) -> {
             shadowsHighQuality = v;
             Persister.put("shadowsHighQuality", v);
         }, Optional.empty()));
-        basicUi2.add(BlipUITextField.create(Optional.of("Bias Max"), Float.toString(shadowsBiasMax), (v) -> {
+        shadowsUI.add(BlipUITextField.create(Optional.of("Bias Max"), Float.toString(shadowsBiasMax), (v) -> {
             float value = shadowsBiasMax;
             try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
             shadowsBiasMax = value;
             Persister.put("shadowsBiasMax", value);
         }));
-        basicUi2.add(BlipUITextField.create(Optional.of("Bias Multi"), Float.toString(shadowsBiasMulti), (v) -> {
+        shadowsUI.add(BlipUITextField.create(Optional.of("Bias Multi"), Float.toString(shadowsBiasMulti), (v) -> {
             float value = shadowsBiasMulti;
             try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
             shadowsBiasMulti = value;
@@ -319,18 +198,87 @@ class ModelViewerScene implements Scene {
             renderLightsEnabled = v;
             Persister.put("renderLightsEnabled", v);
         }, Optional.empty()));
-//        basicUi.add(BlipUICheckbox.create("Debug Shader", debugShader, (v) -> {
-//            debugShader = v;
-//            shaders.debugShader.setCheckErrors(debugShader);
-//            shaders.standardShader.setCheckErrors(!debugShader);
-//        }, Optional.empty()));
-
-        basicUi3.add(BlipUITextField.create(Optional.of("Floor YOffset"), Float.toString(floorYOffset), (v) -> {
+        floorUI.add(BlipUITextField.create(Optional.of("Floor YOffset"), Float.toString(floorYOffset), (v) -> {
             float value = floorYOffset;
             try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
             floorYOffset = value;
             Persister.put("floorYOffset", value);
         }));
+        clearUI.add(BlipUITextField.create(Optional.of("Red"), Float.toString(clearColourRed), (v) -> {
+            float value = clearColourRed;
+            try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
+            clearColourRed = value;
+            Persister.put("clearColourRed", value);
+        }));
+        clearUI.add(BlipUITextField.create(Optional.of("Green"), Float.toString(clearColourGreen), (v) -> {
+            float value = clearColourGreen;
+            try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
+            clearColourGreen = value;
+            Persister.put("clearColourGreen", value);
+        }));
+        clearUI.add(BlipUITextField.create(Optional.of("Blue"), Float.toString(clearColourBlue), (v) -> {
+            float value = clearColourBlue;
+            try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
+            clearColourBlue = value;
+            Persister.put("clearColourBlue", value);
+        }));
+        
+        projectionUI.add(BlipUITextField.create(Optional.of("Near"), Float.toString(projectionNear), (v) -> {
+            float value = projectionNear;
+            try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
+            projectionNear = value;
+            Persister.put("projectionNear", value);
+        }));
+        projectionUI.add(BlipUITextField.create(Optional.of("Far"), Float.toString(projectionFar), (v) -> {
+            float value = projectionFar;
+            try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
+            projectionFar = value;
+            Persister.put("projectionFar", value);
+        }));
+        projectionUI.add(BlipUITextField.create(Optional.of("FOV"), Float.toString(projectionFov), (v) -> {
+            float value = projectionFov;
+            try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
+            projectionFov = value;
+            Persister.put("projectionFov", value);
+        }));
+
+        orthoUI.add(BlipUITextField.create(Optional.of("Near"), Float.toString(orthoNear), (v) -> {
+            float value = orthoNear;
+            try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
+            orthoNear = value;
+            Persister.put("orthoNear", value);
+        }));
+        orthoUI.add(BlipUITextField.create(Optional.of("Far"), Float.toString(orthoFar), (v) -> {
+            float value = orthoFar;
+            try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
+            orthoFar = value;
+            Persister.put("orthoFar", value);
+        }));
+        orthoUI.add(BlipUITextField.create(Optional.of("Left"), Float.toString(orthoLeft), (v) -> {
+            float value = orthoLeft;
+            try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
+            orthoLeft = value;
+            Persister.put("orthoLeft", value);
+        }));
+        orthoUI.add(BlipUITextField.create(Optional.of("Right"), Float.toString(orthoRight), (v) -> {
+            float value = orthoRight;
+            try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
+            orthoRight = value;
+            Persister.put("orthoRight", value);
+        }));
+        orthoUI.add(BlipUITextField.create(Optional.of("Top"), Float.toString(orthoTop), (v) -> {
+            float value = orthoTop;
+            try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
+            orthoTop = value;
+            Persister.put("orthoTop", value);
+        }));
+        orthoUI.add(BlipUITextField.create(Optional.of("Bottom"), Float.toString(orthoBottom), (v) -> {
+            float value = orthoBottom;
+            try { value = Float.parseFloat(v); } catch (RuntimeException e) {}
+            orthoBottom = value;
+            Persister.put("orthoBottom", value);
+        }));
+
 
         if (drawModel) {
             String lastModel = Persister.get("last_model");
@@ -469,9 +417,7 @@ class ModelViewerScene implements Scene {
         Vector4 floorPos = new Vector4(0, floorYOffset, 0, 1);
         quadModels.get(0).setPos(floorPos);
 
-//        glClearColor(1f, 1f, 1f, 1.0f);
-//        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClearColor(1f, 1f, 1f, 1.0f);
+        glClearColor(clearColourRed, clearColourGreen, clearColourBlue, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         queued.forEach(blip -> {
@@ -488,8 +434,8 @@ class ModelViewerScene implements Scene {
             wrap.shader.setBoolean("doLighting", doLighting);
         }
 
-        Matrix4x4 projectionMatrix = createPerspectiveProjectionMatrix(params);
-        Matrix4x4 lightProjection = SceneUtils.createOrthoProjectionMatrix(-1f, 1f, 1f, -1f, 0.001f, 1.5f);
+        Matrix4x4 projectionMatrix = SceneUtils.createPerspectiveProjectionMatrix(params, projectionFar, projectionNear, projectionFov);
+        Matrix4x4 lightProjection = SceneUtils.createOrthoProjectionMatrix(orthoLeft, orthoRight, orthoTop, orthoBottom, orthoNear, orthoFar);
 
         int textureToRender = lighting.directional.shadowTexture;
         if (lighting.directional.isEnabled()) {

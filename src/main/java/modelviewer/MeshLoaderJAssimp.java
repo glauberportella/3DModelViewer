@@ -44,12 +44,12 @@ import java.util.Set;
 // JAssimp, after getting past the PITA that was building the native libs:
 // 1. Works soooo much better than the other two.  All the weird glitches disappear.
 interface MeshLoader {
-    ModelData load(URI resourcePath, String texturesDir, int flags) throws IOException;
+    ModelData load(URI resourcePath) throws IOException;
 }
 
 // Loads a mesh (model) with JAssimp lib
 public class MeshLoaderJAssimp implements MeshLoader {
-    public ModelData load(URI resourcePath, String texturesDir, int flags) throws IOException {
+    public ModelData load(URI resourcePath) throws IOException {
 
         String fullPath = resourcePath.getPath().substring(1);
 

@@ -85,7 +85,6 @@ public class AppWrapper extends GLFWKeyCallback implements BlipHandler {
         AppParams params = new AppParams();
         params.heightPixels = 600;
         params.widthPixels = 600;
-        params.fovDegrees = 90;
         params.windowTitle = "Model Viewer";
 
         init(params);
